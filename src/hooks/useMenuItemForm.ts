@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { mockAPI } from "@/lib/mock-api";
 import { menuItemSchema, MenuItemFormData } from "@/schemas/menu-item-schema";
 import { MenuItem } from "@/types/menu";
 
@@ -12,6 +11,7 @@ export function useMenuItemForm(
 ) {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const form = useForm<MenuItemFormData>({
     resolver: zodResolver(menuItemSchema),
@@ -61,43 +61,45 @@ export function useMenuItemForm(
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
-    try {
-      const imageUrl = await mockAPI.uploadFile(
-        file,
-        `menu-items/${file.name}`
-      );
-      form.setValue("image_url", imageUrl);
-      toast.success("Image uploaded successfully");
-    } catch (error) {
-      toast.error("Failed to upload image");
-    } finally {
-      setUploading(false);
-    }
+    setSelectedFile(file);
   };
 
   // Handle form submission
   const onSubmit = async (data: MenuItemFormData) => {
     try {
-      const menuItemData = {
-        ...data,
-        type: selectedTypes,
-      };
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("price", String(data.price));
+      formData.append("category", data.category);
+      formData.append("is_available", String(data.is_available));
 
-      if (item) {
-        await mockAPI.updateMenuItem(item.id, menuItemData);
-        toast.success("Menu item updated successfully");
-      } else {
-        await mockAPI.createMenuItem(menuItemData);
-        toast.success("Menu item created successfully");
+      // Important: Append using the key "dietary_preference"
+      data.type?.forEach((t) => {
+        formData.append("dietary_preference", t);
+      });
+
+      if (selectedFile) {
+        formData.append("image", selectedFile);
       }
 
-      onSaved();
+      const response = await fetch("/api/menu-items", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(result.message || "Menu item submitted successfully!");
+      } else {
+        toast.error(result.message || "Failed to submit menu item.");
+      }
     } catch (error) {
-      toast.error(`Failed to ${item ? "update" : "create"} menu item`);
+      toast.error(
+        "Failed to submit menu item. Please Check your internet connection"
+      );
     }
   };
-
   return {
     form,
     selectedTypes,

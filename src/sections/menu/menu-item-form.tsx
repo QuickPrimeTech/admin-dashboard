@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Form,
   FormField,
@@ -24,6 +27,7 @@ import { useMenuItemForm } from "@/hooks/useMenuItemForm";
 import { MenuItemForm as MenuItemFormProps } from "@/types/menu";
 import { categories, dietaryTypes } from "@/constants/menu";
 import { X } from "lucide-react";
+import Image from "next/image";
 
 export function MenuItemForm({
   item,
@@ -38,6 +42,7 @@ export function MenuItemForm({
     handleImageUpload,
     onSubmit,
   } = useMenuItemForm(item, onSaved);
+  const [showSkeleton, setShowSkeleton] = useState(false);
 
   return (
     <Form {...form}>
@@ -177,26 +182,37 @@ export function MenuItemForm({
         {/* Image Upload */}
         <div>
           <FormLabel>Image</FormLabel>
-          <div className="mt-2">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploading}
-            />
-            {uploading && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Uploading image...
-              </p>
-            )}
+          {/* The input */}
+          <Input
+            type="file"
+            accept="image/*"
+            className="mt-2"
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                // show skeleton first
+                setShowSkeleton(true);
+                // create object URL and set
+                const url = URL.createObjectURL(e.target.files[0]);
+                form.setValue("image_url", url);
+              }
+            }}
+            disabled={uploading}
+          />
+          <div className="mt-2 relative w-32 h-32">
+            {/* Image preview */}
             {form.watch("image_url") && (
-              <div className="mt-2">
-                <img
-                  src={form.watch("image_url") || "/placeholder.svg"}
+              <>
+                <Image
+                  src={form.watch("image_url") ?? "/placeholder.svg"}
                   alt="Preview"
-                  className="w-32 h-32 object-cover rounded-md"
+                  fill
+                  className="absolute top-0 left-0 w-32 h-32 object-cover rounded-md"
+                  onLoad={() => setShowSkeleton(false)}
                 />
-              </div>
+                {showSkeleton && (
+                  <div className="absolute top-0 left-0 w-32 h-32 bg-muted animate-pulse rounded-md" />
+                )}
+              </>
             )}
           </div>
         </div>
@@ -210,7 +226,13 @@ export function MenuItemForm({
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={uploading}>
+          <Button
+            type="submit"
+            disabled={uploading || form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && (
+              <span className="mr-2 animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
+            )}
             {item ? "Update" : "Create"} Menu Item
           </Button>
         </DialogFooter>
