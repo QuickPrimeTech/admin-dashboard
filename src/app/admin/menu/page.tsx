@@ -111,8 +111,8 @@ export default function MenuManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
+      <div className="flex flex-col gap-4 items-start lg:flex-row justify-between lg:items-center">
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold">Menu Management</h1>
           <p className="text-muted-foreground">
             Manage your restaurant's menu items
