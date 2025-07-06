@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -12,44 +12,48 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Upload } from "lucide-react"
-import { toast } from "sonner"
-import { mockAPI } from "@/lib/mock-api"
-import Image from "next/image"
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Upload } from "lucide-react";
+import { toast } from "sonner";
+import { mockAPI } from "@/lib/mock-api";
+import Image from "next/image";
+import { GalleryItem } from "@/types/gallery";
 
 const formSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   image_url: z.string().min(1, "Image is required"),
-  is_published: z.boolean().default(true),
-})
+  is_published: z.boolean(),
+});
 
-type FormData = z.infer<typeof formSchema>
-
-interface GalleryItem {
-  id: string
-  title?: string
-  description?: string
-  image_url: string
-  order_index: number
-  is_published: boolean
-}
+type FormData = z.infer<typeof formSchema>;
 
 interface GalleryDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  item?: GalleryItem | null
-  onSaved: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item?: GalleryItem | null;
+  onSaved: () => void;
 }
 
-export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDialogProps) {
-  const [uploading, setUploading] = useState(false)
+export function GalleryDialog({
+  open,
+  onOpenChange,
+  item,
+  onSaved,
+}: GalleryDialogProps) {
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -59,7 +63,7 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
       image_url: "",
       is_published: true,
     },
-  })
+  });
 
   useEffect(() => {
     if (item) {
@@ -68,56 +72,62 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
         description: item.description || "",
         image_url: item.image_url,
         is_published: item.is_published,
-      })
+      });
     } else {
       form.reset({
         title: "",
         description: "",
         image_url: "",
         is_published: true,
-      })
+      });
     }
-  }, [item, form])
+  }, [item, form]);
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    setUploading(true)
+    setUploading(true);
     try {
-      const imageUrl = await mockAPI.uploadFile(file, `gallery/${file.name}`)
-      form.setValue("image_url", imageUrl)
-      toast.success("Image uploaded successfully")
+      const imageUrl = await mockAPI.uploadFile(file, `gallery/${file.name}`);
+      form.setValue("image_url", imageUrl);
+      toast.success("Image uploaded successfully");
     } catch (error) {
-      toast.error("Failed to upload image")
+      toast.error("Failed to upload image");
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
       if (item) {
-        await mockAPI.updateGalleryItem(item.id, data)
-        toast.success("Gallery item updated successfully")
+        await mockAPI.updateGalleryItem(item.id, data);
+        toast.success("Gallery item updated successfully");
       } else {
-        await mockAPI.createGalleryItem(data)
-        toast.success("Gallery item created successfully")
+        await mockAPI.createGalleryItem(data);
+        toast.success("Gallery item created successfully");
       }
 
-      onSaved()
+      onSaved();
     } catch (error) {
-      toast.error(`Failed to ${item ? "update" : "create"} gallery item`)
+      toast.error(`Failed to ${item ? "update" : "create"} gallery item`);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{item ? "Edit Gallery Item" : "Add New Gallery Item"}</DialogTitle>
+          <DialogTitle>
+            {item ? "Edit Gallery Item" : "Add New Gallery Item"}
+          </DialogTitle>
           <DialogDescription>
-            {item ? "Update the gallery item details below." : "Upload a new photo to your gallery."}
+            {item
+              ? "Update the gallery item details below."
+              : "Upload a new photo to your gallery."}
           </DialogDescription>
         </DialogHeader>
 
@@ -126,8 +136,17 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
             <div>
               <FormLabel>Image</FormLabel>
               <div className="mt-2 space-y-4">
-                <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                {uploading && <p className="text-sm text-muted-foreground">Uploading image...</p>}
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                />
+                {uploading && (
+                  <p className="text-sm text-muted-foreground">
+                    Uploading image...
+                  </p>
+                )}
                 {form.watch("image_url") && (
                   <div className="relative w-full h-48 rounded-lg overflow-hidden border">
                     <Image
@@ -142,7 +161,9 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
                   <div className="flex items-center justify-center w-full h-48 border-2 border-dashed border-muted-foreground/25 rounded-lg">
                     <div className="text-center">
                       <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">Upload an image</p>
+                      <p className="text-sm text-muted-foreground">
+                        Upload an image
+                      </p>
                     </div>
                   </div>
                 )}
@@ -156,7 +177,10 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
                 <FormItem>
                   <FormLabel>Title (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter a title for this image..." {...field} />
+                    <Input
+                      placeholder="Enter a title for this image..."
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +194,11 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
                 <FormItem>
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter a description..." className="resize-none" {...field} />
+                    <Textarea
+                      placeholder="Enter a description..."
+                      className="resize-none"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -184,20 +212,32 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Published</FormLabel>
-                    <div className="text-sm text-muted-foreground">Make this image visible in the gallery</div>
+                    <div className="text-sm text-muted-foreground">
+                      Make this image visible in the gallery
+                    </div>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
                 </FormItem>
               )}
             />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={uploading || !form.watch("image_url")}>
+              <Button
+                type="submit"
+                disabled={uploading || !form.watch("image_url")}
+              >
                 {item ? "Update" : "Create"} Gallery Item
               </Button>
             </DialogFooter>
@@ -205,5 +245,5 @@ export function GalleryDialog({ open, onOpenChange, item, onSaved }: GalleryDial
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -7,25 +7,19 @@ import { supabase } from "@/lib/supabase"; // Supabase client instance
 // Handle POST requests for creating a new menu item
 export async function POST(request: NextRequest) {
   try {
-    // Step 1: Extract form data from the incoming request
+    // Step 1: Extract and clean form data
     const formData = await request.formData();
-
-    // Step 2: Clean the form data by removing empty fields and parsing values
     const data = cleanFormData(formData);
     console.log("Cleaned Form Data:", data);
 
-    // Step 3: Handle image upload to Cloudinary
+    // Step 2: Upload image to Cloudinary
     let uploadedImageUrl = "";
-
-    // Get the image file from the form data
     const imageFile = formData.get("image") as File | null;
 
     if (imageFile) {
-      // Convert image file to a buffer for Cloudinary upload
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // Upload the image to Cloudinary under the 'menu-items' folder
       const uploadResult = await new Promise<any>((resolve, reject) => {
         cloudinary.uploader
           .upload_stream({ folder: "menu-items" }, (error, result) => {
@@ -34,28 +28,26 @@ export async function POST(request: NextRequest) {
           .end(buffer);
       });
 
-      // Store the uploaded image's secure URL
       uploadedImageUrl = uploadResult.secure_url;
       console.log("Image uploaded:", uploadedImageUrl);
     }
 
-    // Step 4: Prepare the final object to be inserted into Supabase
+    // Step 3: Construct the menu item for Supabase insert
     const newMenuItem = {
-      name: data.name, // Menu item name
-      description: data.description, // Description of the item
-      price: parseFloat(data.price), // Price, converted from string to float
-      category: data.category, // Category (e.g., main, dessert)
-      is_available: data.is_available === "true" || data.is_available === true, // Convert availability to boolean
-      type: data.dietary_preference || [], // Dietary preferences, saved as `type`
-      image_url: uploadedImageUrl, // Cloudinary image URL
+      name: data.name,
+      description: data.description,
+      price: parseFloat(data.price),
+      category: data.category,
+      is_available: data.is_available === "true" || data.is_available === true,
+      type: data.dietary_preference || [],
+      image_url: uploadedImageUrl,
     };
 
     console.log("Data to insert:", newMenuItem);
 
-    // Step 5: Insert the cleaned data into the `menu_items` table in Supabase
+    // Step 4: Insert into Supabase
     const { error } = await supabase.from("menu_items").insert([newMenuItem]);
 
-    // Step 6: Handle insertion error
     if (error) {
       console.error("Supabase insert error:", error);
       return NextResponse.json(
@@ -68,14 +60,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 7: Return a success response
+    // Step 5: Respond with success
     return NextResponse.json({
       success: true,
       message: "Menu item created successfully",
       data: newMenuItem,
     });
   } catch (err: any) {
-    // Step 8: Handle unexpected server errors
     console.error("Unexpected Error:", err);
     return NextResponse.json(
       { success: false, message: "Server error", error: err.message },
@@ -83,13 +74,11 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-// get function for selecting all menu items from the supabase
-// Handle GET request to fetch all menu items
+
+// Handle GET requests to fetch all menu items from Supabase
 export async function GET() {
-  // Fetch all items from the "menu_items" table
   const { data, error } = await supabase.from("menu_items").select("*");
 
-  // If there's an error, return it in the response
   if (error) {
     console.error("Error fetching menu items:", error);
     return NextResponse.json(
@@ -102,7 +91,6 @@ export async function GET() {
     );
   }
 
-  // Return the fetched data
   return NextResponse.json({
     success: true,
     message: "Menu items fetched successfully",

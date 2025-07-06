@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { UploadCloud, UploadIcon } from "lucide-react";
 import {
   Form,
   FormField,
@@ -180,47 +181,61 @@ export function MenuItemForm({
         </div>
 
         {/* Image Upload */}
-        <div>
-          <FormLabel>Image</FormLabel>
-          {/* The input */}
-          <Input
-            type="file"
-            accept="image/*"
-            className="mt-2"
-            onChange={(e) => {
-              if (e.target.files?.[0]) {
-                // Show skeleton immediately
-                setShowSkeleton(true);
+        <FormField
+          control={form.control}
+          name="image_url"
+          render={() => (
+            <FormItem>
+              <FormLabel>Image</FormLabel>
+              <FormControl>
+                <label className="group relative mt-2 block cursor-pointer w-full h-32 rounded-md border border-dashed hover:border-primary transition">
+                  {/* The file input - hidden but still clickable via label */}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setShowSkeleton(true);
+                        const url = URL.createObjectURL(e.target.files[0]);
+                        form.setValue("image_url", url);
+                        handleImageUpload(e);
+                      }
+                    }}
+                    disabled={uploading}
+                  />
 
-                // Create object URL for preview
-                const url = URL.createObjectURL(e.target.files[0]);
-                form.setValue("image_url", url);
-
-                // Also call your hook logic to store the File
-                handleImageUpload(e);
-              }
-            }}
-            disabled={uploading}
-          />
-
-          <div className="mt-2 relative w-32 h-32">
-            {/* Image preview */}
-            {form.watch("image_url") && (
-              <>
-                <Image
-                  src={form.watch("image_url") ?? "/placeholder.svg"}
-                  alt="Preview"
-                  fill
-                  className="absolute top-0 left-0 w-32 h-32 object-cover rounded-md"
-                  onLoad={() => setShowSkeleton(false)}
-                />
-                {showSkeleton && (
-                  <div className="absolute top-0 left-0 w-32 h-32 bg-muted animate-pulse rounded-md" />
-                )}
-              </>
-            )}
-          </div>
-        </div>
+                  {/* If there is an image URL, show preview */}
+                  {form.watch("image_url") ? (
+                    <>
+                      <Image
+                        src={form.watch("image_url") || "/placeholder.svg"}
+                        alt="Preview"
+                        fill
+                        className="absolute inset-0 object-cover rounded-md"
+                        onLoad={() => setShowSkeleton(false)}
+                      />
+                      {showSkeleton && (
+                        <div className="absolute inset-0 bg-muted animate-pulse rounded-md" />
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+                        <span className="text-white text-sm font-medium">
+                          Click to change
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                      <UploadIcon className="w-6 h-6 mb-1" />
+                      <span className="text-xs">Click to upload</span>
+                    </div>
+                  )}
+                </label>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Footer */}
         <DialogFooter>

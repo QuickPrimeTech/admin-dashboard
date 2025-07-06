@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
 
+
 interface MenuItem {
   id: string;
   name: string;
@@ -22,6 +23,8 @@ interface MenuItem {
   image_url?: string;
   is_available: boolean;
 }
+import { MenuItem } from "@/types/menu";
+
 
 interface MenuGridProps {
   items: MenuItem[];
@@ -53,7 +56,7 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
-        <Card key={item.id} className="overflow-hidden">
+        <Card key={item.id} className="py-0 pb-5 overflow-hidden">
           {item.image_url && (
             <div className="relative h-48">
               <Image
