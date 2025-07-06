@@ -208,3 +208,73 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+
+// Function to delete the images from cloudinary and the entry in supabase
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Missing menu item ID" },
+        { status: 400 }
+      );
+    }
+
+    // Step 1: Fetch current menu item to get public_id
+    const { data: item, error: fetchError } = await supabase
+      .from("menu_items")
+      .select("public_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !item) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Menu item not found",
+          error: fetchError?.message,
+        },
+        { status: 404 }
+      );
+    }
+
+    // Step 2: Delete image from Cloudinary
+    if (item.public_id) {
+      await cloudinary.uploader.destroy(item.public_id);
+    }
+
+    // Step 3: Delete item from Supabase
+    const { error: deleteError } = await supabase
+      .from("menu_items")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to delete menu item",
+          error: deleteError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Menu item deleted successfully",
+    });
+  } catch (err: any) {
+    console.error("Delete Error:", err);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Server error",
+        error: err.message,
+      },
+      { status: 500 }
+    );
+  }
+}

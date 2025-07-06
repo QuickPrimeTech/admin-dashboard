@@ -74,11 +74,20 @@ export default function MenuManagement() {
 
   const handleDelete = async (id: string) => {
     try {
-      await mockAPI.deleteMenuItem(id);
+      const response = await fetch(`/api/menu-items?id=${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Unknown error");
+      }
+
       setMenuItems((prev) => prev.filter((item) => item.id !== id));
       toast.success("Menu item deleted successfully");
-    } catch (error) {
-      toast.error("Failed to delete menu item");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete menu item");
     }
   };
 

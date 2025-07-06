@@ -77,11 +77,15 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
                 {item.category}
               </Badge>
             </div>
-            {item.type && item.type.length > 0 && (
+            {item.dietary_preference && item.dietary_preference.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-3">
-                {item.type.map((type) => (
-                  <Badge key={type} variant="secondary" className="text-xs">
-                    {type}
+                {item.dietary_preference.map((dietary_preference) => (
+                  <Badge
+                    key={dietary_preference}
+                    variant="secondary"
+                    className="text-xs"
+                  >
+                    {dietary_preference}
                   </Badge>
                 ))}
               </div>
