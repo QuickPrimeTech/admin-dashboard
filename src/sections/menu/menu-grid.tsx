@@ -11,7 +11,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
+
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  type: string[];
+  image_url?: string;
+  is_available: boolean;
+}
 import { MenuItem } from "@/types/menu";
+
 
 interface MenuGridProps {
   items: MenuItem[];
@@ -72,7 +85,7 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-2xl font-bold">${item.price}</span>
+              <span className="text-lg font-bold">Ksh{item.price}</span>
               <Badge variant="outline" className="capitalize">
                 {item.category}
               </Badge>
