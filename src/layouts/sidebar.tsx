@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Sidebar,
@@ -12,10 +12,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { LayoutDashboard, MenuIcon, Calendar, HelpCircle, Camera, Users, Video, Settings, LogOut } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+} from "@/components/ui/sidebar";
+import {
+  LayoutDashboard,
+  MenuIcon,
+  Calendar,
+  HelpCircle,
+  Camera,
+  Users,
+  Video,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   {
@@ -58,10 +68,10 @@ const menuItems = [
     url: "/admin/settings",
     icon: Settings,
   },
-]
+];
 
-export function AdminSidebar() {
-  const pathname = usePathname()
+export function AppSidebar() {
+  const pathname = usePathname();
 
   return (
     <Sidebar collapsible="icon">
@@ -74,7 +84,9 @@ export function AdminSidebar() {
                   <MenuIcon className="h-4 w-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Restaurant Admin</span>
+                  <span className="truncate font-semibold">
+                    Restaurant Admin
+                  </span>
                   <span className="truncate text-xs">Dashboard</span>
                 </div>
               </div>
@@ -90,7 +102,11 @@ export function AdminSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    tooltip={item.title}
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -115,5 +131,5 @@ export function AdminSidebar() {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

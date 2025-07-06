@@ -1,100 +1,102 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { MenuItemDialog } from "@/components/admin/menu-item-dialog"
-import { MenuFilters } from "@/sections/admin/menu/menu-filters"
-import { MenuGrid } from "@/sections/admin/menu/menu-grid"
-import { toast } from "sonner"
-import { mockAPI } from "@/lib/mock-api"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { MenuItemDialog } from "@/components/admin/menu-item-dialog";
+import { MenuFilters } from "@/sections/admin/menu/menu-filters";
+import { MenuGrid } from "@/sections/admin/menu/menu-grid";
+import { toast } from "sonner";
+import { mockAPI } from "@/lib/mock-api";
 
 interface MenuItem {
-  id: string
-  name: string
-  description: string
-  price: number
-  category: string
-  type: string[]
-  image_url?: string
-  is_available: boolean
-  created_at: string
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  type: string[];
+  image_url?: string;
+  is_available: boolean;
+  created_at: string;
 }
 
 export default function MenuManagement() {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
-  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMenuItems()
-  }, [])
+    fetchMenuItems();
+  }, []);
 
   useEffect(() => {
-    filterItems()
-  }, [menuItems, searchTerm, selectedCategory])
+    filterItems();
+  }, [menuItems, searchTerm, selectedCategory]);
 
   const fetchMenuItems = async () => {
     try {
-      const data = await mockAPI.getMenuItems()
-      setMenuItems(data)
+      const data = await mockAPI.getMenuItems();
+      setMenuItems(data);
     } catch (error) {
-      toast.error("Failed to fetch menu items")
+      toast.error("Failed to fetch menu items");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const filterItems = () => {
-    let filtered = menuItems
+    let filtered = menuItems;
 
     if (searchTerm) {
       filtered = filtered.filter(
         (item) =>
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+          item.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.category.toLowerCase() === selectedCategory)
+      filtered = filtered.filter(
+        (item) => item.category.toLowerCase() === selectedCategory
+      );
     }
 
-    setFilteredItems(filtered)
-  }
+    setFilteredItems(filtered);
+  };
 
   const handleDelete = async (id: string) => {
     try {
-      await mockAPI.deleteMenuItem(id)
-      setMenuItems((prev) => prev.filter((item) => item.id !== id))
-      toast.success("Menu item deleted successfully")
+      await mockAPI.deleteMenuItem(id);
+      setMenuItems((prev) => prev.filter((item) => item.id !== id));
+      toast.success("Menu item deleted successfully");
     } catch (error) {
-      toast.error("Failed to delete menu item")
+      toast.error("Failed to delete menu item");
     }
-  }
+  };
 
   const handleEdit = (item: MenuItem) => {
-    setEditingItem(item)
-    setIsDialogOpen(true)
-  }
+    setEditingItem(item);
+    setIsDialogOpen(true);
+  };
 
   const handleAdd = () => {
-    setIsDialogOpen(true)
-  }
+    setIsDialogOpen(true);
+  };
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false)
-    setEditingItem(null)
-  }
+    setIsDialogOpen(false);
+    setEditingItem(null);
+  };
 
   const handleItemSaved = () => {
-    fetchMenuItems()
-    handleDialogClose()
-  }
+    fetchMenuItems();
+    handleDialogClose();
+  };
 
   if (loading) {
     return (
@@ -104,7 +106,7 @@ export default function MenuManagement() {
         </div>
         <div className="text-center py-12">Loading menu items...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -112,7 +114,9 @@ export default function MenuManagement() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Menu Management</h1>
-          <p className="text-muted-foreground">Manage your restaurant's menu items</p>
+          <p className="text-muted-foreground">
+            Manage your restaurant's menu items
+          </p>
         </div>
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
@@ -127,7 +131,12 @@ export default function MenuManagement() {
         onCategoryChange={setSelectedCategory}
       />
 
-      <MenuGrid items={filteredItems} onEdit={handleEdit} onDelete={handleDelete} onAdd={handleAdd} />
+      <MenuGrid
+        items={filteredItems}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onAdd={handleAdd}
+      />
 
       <MenuItemDialog
         open={isDialogOpen}
@@ -136,5 +145,5 @@ export default function MenuManagement() {
         onSaved={handleItemSaved}
       />
     </div>
-  )
+  );
 }
