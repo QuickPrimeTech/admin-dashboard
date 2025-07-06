@@ -8,18 +8,7 @@ import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
 import { toast } from "sonner";
 import { mockAPI } from "@/lib/mock-api";
-
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  type: string[];
-  image_url?: string;
-  is_available: boolean;
-  created_at: string;
-}
+import { MenuItem } from "@/types/menu";
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);

@@ -1,27 +1,23 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Edit, Trash2, Plus } from "lucide-react"
-import Image from "next/image"
-
-interface MenuItem {
-  id: string
-  name: string
-  description: string
-  price: number
-  category: string
-  type: string[]
-  image_url?: string
-  is_available: boolean
-}
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Plus } from "lucide-react";
+import Image from "next/image";
+import { MenuItem } from "@/types/menu";
 
 interface MenuGridProps {
-  items: MenuItem[]
-  onEdit: (item: MenuItem) => void
-  onDelete: (id: string) => void
-  onAdd: () => void
+  items: MenuItem[];
+  onEdit: (item: MenuItem) => void;
+  onDelete: (id: string) => void;
+  onAdd: () => void;
 }
 
 export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
@@ -31,7 +27,9 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div className="text-center">
             <h3 className="text-lg font-semibold mb-2">No menu items found</h3>
-            <p className="text-muted-foreground mb-4">Get started by adding your first menu item</p>
+            <p className="text-muted-foreground mb-4">
+              Get started by adding your first menu item
+            </p>
             <Button onClick={onAdd}>
               <Plus className="mr-2 h-4 w-4" />
               Add Menu Item
@@ -39,7 +37,7 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -48,16 +46,26 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
         <Card key={item.id} className="overflow-hidden">
           {item.image_url && (
             <div className="relative h-48">
-              <Image src={item.image_url || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+              <Image
+                src={item.image_url || "/placeholder.svg"}
+                alt={item.name}
+                fill
+                className="object-cover"
+              />
             </div>
           )}
           <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <CardTitle className="text-lg">{item.name}</CardTitle>
-                <CardDescription className="mt-1">{item.description}</CardDescription>
+                <CardDescription className="mt-1">
+                  {item.description}
+                </CardDescription>
               </div>
-              <Badge variant={item.is_available ? "default" : "secondary"} className="ml-2">
+              <Badge
+                variant={item.is_available ? "default" : "secondary"}
+                className="ml-2"
+              >
                 {item.is_available ? "Available" : "Unavailable"}
               </Badge>
             </div>
@@ -79,7 +87,12 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
               </div>
             )}
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="flex-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(item)}
+                className="flex-1"
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Button>
@@ -96,5 +109,5 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
         </Card>
       ))}
     </div>
-  )
+  );
 }
