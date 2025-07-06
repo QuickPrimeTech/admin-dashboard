@@ -1,4 +1,4 @@
-export interface MenuItem {
+export type MenuItem = {
   id: string;
   name: string;
   description: string;
@@ -7,7 +7,7 @@ export interface MenuItem {
   type: string[];
   image_url?: string;
   is_available: boolean;
-}
+};
 
 export type MenuItemForm = {
   item?: MenuItem | null;
