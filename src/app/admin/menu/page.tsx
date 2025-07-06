@@ -40,8 +40,22 @@ export default function MenuManagement() {
 
   const fetchMenuItems = async () => {
     try {
-      const data = await mockAPI.getMenuItems();
-      setMenuItems(data);
+      const res = await fetch("/api/menu-items", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Add other custom headers if needed
+          // "Authorization": `Bearer ${yourToken}`,
+        },
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        setMenuItems(result.data);
+      } else {
+        toast.error("Server error: " + result.message);
+      }
     } catch (error) {
       toast.error("Failed to fetch menu items");
     } finally {
