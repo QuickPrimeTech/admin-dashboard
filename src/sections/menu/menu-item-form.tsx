@@ -73,11 +73,12 @@ export function MenuItemForm({
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(Number.parseFloat(e.target.value) || 0)
-                    }
+                    placeholder="Enter the price"
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? undefined : parseFloat(val));
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

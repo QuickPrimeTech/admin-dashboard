@@ -19,7 +19,7 @@ export function useMenuItemForm(
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
+      price: undefined,
       category: "",
       dietary_preference: [],
       is_available: true,
