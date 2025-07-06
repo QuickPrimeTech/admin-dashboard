@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ export function useMenuItemForm(
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const itemRef = useRef<MenuItem | null | undefined>(item);
 
   const form = useForm<MenuItemFormData>({
     resolver: zodResolver(menuItemSchema),
@@ -29,6 +30,7 @@ export function useMenuItemForm(
   // When item changes, reset form values
   useEffect(() => {
     if (item) {
+      itemRef.current = item;
       form.reset({
         name: item.name,
         description: item.description,
@@ -82,18 +84,40 @@ export function useMenuItemForm(
       if (selectedFile) {
         formData.append("image", selectedFile);
       }
+      if (itemRef.current) {
+        formData.append("id", itemRef.current.id);
+        console.log(
+          "current item ---->",
+          itemRef.current,
+          "form data ---->",
+          formData
+        );
 
-      const response = await fetch("/api/menu-items", {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch("/api/menu-items", {
+          method: "PATCH",
+          body: formData,
+        });
 
-      const result = await response.json();
-      if (response.ok) {
-        console.log(result.imageUrl);
-        toast.success(result.message || "Menu item submitted successfully!");
+        const result = await response.json();
+        if (response.ok) {
+          toast.success(result.message || "Menu item updated successfully!");
+          onSaved();
+        } else {
+          toast.error(result.message || "Failed to update menu item.");
+        }
       } else {
-        toast.error(result.message || "Failed to submit menu item.");
+        const response = await fetch("/api/menu-items", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          toast.success(result.message || "Menu item submitted successfully!");
+          onSaved();
+        } else {
+          toast.error(result.message || "Failed to submit menu item.");
+        }
       }
     } catch (error) {
       toast.error(

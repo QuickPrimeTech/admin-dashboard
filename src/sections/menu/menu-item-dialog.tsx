@@ -36,7 +36,11 @@ export function MenuItemDialog({
               : "Fill in the details for the new menu item."}
           </DialogDescription>
         </DialogHeader>
-        <MenuItemForm onOpenChange={onOpenChange} onSaved={onSaved} />
+        <MenuItemForm
+          item={item}
+          onOpenChange={onOpenChange}
+          onSaved={onSaved}
+        />
       </DialogContent>
     </Dialog>
   );

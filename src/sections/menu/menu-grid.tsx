@@ -11,20 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
-
-
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  type: string[];
-  image_url?: string;
-  is_available: boolean;
-}
 import { MenuItem } from "@/types/menu";
-
 
 interface MenuGridProps {
   items: MenuItem[];
