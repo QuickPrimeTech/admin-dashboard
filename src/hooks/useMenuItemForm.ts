@@ -10,7 +10,7 @@ export function useMenuItemForm(
   onSaved: () => void
 ) {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const [uploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const itemRef = useRef<MenuItem | null | undefined>(item);
 
@@ -21,7 +21,7 @@ export function useMenuItemForm(
       description: "",
       price: 0,
       category: "",
-      type: [],
+      dietary_preference: [],
       is_available: true,
       image_url: "",
     },
@@ -36,11 +36,11 @@ export function useMenuItemForm(
         description: item.description,
         price: item.price,
         category: item.category,
-        type: item.type || [],
+        dietary_preference: item.dietary_preference || [],
         is_available: item.is_available,
         image_url: item.image_url || "",
       });
-      setSelectedTypes(item.type || []);
+      setSelectedTypes(item.dietary_preference || []);
     } else {
       form.reset();
       setSelectedTypes([]);
@@ -53,7 +53,7 @@ export function useMenuItemForm(
       ? selectedTypes.filter((t) => t !== type)
       : [...selectedTypes, type];
     setSelectedTypes(newTypes);
-    form.setValue("type", newTypes);
+    form.setValue("dietary_preference", newTypes);
   };
 
   // Handle image upload
@@ -77,7 +77,7 @@ export function useMenuItemForm(
       formData.append("is_available", String(data.is_available));
 
       // Important: Append using the key "dietary_preference"
-      data.type?.forEach((t) => {
+      data.dietary_preference?.forEach((t) => {
         formData.append("dietary_preference", t);
       });
 

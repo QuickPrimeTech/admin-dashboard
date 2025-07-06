@@ -73,7 +73,6 @@ export function MenuItemForm({
                 <FormControl>
                   <Input
                     type="number"
-                    step="0.01"
                     placeholder="0.00"
                     {...field}
                     onChange={(e) =>
@@ -115,8 +114,8 @@ export function MenuItemForm({
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
                   defaultValue={field.value}
+                  onValueChange={field.onChange}
                 >
                   <FormControl>
                     <SelectTrigger>

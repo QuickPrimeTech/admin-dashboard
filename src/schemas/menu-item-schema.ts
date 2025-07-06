@@ -5,7 +5,7 @@ export const menuItemSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.number().min(0, "Price must be positive"),
   category: z.string().min(1, "Category is required"),
-  type: z.array(z.string()).optional(),
+  dietary_preference: z.array(z.string()).optional(),
   is_available: z.boolean(),
   image_url: z.string().min(1, "Image is required"),
 });
