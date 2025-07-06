@@ -1,6 +1,6 @@
-import { StatsOverview } from "@/sections/admin/dashboard/stats-overview";
-import { RecentActivity } from "@/sections/admin/dashboard/recent-activity";
-import { QuickActions } from "@/sections/admin/dashboard/quick-actions";
+import { StatsOverview } from "@/sections/dashboard/stats-overview";
+import { RecentActivity } from "@/sections/dashboard/recent-activity";
+import { QuickActions } from "@/sections/dashboard/quick-actions";
 
 export default function AdminDashboard() {
   return (

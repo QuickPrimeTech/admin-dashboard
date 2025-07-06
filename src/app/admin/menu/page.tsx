@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { MenuItemDialog } from "@/components/admin/menu-item-dialog";
-import { MenuFilters } from "@/sections/admin/menu/menu-filters";
-import { MenuGrid } from "@/sections/admin/menu/menu-grid";
+import { MenuItemDialog } from "@/sections/menu/menu-item-dialog";
+import { MenuFilters } from "@/sections/menu/menu-filters";
+import { MenuGrid } from "@/sections/menu/menu-grid";
 import { toast } from "sonner";
 import { mockAPI } from "@/lib/mock-api";
 

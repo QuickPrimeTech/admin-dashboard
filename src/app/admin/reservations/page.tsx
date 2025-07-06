@@ -1,80 +1,86 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { ReservationsFilters } from "@/sections/admin/reservations/reservations-filters"
-import { ReservationsList } from "@/sections/admin/reservations/reservations-list"
-import { mockAPI } from "@/lib/mock-api"
-import { toast } from "sonner"
+import { useState, useEffect } from "react";
+import { ReservationsFilters } from "@/sections/reservations/reservations-filters";
+import { ReservationsList } from "@/sections/reservations/reservations-list";
+import { mockAPI } from "@/lib/mock-api";
+import { toast } from "sonner";
 
 interface Reservation {
-  id: string
-  name: string
-  email: string
-  phone: string
-  date: string
-  time: string
-  guests: number
-  status: string
-  notes?: string
-  created_at: string
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  date: string;
+  time: string;
+  guests: number;
+  status: string;
+  notes?: string;
+  created_at: string;
 }
 
 export default function ReservationsPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([])
-  const [filteredReservations, setFilteredReservations] = useState<Reservation[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [loading, setLoading] = useState(true)
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [filteredReservations, setFilteredReservations] = useState<
+    Reservation[]
+  >([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchReservations()
-  }, [])
+    fetchReservations();
+  }, []);
 
   useEffect(() => {
-    filterReservations()
-  }, [reservations, searchTerm, statusFilter])
+    filterReservations();
+  }, [reservations, searchTerm, statusFilter]);
 
   const fetchReservations = async () => {
     try {
-      const data = await mockAPI.getReservations()
-      setReservations(data)
+      const data = await mockAPI.getReservations();
+      setReservations(data);
     } catch (error) {
-      toast.error("Failed to fetch reservations")
+      toast.error("Failed to fetch reservations");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const filterReservations = () => {
-    let filtered = reservations
+    let filtered = reservations;
 
     if (searchTerm) {
       filtered = filtered.filter(
         (reservation) =>
           reservation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           reservation.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          reservation.phone.includes(searchTerm),
-      )
+          reservation.phone.includes(searchTerm)
+      );
     }
 
     if (statusFilter !== "all") {
-      filtered = filtered.filter((reservation) => reservation.status.toLowerCase() === statusFilter)
+      filtered = filtered.filter(
+        (reservation) => reservation.status.toLowerCase() === statusFilter
+      );
     }
 
-    setFilteredReservations(filtered)
-  }
+    setFilteredReservations(filtered);
+  };
 
   const updateReservationStatus = async (id: string, status: string) => {
     try {
-      await mockAPI.updateReservationStatus(id, status)
+      await mockAPI.updateReservationStatus(id, status);
       setReservations((prev) =>
-        prev.map((reservation) => (reservation.id === id ? { ...reservation, status } : reservation)),
-      )
-      toast.success(`Reservation ${status} successfully`)
+        prev.map((reservation) =>
+          reservation.id === id ? { ...reservation, status } : reservation
+        )
+      );
+      toast.success(`Reservation ${status} successfully`);
     } catch (error) {
-      toast.error("Failed to update reservation status")
+      toast.error("Failed to update reservation status");
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -84,14 +90,16 @@ export default function ReservationsPage() {
           <p className="text-muted-foreground">Loading reservations...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Reservations</h1>
-        <p className="text-muted-foreground">Manage customer reservations and bookings</p>
+        <p className="text-muted-foreground">
+          Manage customer reservations and bookings
+        </p>
       </div>
 
       <ReservationsFilters
@@ -101,7 +109,10 @@ export default function ReservationsPage() {
         onStatusChange={setStatusFilter}
       />
 
-      <ReservationsList reservations={filteredReservations} onUpdateStatus={updateReservationStatus} />
+      <ReservationsList
+        reservations={filteredReservations}
+        onUpdateStatus={updateReservationStatus}
+      />
     </div>
-  )
+  );
 }
