@@ -189,15 +189,20 @@ export function MenuItemForm({
             className="mt-2"
             onChange={(e) => {
               if (e.target.files?.[0]) {
-                // show skeleton first
+                // Show skeleton immediately
                 setShowSkeleton(true);
-                // create object URL and set
+
+                // Create object URL for preview
                 const url = URL.createObjectURL(e.target.files[0]);
                 form.setValue("image_url", url);
+
+                // Also call your hook logic to store the File
+                handleImageUpload(e);
               }
             }}
             disabled={uploading}
           />
+
           <div className="mt-2 relative w-32 h-32">
             {/* Image preview */}
             {form.watch("image_url") && (

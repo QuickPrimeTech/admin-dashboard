@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   // cleaning the data and preparing it for submission to supabase
   const data = cleanFormData(formData);
+  console.log(data);
 
   //   creating the upload image url so that I can later send it back as a response
   let uploadedImageUrl = "";
