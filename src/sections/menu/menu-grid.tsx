@@ -66,14 +66,9 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
               />
             </div>
           )}
-          <CardHeader className="pb-3">
+          <CardHeader>
             <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <CardTitle className="text-lg">{item.name}</CardTitle>
-                <CardDescription className="mt-1">
-                  {item.description}
-                </CardDescription>
-              </div>
+              <CardTitle className="text-lg">{item.name}</CardTitle>
               <Badge
                 variant={item.is_available ? "default" : "secondary"}
                 className="ml-2"
@@ -81,8 +76,11 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
                 {item.is_available ? "Available" : "Unavailable"}
               </Badge>
             </div>
+            <CardDescription className="mt-1">
+              {item.description}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="flex justify-between items-center mb-3">
               <span className="text-lg font-bold">Ksh{item.price}</span>
               <Badge variant="outline" className="capitalize">

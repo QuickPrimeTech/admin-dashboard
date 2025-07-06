@@ -9,6 +9,7 @@ import { MenuGrid } from "@/sections/menu/menu-grid";
 import { toast } from "sonner";
 import { mockAPI } from "@/lib/mock-api";
 import { MenuItem } from "@/types/menu";
+import { MenuItemSkeleton } from "@/components/menu-item-skeleton";
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -113,10 +114,30 @@ export default function MenuManagement() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Menu Management</h1>
+        <div className="flex flex-col gap-4 items-start lg:flex-row justify-between lg:items-center">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">Menu Management</h1>
+            <p className="text-muted-foreground">
+              Manage your restaurant's menu items
+            </p>
+          </div>
+          <Button onClick={handleAdd}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Menu Item
+          </Button>
         </div>
-        <div className="text-center py-12">Loading menu items...</div>
+
+        <MenuFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <MenuItemSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
