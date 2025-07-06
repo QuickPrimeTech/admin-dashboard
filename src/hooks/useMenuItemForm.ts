@@ -90,6 +90,7 @@ export function useMenuItemForm(
 
       const result = await response.json();
       if (response.ok) {
+        console.log(result.imageUrl);
         toast.success(result.message || "Menu item submitted successfully!");
       } else {
         toast.error(result.message || "Failed to submit menu item.");
