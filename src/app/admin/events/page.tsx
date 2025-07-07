@@ -12,9 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Users, Phone, Mail, Search } from "lucide-react";
-import { mockAPI } from "@/lib/mock-api";
 import { toast } from "sonner";
 import { ReservationStatus } from "@/types/mock-api";
+import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
+import { Events } from "@/components/admin/events-skeleton";
+import { supabase } from "@/lib/supabase";
 
 interface PrivateEvent {
   id: string;
@@ -38,14 +40,116 @@ export default function PrivateEventsPage() {
 
   const statusOptions = ["all", "pending", "confirmed", "cancelled"];
 
+  useEffect(() => {
+    const init = async () => {
+      await fetchEvents();
+
+      const channel = supabase
+        .channel("private-events-realtime")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "private_events",
+          },
+          (payload) => {
+            const { eventType, new: newItem, old: oldItem } = payload;
+
+            setEvents((prev) => {
+              if (eventType === "INSERT") {
+                if (prev.some((e) => e.id === (newItem as PrivateEvent).id))
+                  return prev;
+                return [newItem as PrivateEvent, ...prev];
+              }
+
+              if (eventType === "UPDATE") {
+                return prev.map((e) =>
+                  e.id === (newItem as PrivateEvent).id
+                    ? (newItem as PrivateEvent)
+                    : e
+                );
+              }
+
+              if (eventType === "DELETE") {
+                return prev.filter(
+                  (e) => e.id !== (oldItem as PrivateEvent).id
+                );
+              }
+
+              return prev;
+            });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+
+    init();
+  }, []);
+
   const fetchEvents = async () => {
     try {
-      const data = await mockAPI.getPrivateEvents();
-      setEvents(data);
+      const res = await fetch("/api/private-events");
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        setEvents(result.data);
+      } else {
+        throw new Error(result.message);
+      }
     } catch {
       toast.error("Failed to fetch private events");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteEvent = async (id: string) => {
+    try {
+      const res = await fetch("/api/private-events", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to delete event");
+      }
+
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+      toast.success("Event deleted successfully");
+    } catch {
+      toast.error("Failed to delete event");
+    }
+  };
+
+  const updateEventStatus = async (id: string, status: ReservationStatus) => {
+    try {
+      const res = await fetch("/api/private-events", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to update event");
+      }
+
+      setEvents((prev) =>
+        prev.map((event) => (event.id === id ? { ...event, status } : event))
+      );
+
+      toast.success(`Event marked as ${status}`);
+    } catch {
+      toast.error("Failed to update event status");
     }
   };
 
@@ -71,24 +175,8 @@ export default function PrivateEventsPage() {
   }, [events, searchTerm, statusFilter]);
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  useEffect(() => {
     filterEvents();
   }, [filterEvents]);
-
-  const updateEventStatus = async (id: string, status: ReservationStatus) => {
-    try {
-      await mockAPI.updateEventStatus(id, status);
-      setEvents((prev) =>
-        prev.map((event) => (event.id === id ? { ...event, status } : event))
-      );
-      toast.success(`Event ${status} successfully`);
-    } catch {
-      toast.error("Failed to update event status");
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -102,17 +190,6 @@ export default function PrivateEventsPage() {
         return "bg-gray-100 text-gray-800";
     }
   };
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Private Events</h1>
-          <p className="text-muted-foreground">Loading events...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -148,7 +225,13 @@ export default function PrivateEventsPage() {
         </div>
       </div>
 
-      {filteredEvents.length === 0 ? (
+      {loading ? (
+        <div className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index}>{Events()}</div>
+          ))}
+        </div>
+      ) : filteredEvents.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center">
@@ -206,33 +289,43 @@ export default function PrivateEventsPage() {
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  {event.status !== "confirmed" && (
-                    <Button
-                      size="sm"
-                      onClick={() => updateEventStatus(event.id, "confirmed")}
-                    >
-                      Confirm
-                    </Button>
-                  )}
-                  {event.status !== "cancelled" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateEventStatus(event.id, "cancelled")}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                  {event.status !== "pending" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateEventStatus(event.id, "pending")}
-                    >
-                      Mark Pending
-                    </Button>
-                  )}
+                <div className="flex justify-between">
+                  <div className="flex gap-2">
+                    {event.status !== "confirmed" && (
+                      <Button
+                        size="sm"
+                        onClick={() => updateEventStatus(event.id, "confirmed")}
+                      >
+                        Confirm
+                      </Button>
+                    )}
+                    {event.status !== "cancelled" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateEventStatus(event.id, "cancelled")}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                    {event.status !== "pending" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateEventStatus(event.id, "pending")}
+                      >
+                        Mark Pending
+                      </Button>
+                    )}
+                  </div>
+                  <ConfirmDeleteDialog
+                    onConfirm={() => deleteEvent(event.id)}
+                    trigger={
+                      <Button variant="destructive" size="sm">
+                        Delete
+                      </Button>
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>
