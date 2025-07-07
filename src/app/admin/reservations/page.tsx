@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ReservationsFilters } from "@/sections/reservations/reservations-filters";
 import { ReservationsList } from "@/sections/reservations/reservations-list";
 import { mockAPI } from "@/lib/mock-api";
 import { toast } from "sonner";
+import { ReservationStatus } from "@/types/mock-api";
 
 interface Reservation {
   id: string;
@@ -32,22 +33,18 @@ export default function ReservationsPage() {
     fetchReservations();
   }, []);
 
-  useEffect(() => {
-    filterReservations();
-  }, [reservations, searchTerm, statusFilter]);
-
   const fetchReservations = async () => {
     try {
       const data = await mockAPI.getReservations();
       setReservations(data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch reservations");
     } finally {
       setLoading(false);
     }
   };
 
-  const filterReservations = () => {
+  const filterReservations = useCallback(() => {
     let filtered = reservations;
 
     if (searchTerm) {
@@ -66,9 +63,16 @@ export default function ReservationsPage() {
     }
 
     setFilteredReservations(filtered);
-  };
+  }, [reservations, searchTerm, statusFilter]);
 
-  const updateReservationStatus = async (id: string, status: string) => {
+  useEffect(() => {
+    filterReservations();
+  }, [filterReservations]);
+
+  const updateReservationStatus = async (
+    id: string,
+    status: ReservationStatus
+  ) => {
     try {
       await mockAPI.updateReservationStatus(id, status);
       setReservations((prev) =>
@@ -77,7 +81,7 @@ export default function ReservationsPage() {
         )
       );
       toast.success(`Reservation ${status} successfully`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update reservation status");
     }
   };

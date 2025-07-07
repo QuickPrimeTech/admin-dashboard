@@ -4,17 +4,29 @@ import { cleanFormData } from "@/lib/clean-form-data"; // Utility to clean and p
 import { cloudinary } from "@/lib/cloudinary"; // Cloudinary client for image upload
 import { supabase } from "@/lib/supabase"; // Supabase client instance
 
+interface UploadResult {
+  secure_url: string;
+  public_id: string;
+}
+
+interface FormDataFields {
+  id?: string;
+  name: string;
+  description: string;
+  price: string;
+  category: string;
+  is_available: string | boolean;
+  dietary_preference?: string[];
+  image_url?: string;
+}
+
 // Handle POST requests for creating a new menu item
 export async function POST(request: NextRequest) {
   try {
-    // Step 1: Extract and clean form data
     const formData = await request.formData();
-    const data = cleanFormData(formData);
-    console.log("Cleaned Form Data:", data);
-
-    // Step 2: Upload image to Cloudinary
-    let uploadedImageUrl,
-      publicId = "";
+    const data = cleanFormData(formData) as unknown as FormDataFields;
+    let uploadedImageUrl = "";
+    let publicId = "";
 
     const imageFile = formData.get("image") as File | null;
 
@@ -22,19 +34,22 @@ export async function POST(request: NextRequest) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const uploadResult = await new Promise<any>((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "menu-items" }, (error, result) => {
-            error ? reject(error) : resolve(result);
-          })
-          .end(buffer);
-      });
+      const uploadResult = await new Promise<UploadResult>(
+        (resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({ folder: "menu-items" }, (error, result) => {
+              if (error || !result) return reject(error);
+              resolve(result as UploadResult);
+            })
+            .end(buffer);
+        }
+      );
 
       uploadedImageUrl = uploadResult.secure_url;
       publicId = uploadResult.public_id;
     }
+
     if (publicId) {
-      // Step 3: Construct the menu item for Supabase insert
       const newMenuItem = {
         name: data.name,
         description: data.description,
@@ -47,13 +62,9 @@ export async function POST(request: NextRequest) {
         public_id: publicId,
       };
 
-      // console.log("Data to insert:", newMenuItem);
-
-      // Step 4: Insert into Supabase
       const { error } = await supabase.from("menu_items").insert([newMenuItem]);
 
       if (error) {
-        console.error("Supabase insert error:", error);
         return NextResponse.json(
           {
             success: false,
@@ -64,16 +75,15 @@ export async function POST(request: NextRequest) {
         );
       }
     }
-    // Step 5: Respond with success
+
     return NextResponse.json({
       success: true,
       message: "Menu item created successfully",
-      // data: newMenuItem,
     });
-  } catch (err: any) {
-    console.error("Unexpected Error:", err);
+  } catch (err) {
+    const error = err as Error;
     return NextResponse.json(
-      { success: false, message: "Server error", error: err.message },
+      { success: false, message: "Server error", error: error.message },
       { status: 500 }
     );
   }
@@ -84,10 +94,9 @@ export async function GET() {
   const { data, error } = await supabase
     .from("menu_items")
     .select("*")
-    .order("created_at", { ascending: false }); // ⬅️ Sort by latest first
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching menu items:", error);
     return NextResponse.json(
       {
         success: false,
@@ -104,14 +113,13 @@ export async function GET() {
     data,
   });
 }
+
 // Handle PATCH requests to update a menu item
 export async function PATCH(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const data = cleanFormData(formData);
+    const data = cleanFormData(formData) as unknown as FormDataFields;
     const id = data.id;
-    console.log("data ---->", data);
-
     if (!id) {
       return NextResponse.json(
         { success: false, message: "Missing menu item ID" },
@@ -119,7 +127,6 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Fetch the current item from Supabase to get the old public_id
     const { data: currentItem, error: fetchError } = await supabase
       .from("menu_items")
       .select("public_id")
@@ -142,32 +149,29 @@ export async function PATCH(request: NextRequest) {
 
     const imageFile = formData.get("image") as File | null;
 
-    console.log("current item---->", currentItem);
-
     if (imageFile) {
-      console.log("image available");
-      // 🧹 Step 1: Delete the old image from Cloudinary
       if (currentItem?.public_id) {
         await cloudinary.uploader.destroy(currentItem.public_id);
       }
 
-      // 💾 Step 2: Upload the new image
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const uploadResult = await new Promise<any>((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "menu-items" }, (error, result) => {
-            error ? reject(error) : resolve(result);
-          })
-          .end(buffer);
-      });
+      const uploadResult = await new Promise<UploadResult>(
+        (resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({ folder: "menu-items" }, (error, result) => {
+              if (error || !result) return reject(error);
+              resolve(result as UploadResult);
+            })
+            .end(buffer);
+        }
+      );
 
       uploadedImageUrl = uploadResult.secure_url;
       newPublicId = uploadResult.public_id;
     }
 
-    // Prepare payload for Supabase
     const updatedMenuItem = {
       name: data.name,
       description: data.description,
@@ -200,16 +204,16 @@ export async function PATCH(request: NextRequest) {
       message: "Menu item updated successfully",
       data: updated,
     });
-  } catch (err: any) {
-    console.error("Unexpected Error:", err);
+  } catch (err) {
+    const error = err as Error;
     return NextResponse.json(
-      { success: false, message: "Server error", error: err.message },
+      { success: false, message: "Server error", error: error.message },
       { status: 500 }
     );
   }
 }
 
-// Function to delete the images from cloudinary and the entry in supabase
+// Function to delete the images from Cloudinary and the entry in Supabase
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -222,7 +226,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Step 1: Fetch current menu item to get public_id
     const { data: item, error: fetchError } = await supabase
       .from("menu_items")
       .select("public_id")
@@ -240,12 +243,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Step 2: Delete image from Cloudinary
     if (item.public_id) {
       await cloudinary.uploader.destroy(item.public_id);
     }
 
-    // Step 3: Delete item from Supabase
     const { error: deleteError } = await supabase
       .from("menu_items")
       .delete()
@@ -266,14 +267,10 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: "Menu item deleted successfully",
     });
-  } catch (err: any) {
-    console.error("Delete Error:", err);
+  } catch (err) {
+    const error = err as Error;
     return NextResponse.json(
-      {
-        success: false,
-        message: "Server error",
-        error: err.message,
-      },
+      { success: false, message: "Server error", error: error.message },
       { status: 500 }
     );
   }

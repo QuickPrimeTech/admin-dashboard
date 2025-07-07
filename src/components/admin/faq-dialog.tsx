@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -11,39 +11,51 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { toast } from "sonner"
-import { mockAPI } from "@/lib/mock-api"
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { mockAPI } from "@/lib/mock-api";
 
 const formSchema = z.object({
   question: z.string().min(1, "Question is required"),
   answer: z.string().min(1, "Answer is required"),
-  is_published: z.boolean().default(true),
-})
+  is_published: z.boolean(),
+});
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<typeof formSchema>;
 
 interface FAQ {
-  id: string
-  question: string
-  answer: string
-  order_index: number
-  is_published: boolean
+  id: string;
+  question: string;
+  answer: string;
+  order_index: number;
+  is_published: boolean;
 }
 
 interface FAQDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  faq?: FAQ | null
-  onSaved: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  faq?: FAQ | null;
+  onSaved: () => void;
 }
 
-export function FAQDialog({ open, onOpenChange, faq, onSaved }: FAQDialogProps) {
+export function FAQDialog({
+  open,
+  onOpenChange,
+  faq,
+  onSaved,
+}: FAQDialogProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,7 +63,7 @@ export function FAQDialog({ open, onOpenChange, faq, onSaved }: FAQDialogProps) 
       answer: "",
       is_published: true,
     },
-  })
+  });
 
   useEffect(() => {
     if (faq) {
@@ -59,31 +71,36 @@ export function FAQDialog({ open, onOpenChange, faq, onSaved }: FAQDialogProps) 
         question: faq.question,
         answer: faq.answer,
         is_published: faq.is_published,
-      })
+      });
     } else {
       form.reset({
         question: "",
         answer: "",
         is_published: true,
-      })
+      });
     }
-  }, [faq, form])
+  }, [faq, form]);
 
   const onSubmit = async (data: FormData) => {
+    const payload = {
+      ...data,
+      order_index: faq?.order_index ?? 0, // or calculate based on existing FAQs
+    };
+
     try {
       if (faq) {
-        await mockAPI.updateFAQ(faq.id, data)
-        toast.success("FAQ updated successfully")
+        await mockAPI.updateFAQ(faq.id, payload);
+        toast.success("FAQ updated successfully");
       } else {
-        await mockAPI.createFAQ(data)
-        toast.success("FAQ created successfully")
+        await mockAPI.createFAQ(payload);
+        toast.success("FAQ created successfully");
       }
 
-      onSaved()
-    } catch (error) {
-      toast.error(`Failed to ${faq ? "update" : "create"} FAQ`)
+      onSaved();
+    } catch {
+      toast.error(`Failed to ${faq ? "update" : "create"} FAQ`);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,7 +108,9 @@ export function FAQDialog({ open, onOpenChange, faq, onSaved }: FAQDialogProps) 
         <DialogHeader>
           <DialogTitle>{faq ? "Edit FAQ" : "Add New FAQ"}</DialogTitle>
           <DialogDescription>
-            {faq ? "Update the FAQ details below." : "Fill in the details for the new FAQ."}
+            {faq
+              ? "Update the FAQ details below."
+              : "Fill in the details for the new FAQ."}
           </DialogDescription>
         </DialogHeader>
 
@@ -118,7 +137,11 @@ export function FAQDialog({ open, onOpenChange, faq, onSaved }: FAQDialogProps) 
                 <FormItem>
                   <FormLabel>Answer</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter the answer..." className="resize-none min-h-[120px]" {...field} />
+                    <Textarea
+                      placeholder="Enter the answer..."
+                      className="resize-none min-h-[120px]"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,17 +155,26 @@ export function FAQDialog({ open, onOpenChange, faq, onSaved }: FAQDialogProps) 
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Published</FormLabel>
-                    <div className="text-sm text-muted-foreground">Make this FAQ visible to customers</div>
+                    <div className="text-sm text-muted-foreground">
+                      Make this FAQ visible to customers
+                    </div>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
                 </FormItem>
               )}
             />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit">{faq ? "Update" : "Create"} FAQ</Button>
@@ -151,5 +183,5 @@ export function FAQDialog({ open, onOpenChange, faq, onSaved }: FAQDialogProps) 
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UploadCloud, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
 import {
   Form,
   FormField,

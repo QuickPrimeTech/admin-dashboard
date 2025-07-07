@@ -8,12 +8,25 @@ import {
   mockRestaurantSettings,
 } from "@/data/mock-data";
 
-// Mock API functions
+import {
+  MenuItem,
+  Reservation,
+  FAQ,
+  PrivateEvent,
+  GalleryItem,
+  SocialMediaItem,
+  RestaurantSettings,
+  ReservationStatus,
+} from "@/types/mock-api";
+
+// Generic type for update payloads
 export const mockAPI = {
   // Menu Items
-  getMenuItems: () => Promise.resolve([...mockMenuItems]),
-  createMenuItem: (item: any) => {
-    const newItem = {
+  getMenuItems: (): Promise<MenuItem[]> => Promise.resolve([...mockMenuItems]),
+  createMenuItem: (
+    item: Omit<MenuItem, "id" | "created_at">
+  ): Promise<MenuItem> => {
+    const newItem: MenuItem = {
       ...item,
       id: Date.now().toString(),
       created_at: new Date().toISOString(),
@@ -21,14 +34,17 @@ export const mockAPI = {
     mockMenuItems.push(newItem);
     return Promise.resolve(newItem);
   },
-  updateMenuItem: (id: string, updates: any) => {
+  updateMenuItem: (
+    id: string,
+    updates: Partial<MenuItem>
+  ): Promise<MenuItem | undefined> => {
     const index = mockMenuItems.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockMenuItems[index] = { ...mockMenuItems[index], ...updates };
     }
     return Promise.resolve(mockMenuItems[index]);
   },
-  deleteMenuItem: (id: string) => {
+  deleteMenuItem: (id: string): Promise<void> => {
     const index = mockMenuItems.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockMenuItems.splice(index, 1);
@@ -37,8 +53,12 @@ export const mockAPI = {
   },
 
   // Reservations
-  getReservations: () => Promise.resolve([...mockReservations]),
-  updateReservationStatus: (id: string, status: string) => {
+  getReservations: (): Promise<Reservation[]> =>
+    Promise.resolve([...mockReservations]),
+  updateReservationStatus: (
+    id: string,
+    status: ReservationStatus // 👈 enforce only valid statuses
+  ): Promise<Reservation | undefined> => {
     const index = mockReservations.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockReservations[index].status = status;
@@ -47,9 +67,9 @@ export const mockAPI = {
   },
 
   // FAQs
-  getFAQs: () => Promise.resolve([...mockFAQs]),
-  createFAQ: (faq: any) => {
-    const newFAQ = {
+  getFAQs: (): Promise<FAQ[]> => Promise.resolve([...mockFAQs]),
+  createFAQ: (faq: Omit<FAQ, "id" | "created_at">): Promise<FAQ> => {
+    const newFAQ: FAQ = {
       ...faq,
       id: Date.now().toString(),
       created_at: new Date().toISOString(),
@@ -57,14 +77,14 @@ export const mockAPI = {
     mockFAQs.push(newFAQ);
     return Promise.resolve(newFAQ);
   },
-  updateFAQ: (id: string, updates: any) => {
+  updateFAQ: (id: string, updates: Partial<FAQ>): Promise<FAQ | undefined> => {
     const index = mockFAQs.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockFAQs[index] = { ...mockFAQs[index], ...updates };
     }
     return Promise.resolve(mockFAQs[index]);
   },
-  deleteFAQ: (id: string) => {
+  deleteFAQ: (id: string): Promise<void> => {
     const index = mockFAQs.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockFAQs.splice(index, 1);
@@ -73,8 +93,12 @@ export const mockAPI = {
   },
 
   // Private Events
-  getPrivateEvents: () => Promise.resolve([...mockPrivateEvents]),
-  updateEventStatus: (id: string, status: string) => {
+  getPrivateEvents: (): Promise<PrivateEvent[]> =>
+    Promise.resolve([...mockPrivateEvents]),
+  updateEventStatus: (
+    id: string,
+    status: ReservationStatus // restrict to specific values
+  ): Promise<PrivateEvent | undefined> => {
     const index = mockPrivateEvents.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockPrivateEvents[index].status = status;
@@ -83,9 +107,12 @@ export const mockAPI = {
   },
 
   // Gallery
-  getGalleryItems: () => Promise.resolve([...mockGalleryItems]),
-  createGalleryItem: (item: any) => {
-    const newItem = {
+  getGalleryItems: (): Promise<GalleryItem[]> =>
+    Promise.resolve([...mockGalleryItems]),
+  createGalleryItem: (
+    item: Omit<GalleryItem, "id" | "created_at">
+  ): Promise<GalleryItem> => {
+    const newItem: GalleryItem = {
       ...item,
       id: Date.now().toString(),
       created_at: new Date().toISOString(),
@@ -93,14 +120,17 @@ export const mockAPI = {
     mockGalleryItems.push(newItem);
     return Promise.resolve(newItem);
   },
-  updateGalleryItem: (id: string, updates: any) => {
+  updateGalleryItem: (
+    id: string,
+    updates: Partial<GalleryItem>
+  ): Promise<GalleryItem | undefined> => {
     const index = mockGalleryItems.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockGalleryItems[index] = { ...mockGalleryItems[index], ...updates };
     }
     return Promise.resolve(mockGalleryItems[index]);
   },
-  deleteGalleryItem: (id: string) => {
+  deleteGalleryItem: (id: string): Promise<void> => {
     const index = mockGalleryItems.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockGalleryItems.splice(index, 1);
@@ -109,9 +139,12 @@ export const mockAPI = {
   },
 
   // Social Media
-  getSocialMediaItems: () => Promise.resolve([...mockSocialMediaItems]),
-  createSocialMediaItem: (item: any) => {
-    const newItem = {
+  getSocialMediaItems: (): Promise<SocialMediaItem[]> =>
+    Promise.resolve([...mockSocialMediaItems]),
+  createSocialMediaItem: (
+    item: Omit<SocialMediaItem, "id" | "created_at">
+  ): Promise<SocialMediaItem> => {
+    const newItem: SocialMediaItem = {
       ...item,
       id: Date.now().toString(),
       created_at: new Date().toISOString(),
@@ -119,7 +152,10 @@ export const mockAPI = {
     mockSocialMediaItems.push(newItem);
     return Promise.resolve(newItem);
   },
-  updateSocialMediaItem: (id: string, updates: any) => {
+  updateSocialMediaItem: (
+    id: string,
+    updates: Partial<SocialMediaItem>
+  ): Promise<SocialMediaItem | undefined> => {
     const index = mockSocialMediaItems.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockSocialMediaItems[index] = {
@@ -129,7 +165,7 @@ export const mockAPI = {
     }
     return Promise.resolve(mockSocialMediaItems[index]);
   },
-  deleteSocialMediaItem: (id: string) => {
+  deleteSocialMediaItem: (id: string): Promise<void> => {
     const index = mockSocialMediaItems.findIndex((item) => item.id === id);
     if (index !== -1) {
       mockSocialMediaItems.splice(index, 1);
@@ -138,14 +174,17 @@ export const mockAPI = {
   },
 
   // Settings
-  getRestaurantSettings: () => Promise.resolve({ ...mockRestaurantSettings }),
-  updateRestaurantSettings: (updates: any) => {
+  getRestaurantSettings: (): Promise<RestaurantSettings> =>
+    Promise.resolve({ ...mockRestaurantSettings }),
+  updateRestaurantSettings: (
+    updates: Partial<RestaurantSettings>
+  ): Promise<RestaurantSettings> => {
     Object.assign(mockRestaurantSettings, updates);
     return Promise.resolve({ ...mockRestaurantSettings });
   },
 
   // Mock file upload
-  uploadFile: (file: File, path: string) => {
+  uploadFile: (file: File): Promise<string> => {
     return Promise.resolve(
       `/placeholder.svg?height=400&width=400&text=${encodeURIComponent(
         file.name

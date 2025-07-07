@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { MenuItemDialog } from "@/sections/menu/menu-item-dialog";
 import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
 import { toast } from "sonner";
-import { mockAPI } from "@/lib/mock-api";
 import { MenuItem } from "@/types/menu";
 import { MenuItemSkeleton } from "@/components/menu-item-skeleton";
 
@@ -20,40 +19,7 @@ export default function MenuManagement() {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchMenuItems();
-  }, []);
-
-  useEffect(() => {
-    filterItems();
-  }, [menuItems, searchTerm, selectedCategory]);
-
-  const fetchMenuItems = async () => {
-    try {
-      const res = await fetch("/api/menu-items", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // Add other custom headers if needed
-          // "Authorization": `Bearer ${yourToken}`,
-        },
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        setMenuItems(result.data);
-      } else {
-        toast.error("Server error: " + result.message);
-      }
-    } catch (error) {
-      toast.error("Failed to fetch menu items");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterItems = () => {
+  const filterItems = useCallback(() => {
     let filtered = menuItems;
 
     if (searchTerm) {
@@ -71,6 +37,37 @@ export default function MenuManagement() {
     }
 
     setFilteredItems(filtered);
+  }, [menuItems, searchTerm, selectedCategory]);
+
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
+
+  useEffect(() => {
+    filterItems();
+  }, [filterItems]);
+
+  const fetchMenuItems = async () => {
+    try {
+      const res = await fetch("/api/menu-items", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        setMenuItems(result.data);
+      } else {
+        toast.error("Server error: " + result.message);
+      }
+    } catch {
+      toast.error("Failed to fetch menu items");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -87,8 +84,8 @@ export default function MenuManagement() {
 
       setMenuItems((prev) => prev.filter((item) => item.id !== id));
       toast.success("Menu item deleted successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete menu item");
+    } catch {
+      toast.error("Failed to delete menu item");
     }
   };
 
@@ -118,7 +115,7 @@ export default function MenuManagement() {
           <div className="space-y-2">
             <h1 className="text-3xl font-bold">Menu Management</h1>
             <p className="text-muted-foreground">
-              Manage your restaurant's menu items
+              Manage your restaurant&apos;s menu items
             </p>
           </div>
           <Button onClick={handleAdd}>
@@ -148,7 +145,7 @@ export default function MenuManagement() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Menu Management</h1>
           <p className="text-muted-foreground">
-            Manage your restaurant's menu items
+            Manage your restaurant&apos;s menu items
           </p>
         </div>
         <Button onClick={handleAdd}>

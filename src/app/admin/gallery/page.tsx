@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { mockAPI } from "@/lib/mock-api";
 import { GalleryDialog } from "@/sections/gallery/gallery-dialog";
@@ -24,10 +24,6 @@ export default function GalleryPage() {
     fetchGalleryItems();
   }, []);
 
-  useEffect(() => {
-    filterItems();
-  }, [galleryItems, searchTerm, showPublished]);
-
   const fetchGalleryItems = async () => {
     try {
       const data = await mockAPI.getGalleryItems();
@@ -39,8 +35,9 @@ export default function GalleryPage() {
     }
   };
 
-  const filterItems = () => {
+  const filterItems = useCallback(() => {
     let filtered = galleryItems;
+
     if (searchTerm) {
       filtered = filtered.filter(
         (item) =>
@@ -48,12 +45,18 @@ export default function GalleryPage() {
           item.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+
     if (showPublished !== "all") {
       const isPublished = showPublished === "published";
       filtered = filtered.filter((item) => item.is_published === isPublished);
     }
+
     setFilteredItems(filtered);
-  };
+  }, [galleryItems, searchTerm, showPublished]);
+
+  useEffect(() => {
+    filterItems();
+  }, [filterItems]);
 
   const handleDelete = async (id: string) => {
     try {

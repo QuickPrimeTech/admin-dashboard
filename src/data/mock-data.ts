@@ -1,5 +1,15 @@
+import {
+  MenuItem,
+  Reservation,
+  FAQ,
+  PrivateEvent,
+  GalleryItem,
+  SocialMediaItem,
+  RestaurantSettings,
+} from "@/types/mock-api";
+
 // Mock data for development
-export const mockMenuItems = [
+export const mockMenuItems: MenuItem[] = [
   {
     id: "1",
     name: "Caesar Salad",
@@ -72,7 +82,7 @@ export const mockMenuItems = [
   },
 ];
 
-export const mockReservations = [
+export const mockReservations: Reservation[] = [
   {
     id: "1",
     name: "John Smith",
@@ -106,12 +116,12 @@ export const mockReservations = [
     time: "20:00",
     guests: 2,
     status: "confirmed",
-    notes: null,
+    notes: "",
     created_at: "2024-01-01T00:00:00Z",
   },
 ];
 
-export const mockFAQs = [
+export const mockFAQs: FAQ[] = [
   {
     id: "1",
     question: "What are your opening hours?",
@@ -141,13 +151,14 @@ export const mockFAQs = [
   },
 ];
 
-export const mockPrivateEvents = [
+export const mockPrivateEvents: PrivateEvent[] = [
   {
     id: "1",
     name: "Corporate Dinner",
     email: "events@company.com",
     phone: "555-0200",
     event_date: "2024-02-01",
+    time: "19:00",
     event_type: "Corporate Event",
     guests: 25,
     status: "pending",
@@ -160,6 +171,7 @@ export const mockPrivateEvents = [
     email: "bride@example.com",
     phone: "555-0201",
     event_date: "2024-03-15",
+    time: "17:30",
     event_type: "Wedding",
     guests: 80,
     status: "confirmed",
@@ -168,7 +180,7 @@ export const mockPrivateEvents = [
   },
 ];
 
-export const mockGalleryItems = [
+export const mockGalleryItems: GalleryItem[] = [
   {
     id: "1",
     title: "Restaurant Interior",
@@ -207,7 +219,7 @@ export const mockGalleryItems = [
   },
 ];
 
-export const mockSocialMediaItems = [
+export const mockSocialMediaItems: SocialMediaItem[] = [
   {
     id: "1",
     platform: "instagram",
@@ -243,7 +255,7 @@ export const mockSocialMediaItems = [
   },
 ];
 
-export const mockRestaurantSettings = {
+export const mockRestaurantSettings: RestaurantSettings = {
   id: "1",
   restaurant_name: "Your Restaurant Name",
   description:

@@ -1,33 +1,49 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
-import { Save, Instagram, Facebook, Twitter, Youtube, Globe, Phone, Mail, MapPin } from "lucide-react"
-import { toast } from "sonner"
-import { mockAPI } from "@/lib/mock-api"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Save,
+  Instagram,
+  Facebook,
+  Twitter,
+  Youtube,
+  Globe,
+  Phone,
+  Mail,
+  MapPin,
+} from "lucide-react";
+import { toast } from "sonner";
+import { mockAPI } from "@/lib/mock-api";
 
 interface RestaurantSettings {
-  id?: string
-  restaurant_name: string
-  description: string
-  phone: string
-  email: string
-  address: string
-  website: string
-  instagram_url: string
-  facebook_url: string
-  twitter_url: string
-  youtube_url: string
-  tiktok_url: string
-  opening_hours: string
-  is_open: boolean
-  created_at?: string
-  updated_at?: string
+  id?: string;
+  restaurant_name: string;
+  description: string;
+  phone: string;
+  email: string;
+  address: string;
+  website: string;
+  instagram_url: string;
+  facebook_url: string;
+  twitter_url: string;
+  youtube_url: string;
+  tiktok_url: string;
+  opening_hours: string;
+  is_open: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default function SettingsPage() {
@@ -45,43 +61,46 @@ export default function SettingsPage() {
     tiktok_url: "",
     opening_hours: "",
     is_open: true,
-  })
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchSettings()
-  }, [])
+    fetchSettings();
+  }, []);
 
   const fetchSettings = async () => {
     try {
-      const data = await mockAPI.getRestaurantSettings()
-      setSettings(data)
-    } catch (error) {
-      toast.error("Failed to fetch settings")
+      const data = await mockAPI.getRestaurantSettings();
+      setSettings(data);
+    } catch {
+      toast.error("Failed to fetch settings");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleInputChange = (field: keyof RestaurantSettings, value: string | boolean) => {
+  const handleInputChange = (
+    field: keyof RestaurantSettings,
+    value: string | boolean
+  ) => {
     setSettings((prev) => ({
       ...prev,
       [field]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSave = async () => {
-    setSaving(true)
+    setSaving(true);
     try {
-      await mockAPI.updateRestaurantSettings(settings)
-      toast.success("Settings saved successfully")
-    } catch (error) {
-      toast.error("Failed to save settings")
+      await mockAPI.updateRestaurantSettings(settings);
+      toast.success("Settings saved successfully");
+    } catch {
+      toast.error("Failed to save settings");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -91,7 +110,7 @@ export default function SettingsPage() {
           <p className="text-muted-foreground">Loading settings...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -99,7 +118,9 @@ export default function SettingsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your restaurant settings and social media links</p>
+          <p className="text-muted-foreground">
+            Manage your restaurant settings and social media links
+          </p>
         </div>
         <Button onClick={handleSave} disabled={saving}>
           <Save className="mr-2 h-4 w-4" />
@@ -112,7 +133,9 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Restaurant Information</CardTitle>
-            <CardDescription>Basic information about your restaurant</CardDescription>
+            <CardDescription>
+              Basic information about your restaurant
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,18 +144,24 @@ export default function SettingsPage() {
                 <Input
                   id="restaurant_name"
                   value={settings.restaurant_name}
-                  onChange={(e) => handleInputChange("restaurant_name", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("restaurant_name", e.target.value)
+                  }
                   placeholder="Enter restaurant name"
                 />
               </div>
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
                   <Label className="text-base">Currently Open</Label>
-                  <div className="text-sm text-muted-foreground">Toggle restaurant open/closed status</div>
+                  <div className="text-sm text-muted-foreground">
+                    Toggle restaurant open/closed status
+                  </div>
                 </div>
                 <Switch
                   checked={settings.is_open}
-                  onCheckedChange={(checked) => handleInputChange("is_open", checked)}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("is_open", checked)
+                  }
                 />
               </div>
             </div>
@@ -142,7 +171,9 @@ export default function SettingsPage() {
               <Textarea
                 id="description"
                 value={settings.description}
-                onChange={(e) => handleInputChange("description", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 placeholder="Describe your restaurant..."
                 className="resize-none"
               />
@@ -153,7 +184,9 @@ export default function SettingsPage() {
               <Textarea
                 id="opening_hours"
                 value={settings.opening_hours}
-                onChange={(e) => handleInputChange("opening_hours", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("opening_hours", e.target.value)
+                }
                 placeholder="Mon-Fri: 11:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
                 className="resize-none"
               />
@@ -229,7 +262,9 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Social Media Links</CardTitle>
-            <CardDescription>Connect your social media accounts</CardDescription>
+            <CardDescription>
+              Connect your social media accounts
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -241,7 +276,9 @@ export default function SettingsPage() {
                 <Input
                   id="instagram_url"
                   value={settings.instagram_url}
-                  onChange={(e) => handleInputChange("instagram_url", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("instagram_url", e.target.value)
+                  }
                   placeholder="https://instagram.com/yourrestaurant"
                 />
               </div>
@@ -253,7 +290,9 @@ export default function SettingsPage() {
                 <Input
                   id="facebook_url"
                   value={settings.facebook_url}
-                  onChange={(e) => handleInputChange("facebook_url", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("facebook_url", e.target.value)
+                  }
                   placeholder="https://facebook.com/yourrestaurant"
                 />
               </div>
@@ -265,7 +304,9 @@ export default function SettingsPage() {
                 <Input
                   id="twitter_url"
                   value={settings.twitter_url}
-                  onChange={(e) => handleInputChange("twitter_url", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("twitter_url", e.target.value)
+                  }
                   placeholder="https://twitter.com/yourrestaurant"
                 />
               </div>
@@ -277,7 +318,9 @@ export default function SettingsPage() {
                 <Input
                   id="youtube_url"
                   value={settings.youtube_url}
-                  onChange={(e) => handleInputChange("youtube_url", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("youtube_url", e.target.value)
+                  }
                   placeholder="https://youtube.com/@yourrestaurant"
                 />
               </div>
@@ -293,7 +336,9 @@ export default function SettingsPage() {
                 <Input
                   id="tiktok_url"
                   value={settings.tiktok_url}
-                  onChange={(e) => handleInputChange("tiktok_url", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("tiktok_url", e.target.value)
+                  }
                   placeholder="https://tiktok.com/@yourrestaurant"
                 />
               </div>
@@ -310,5 +355,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

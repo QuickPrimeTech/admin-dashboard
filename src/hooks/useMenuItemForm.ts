@@ -119,7 +119,7 @@ export function useMenuItemForm(
           toast.error(result.message || "Failed to submit menu item.");
         }
       }
-    } catch (error) {
+    } catch {
       toast.error(
         "Failed to submit menu item. Please Check your internet connection"
       );

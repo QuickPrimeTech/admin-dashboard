@@ -67,8 +67,8 @@ export function LoginForm() {
       } else {
         setError(result.error || "Login failed");
       }
-    } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
+    } catch {
+      setError("An unexpected error occurred. Please try again. Due to ");
     } finally {
       setIsLoading(false);
     }
