@@ -93,8 +93,6 @@ export default function GalleryPage() {
     console.log("toggling the publishing");
   };
 
-  if (loading) return <GallerySkeletonGrid />;
-
   return (
     <div className="space-y-6">
       <GalleryHeader onAdd={() => setIsDialogOpen(true)} />
@@ -104,7 +102,10 @@ export default function GalleryPage() {
         showPublished={showPublished}
         setShowPublished={setShowPublished}
       />
-      {filteredItems.length === 0 ? (
+
+      {loading ? (
+        <GallerySkeletonGrid />
+      ) : filteredItems.length === 0 ? (
         <GalleryEmptyState
           onAdd={() => setIsDialogOpen(true)}
           searchTerm={searchTerm}
@@ -118,6 +119,7 @@ export default function GalleryPage() {
           onTogglePublished={togglePublished}
         />
       )}
+
       <GalleryDialog
         open={isDialogOpen}
         onOpenChange={handleDialogClose}
