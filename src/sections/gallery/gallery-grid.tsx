@@ -28,7 +28,7 @@ export function GalleryGrid({
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item) => (
-        <Card key={item.id} className="overflow-hidden group">
+        <Card key={item.id} className="py-0 pb-3 overflow-hidden group">
           <div className="relative aspect-square">
             <Image
               src={item.image_url || "/placeholder.svg"}

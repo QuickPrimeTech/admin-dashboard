@@ -7,3 +7,10 @@ export type GalleryItem = {
   is_published: boolean;
   created_at: string;
 };
+
+export type GalleryDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item?: GalleryItem | null;
+  onSaved: () => void;
+};
