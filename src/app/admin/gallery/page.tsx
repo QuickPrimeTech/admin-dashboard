@@ -90,7 +90,25 @@ export default function GalleryPage() {
   };
 
   const togglePublished = async (id: number, isPublished: boolean) => {
-    console.log("toggling the publishing");
+    try {
+      const res = await fetch("/api/gallery/publish-toggle", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, is_published: isPublished }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to toggle published status");
+      }
+
+      toast.success("Publish status updated");
+    } catch (error) {
+      toast.error("Failed to update publish status");
+      console.error(error);
+    }
+    fetchGalleryItems();
   };
 
   return (

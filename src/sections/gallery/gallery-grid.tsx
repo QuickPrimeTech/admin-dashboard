@@ -58,7 +58,7 @@ export function GalleryGrid({
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => onTogglePublished(item.id, item.is_published)}
+                onClick={() => onTogglePublished(item.id, !item.is_published)}
               >
                 {item.is_published ? (
                   <EyeOff className="h-4 w-4" />
