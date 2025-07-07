@@ -2,24 +2,25 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { mockAPI } from "@/lib/mock-api";
-import { formSchema, FormData } from "@/schemas/galllery-item-schema";
+import {
+  formSchema,
+  FormData as FormDataProps,
+} from "@/schemas/galllery-item-schema";
 import { GalleryItem } from "@/types/gallery"; // assume you have a type for existing item
 
 export function useGalleryItemForm(
   item: GalleryItem | null | undefined,
   onSaved: () => void
 ) {
-  const [uploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
 
-  const form = useForm<FormData>({
+  const form = useForm<FormDataProps>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
-      image_url: "",
       is_published: true,
+      file: undefined as unknown as File, // default to empty
     },
   });
 
@@ -28,47 +29,56 @@ export function useGalleryItemForm(
       form.reset({
         title: item.title || "",
         description: item.description || "",
-        image_url: item.image_url,
         is_published: item.is_published,
+        file: undefined as unknown as File,
       });
     } else {
       form.reset({
         title: "",
         description: "",
-        image_url: "",
         is_published: true,
+        file: undefined as unknown as File,
       });
     }
-    setSelectedFile(null);
   }, [item, form]);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormDataProps) => {
+    setUploading(true);
     try {
-      if (item) {
-        await mockAPI.updateGalleryItem(item.id, data);
-        toast.success("Gallery item updated successfully");
-      } else {
-        await mockAPI.createGalleryItem({
-          order_index: 0,
-          image_url: data.image_url ?? "",
-          is_published: data.is_published,
-          title: data.title ?? "", // fallback to empty string
-          description: data.description ?? "", // fallback to empty string
-        });
-        toast.success("Gallery item created successfully");
+      const formData = new FormData();
+      //Adding all the data to the form item
+      formData.append("title", data.title || "");
+      formData.append("description", data.description || "");
+      formData.append("is_published", String(data.is_published));
+      formData.append("file", data.file);
+
+      const res = await fetch("/api/gallery", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error(errorData);
+        toast.error(errorData.error || "Failed to upload");
+        setUploading(false);
+        return;
       }
 
+      const savedItem = await res.json();
+      console.log(savedItem);
+      setUploading(false);
+      toast.success(savedItem.message);
       onSaved();
-    } catch {
-      toast.error(`Failed to ${item ? "update" : "create"} gallery item`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
     }
   };
 
   return {
     form,
     uploading,
-    selectedFile,
-    setSelectedFile,
     onSubmit,
   };
 }

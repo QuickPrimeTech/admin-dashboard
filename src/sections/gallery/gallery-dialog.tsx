@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { UploadIcon } from "lucide-react";
+import { Loader2, UploadIcon } from "lucide-react";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GalleryDialogProps } from "@/types/gallery";
@@ -33,10 +33,7 @@ export function GalleryDialog({
   onSaved,
 }: GalleryDialogProps) {
   // hook that handles all the logic
-  const { form, uploading, setSelectedFile, onSubmit } = useGalleryItemForm(
-    item,
-    onSaved
-  );
+  const { form, uploading, onSubmit } = useGalleryItemForm(item, onSaved);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,36 +54,31 @@ export function GalleryDialog({
               {/* Image Upload */}
               <FormField
                 control={form.control}
-                name="image_url"
-                render={() => (
+                name="file"
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Image</FormLabel>
                     <FormControl>
                       <label className="group relative mt-2 block cursor-pointer w-full h-32 rounded-md border border-dashed hover:border-primary transition">
-                        {/* The file input - hidden but still clickable via label */}
+                        {/* hidden file input */}
                         <Input
                           type="file"
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                              const url = URL.createObjectURL(
-                                e.target.files[0]
-                              );
-                              form.setValue("image_url", url);
-                              setSelectedFile(e.target.files?.[0]);
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              field.onChange(file);
                             }
                           }}
                           disabled={uploading}
                         />
 
-                        {/* If there is an image URL, show preview */}
-                        {form.watch("image_url") ? (
+                        {/* show preview if file is selected */}
+                        {form.watch("file") ? (
                           <>
                             <Image
-                              src={
-                                form.watch("image_url") || "/placeholder.svg"
-                              }
+                              src={URL.createObjectURL(form.watch("file"))}
                               alt="Preview"
                               fill
                               className="absolute inset-0 object-cover rounded-md"
@@ -179,10 +171,11 @@ export function GalleryDialog({
                   Cancel
                 </Button>
                 <Button type="submit" disabled={uploading}>
+                  {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {uploading
                     ? item
-                      ? "Updating..."
-                      : "Creating..."
+                      ? "Updating"
+                      : "Creating"
                     : item
                     ? "Update"
                     : "Create"}{" "}

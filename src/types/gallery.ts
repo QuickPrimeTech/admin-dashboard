@@ -14,3 +14,14 @@ export type GalleryDialogProps = {
   item?: GalleryItem | null;
   onSaved: () => void;
 };
+
+export type GalleryItemInsert = {
+  title: string | null;
+  description: string | null;
+  is_published: boolean;
+  image_url: string;
+};
+
+export type CloudinaryUploadResult = {
+  secure_url: string;
+};
