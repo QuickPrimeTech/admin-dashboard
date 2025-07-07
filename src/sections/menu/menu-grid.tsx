@@ -7,24 +7,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
-
-
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  type: string[];
-  image_url?: string;
-  is_available: boolean;
-}
 import { MenuItem } from "@/types/menu";
-
 
 interface MenuGridProps {
   items: MenuItem[];
@@ -67,14 +66,9 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
               />
             </div>
           )}
-          <CardHeader className="pb-3">
+          <CardHeader>
             <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <CardTitle className="text-lg">{item.name}</CardTitle>
-                <CardDescription className="mt-1">
-                  {item.description}
-                </CardDescription>
-              </div>
+              <CardTitle className="text-lg">{item.name}</CardTitle>
               <Badge
                 variant={item.is_available ? "default" : "secondary"}
                 className="ml-2"
@@ -82,19 +76,26 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
                 {item.is_available ? "Available" : "Unavailable"}
               </Badge>
             </div>
+            <CardDescription className="mt-1">
+              {item.description}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="flex justify-between items-center mb-3">
               <span className="text-lg font-bold">Ksh{item.price}</span>
               <Badge variant="outline" className="capitalize">
                 {item.category}
               </Badge>
             </div>
-            {item.type && item.type.length > 0 && (
+            {item.dietary_preference && item.dietary_preference.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-3">
-                {item.type.map((type) => (
-                  <Badge key={type} variant="secondary" className="text-xs">
-                    {type}
+                {item.dietary_preference.map((dietary_preference) => (
+                  <Badge
+                    key={dietary_preference}
+                    variant="secondary"
+                    className="text-xs"
+                  >
+                    {dietary_preference}
                   </Badge>
                 ))}
               </div>
@@ -109,14 +110,38 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDelete(item.id)}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete{" "}
+                      <span className="font-medium">{item.name}</span> from your
+                      menu.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive hover:bg-destructive/90 text-white"
+                      onClick={() => onDelete(item.id)}
+                    >
+                      Yes, delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardContent>
         </Card>

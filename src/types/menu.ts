@@ -4,7 +4,7 @@ export type MenuItem = {
   description: string;
   price: number;
   category: string;
-  type: string[];
+  dietary_preference: string[];
   image_url?: string;
   is_available: boolean;
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -10,17 +10,18 @@ export function useMenuItemForm(
   onSaved: () => void
 ) {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const [uploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const itemRef = useRef<MenuItem | null | undefined>(item);
 
   const form = useForm<MenuItemFormData>({
     resolver: zodResolver(menuItemSchema),
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
+      price: undefined,
       category: "",
-      type: [],
+      dietary_preference: [],
       is_available: true,
       image_url: "",
     },
@@ -29,16 +30,17 @@ export function useMenuItemForm(
   // When item changes, reset form values
   useEffect(() => {
     if (item) {
+      itemRef.current = item;
       form.reset({
         name: item.name,
         description: item.description,
         price: item.price,
         category: item.category,
-        type: item.type || [],
+        dietary_preference: item.dietary_preference || [],
         is_available: item.is_available,
         image_url: item.image_url || "",
       });
-      setSelectedTypes(item.type || []);
+      setSelectedTypes(item.dietary_preference || []);
     } else {
       form.reset();
       setSelectedTypes([]);
@@ -51,7 +53,7 @@ export function useMenuItemForm(
       ? selectedTypes.filter((t) => t !== type)
       : [...selectedTypes, type];
     setSelectedTypes(newTypes);
-    form.setValue("type", newTypes);
+    form.setValue("dietary_preference", newTypes);
   };
 
   // Handle image upload
@@ -75,27 +77,49 @@ export function useMenuItemForm(
       formData.append("is_available", String(data.is_available));
 
       // Important: Append using the key "dietary_preference"
-      data.type?.forEach((t) => {
+      data.dietary_preference?.forEach((t) => {
         formData.append("dietary_preference", t);
       });
 
       if (selectedFile) {
         formData.append("image", selectedFile);
       }
+      if (itemRef.current) {
+        formData.append("id", itemRef.current.id);
+        console.log(
+          "current item ---->",
+          itemRef.current,
+          "form data ---->",
+          formData
+        );
 
-      const response = await fetch("/api/menu-items", {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch("/api/menu-items", {
+          method: "PATCH",
+          body: formData,
+        });
 
-      const result = await response.json();
-      if (response.ok) {
-        console.log(result.imageUrl);
-        toast.success(result.message || "Menu item submitted successfully!");
+        const result = await response.json();
+        if (response.ok) {
+          toast.success(result.message || "Menu item updated successfully!");
+          onSaved();
+        } else {
+          toast.error(result.message || "Failed to update menu item.");
+        }
       } else {
-        toast.error(result.message || "Failed to submit menu item.");
+        const response = await fetch("/api/menu-items", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          toast.success(result.message || "Menu item submitted successfully!");
+          onSaved();
+        } else {
+          toast.error(result.message || "Failed to submit menu item.");
+        }
       }
-    } catch (error) {
+    } catch {
       toast.error(
         "Failed to submit menu item. Please Check your internet connection"
       );

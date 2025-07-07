@@ -1,19 +1,24 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface MenuFiltersProps {
-  searchTerm: string
-  onSearchChange: (value: string) => void
-  selectedCategory: string
-  onCategoryChange: (category: string) => void
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  selectedCategory: string;
+  onCategoryChange: (category: string) => void;
 }
 
-const categories = ["all", "starter", "main", "dessert", "beverage"]
+const categories = ["all", "starter", "main", "dessert", "beverage"];
 
-export function MenuFilters({ searchTerm, onSearchChange, selectedCategory, onCategoryChange }: MenuFiltersProps) {
+export function MenuFilters({
+  searchTerm,
+  onSearchChange,
+  selectedCategory,
+  onCategoryChange,
+}: MenuFiltersProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       <div className="relative flex-1">
@@ -25,19 +30,21 @@ export function MenuFilters({ searchTerm, onSearchChange, selectedCategory, onCa
           className="pl-10"
         />
       </div>
-      <div className="flex gap-2">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={selectedCategory === category ? "default" : "outline"}
-            size="sm"
-            onClick={() => onCategoryChange(category)}
-            className="capitalize"
-          >
-            {category}
-          </Button>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="flex gap-2 w-max px-1">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"}
+              size="sm"
+              onClick={() => onCategoryChange(category)}
+              className="capitalize whitespace-nowrap"
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
-  )
+  );
 }

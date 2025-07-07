@@ -1,96 +1,107 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Calendar, Users, Phone, Mail, Search } from "lucide-react"
-import { mockAPI } from "@/lib/mock-api"
-import { toast } from "sonner"
+import { useState, useEffect, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Calendar, Users, Phone, Mail, Search } from "lucide-react";
+import { mockAPI } from "@/lib/mock-api";
+import { toast } from "sonner";
+import { ReservationStatus } from "@/types/mock-api";
 
 interface PrivateEvent {
-  id: string
-  name: string
-  email: string
-  phone: string
-  event_date: string
-  event_type: string
-  guests: number
-  status: string
-  notes?: string
-  created_at: string
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  event_date: string;
+  event_type: string;
+  guests: number;
+  status: string;
+  notes?: string;
+  created_at: string;
 }
 
 export default function PrivateEventsPage() {
-  const [events, setEvents] = useState<PrivateEvent[]>([])
-  const [filteredEvents, setFilteredEvents] = useState<PrivateEvent[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [loading, setLoading] = useState(true)
+  const [events, setEvents] = useState<PrivateEvent[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<PrivateEvent[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
-  const statusOptions = ["all", "pending", "confirmed", "cancelled"]
-
-  useEffect(() => {
-    fetchEvents()
-  }, [])
-
-  useEffect(() => {
-    filterEvents()
-  }, [events, searchTerm, statusFilter])
+  const statusOptions = ["all", "pending", "confirmed", "cancelled"];
 
   const fetchEvents = async () => {
     try {
-      const data = await mockAPI.getPrivateEvents()
-      setEvents(data)
-    } catch (error) {
-      toast.error("Failed to fetch private events")
+      const data = await mockAPI.getPrivateEvents();
+      setEvents(data);
+    } catch {
+      toast.error("Failed to fetch private events");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const filterEvents = () => {
-    let filtered = events
+  const filterEvents = useCallback(() => {
+    let filtered = events;
 
     if (searchTerm) {
       filtered = filtered.filter(
         (event) =>
           event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           event.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          event.event_type.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+          event.event_type.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     if (statusFilter !== "all") {
-      filtered = filtered.filter((event) => event.status.toLowerCase() === statusFilter)
+      filtered = filtered.filter(
+        (event) => event.status.toLowerCase() === statusFilter
+      );
     }
 
-    setFilteredEvents(filtered)
-  }
+    setFilteredEvents(filtered);
+  }, [events, searchTerm, statusFilter]);
 
-  const updateEventStatus = async (id: string, status: string) => {
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    filterEvents();
+  }, [filterEvents]);
+
+  const updateEventStatus = async (id: string, status: ReservationStatus) => {
     try {
-      await mockAPI.updateEventStatus(id, status)
-      setEvents((prev) => prev.map((event) => (event.id === id ? { ...event, status } : event)))
-      toast.success(`Event ${status} successfully`)
-    } catch (error) {
-      toast.error("Failed to update event status")
+      await mockAPI.updateEventStatus(id, status);
+      setEvents((prev) =>
+        prev.map((event) => (event.id === id ? { ...event, status } : event))
+      );
+      toast.success(`Event ${status} successfully`);
+    } catch {
+      toast.error("Failed to update event status");
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "confirmed":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "cancelled":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -100,14 +111,16 @@ export default function PrivateEventsPage() {
           <p className="text-muted-foreground">Loading events...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Private Events</h1>
-        <p className="text-muted-foreground">Manage private event requests and bookings</p>
+        <p className="text-muted-foreground">
+          Manage private event requests and bookings
+        </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -158,17 +171,22 @@ export default function PrivateEventsPage() {
                   <div>
                     <CardTitle className="text-lg">{event.name}</CardTitle>
                     <CardDescription>
-                      {event.event_type} for {event.guests} {event.guests === 1 ? "guest" : "guests"}
+                      {event.event_type} for {event.guests}{" "}
+                      {event.guests === 1 ? "guest" : "guests"}
                     </CardDescription>
                   </div>
-                  <Badge className={getStatusColor(event.status)}>{event.status}</Badge>
+                  <Badge className={getStatusColor(event.status)}>
+                    {event.status}
+                  </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{new Date(event.event_date).toLocaleDateString()}</span>
+                    <span className="text-sm">
+                      {new Date(event.event_date).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
@@ -190,17 +208,28 @@ export default function PrivateEventsPage() {
 
                 <div className="flex gap-2">
                   {event.status !== "confirmed" && (
-                    <Button size="sm" onClick={() => updateEventStatus(event.id, "confirmed")}>
+                    <Button
+                      size="sm"
+                      onClick={() => updateEventStatus(event.id, "confirmed")}
+                    >
                       Confirm
                     </Button>
                   )}
                   {event.status !== "cancelled" && (
-                    <Button size="sm" variant="outline" onClick={() => updateEventStatus(event.id, "cancelled")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateEventStatus(event.id, "cancelled")}
+                    >
                       Cancel
                     </Button>
                   )}
                   {event.status !== "pending" && (
-                    <Button size="sm" variant="outline" onClick={() => updateEventStatus(event.id, "pending")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateEventStatus(event.id, "pending")}
+                    >
                       Mark Pending
                     </Button>
                   )}
@@ -211,5 +240,5 @@ export default function PrivateEventsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

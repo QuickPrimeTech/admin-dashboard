@@ -1,133 +1,166 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Plus, Edit, Trash2, Search, Video, ImageIcon, Eye, EyeOff } from "lucide-react"
-import { SocialMediaDialog } from "@/components/admin/social-media-dialog"
-import { toast } from "sonner"
-import { mockAPI } from "@/lib/mock-api"
-import Image from "next/image"
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  Video,
+  ImageIcon,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import { SocialMediaDialog } from "@/components/admin/social-media-dialog";
+import { toast } from "sonner";
+import { mockAPI } from "@/lib/mock-api";
+import Image from "next/image";
 
 interface SocialMediaItem {
-  id: string
-  platform: string
-  content_type: string
-  title?: string
-  url: string
-  thumbnail_url?: string
-  order_index: number
-  is_published: boolean
-  created_at: string
+  id: string;
+  platform: string;
+  content_type: string;
+  title?: string;
+  url: string;
+  thumbnail_url?: string;
+  order_index: number;
+  is_published: boolean;
+  created_at: string;
 }
 
 export default function FollowUsPage() {
-  const [socialItems, setSocialItems] = useState<SocialMediaItem[]>([])
-  const [filteredItems, setFilteredItems] = useState<SocialMediaItem[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [platformFilter, setPlatformFilter] = useState("all")
-  const [contentTypeFilter, setContentTypeFilter] = useState("all")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<SocialMediaItem | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [socialItems, setSocialItems] = useState<SocialMediaItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<SocialMediaItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [platformFilter, setPlatformFilter] = useState("all");
+  const [contentTypeFilter, setContentTypeFilter] = useState("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<SocialMediaItem | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const platforms = ["all", "instagram", "tiktok", "youtube", "facebook", "twitter"]
-  const contentTypes = ["all", "video", "image", "post"]
+  const platforms = [
+    "all",
+    "instagram",
+    "tiktok",
+    "youtube",
+    "facebook",
+    "twitter",
+  ];
+  const contentTypes = ["all", "video", "image", "post"];
 
   useEffect(() => {
-    fetchSocialItems()
-  }, [])
-
-  useEffect(() => {
-    filterItems()
-  }, [socialItems, searchTerm, platformFilter, contentTypeFilter])
+    fetchSocialItems();
+  }, []);
 
   const fetchSocialItems = async () => {
     try {
-      const data = await mockAPI.getSocialMediaItems()
-      setSocialItems(data)
-    } catch (error) {
-      toast.error("Failed to fetch social media items")
+      const data = await mockAPI.getSocialMediaItems();
+      setSocialItems(data);
+    } catch {
+      toast.error("Failed to fetch social media items");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const filterItems = () => {
-    let filtered = socialItems
+  const filterItems = useCallback(() => {
+    let filtered = socialItems;
 
     if (searchTerm) {
       filtered = filtered.filter(
         (item) =>
           item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.platform.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+          item.platform.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     if (platformFilter !== "all") {
-      filtered = filtered.filter((item) => item.platform.toLowerCase() === platformFilter)
+      filtered = filtered.filter(
+        (item) => item.platform.toLowerCase() === platformFilter
+      );
     }
 
     if (contentTypeFilter !== "all") {
-      filtered = filtered.filter((item) => item.content_type.toLowerCase() === contentTypeFilter)
+      filtered = filtered.filter(
+        (item) => item.content_type.toLowerCase() === contentTypeFilter
+      );
     }
 
-    setFilteredItems(filtered)
-  }
+    setFilteredItems(filtered);
+  }, [socialItems, searchTerm, platformFilter, contentTypeFilter]);
+
+  useEffect(() => {
+    filterItems();
+  }, [filterItems]);
 
   const handleDelete = async (id: string) => {
     try {
-      await mockAPI.deleteSocialMediaItem(id)
-      setSocialItems((prev) => prev.filter((item) => item.id !== id))
-      toast.success("Social media item deleted successfully")
-    } catch (error) {
-      toast.error("Failed to delete social media item")
+      await mockAPI.deleteSocialMediaItem(id);
+      setSocialItems((prev) => prev.filter((item) => item.id !== id));
+      toast.success("Social media item deleted successfully");
+    } catch {
+      toast.error("Failed to delete social media item");
     }
-  }
+  };
 
   const handleEdit = (item: SocialMediaItem) => {
-    setEditingItem(item)
-    setIsDialogOpen(true)
-  }
+    setEditingItem(item);
+    setIsDialogOpen(true);
+  };
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false)
-    setEditingItem(null)
-  }
+    setIsDialogOpen(false);
+    setEditingItem(null);
+  };
 
   const handleItemSaved = () => {
-    fetchSocialItems()
-    handleDialogClose()
-  }
+    fetchSocialItems();
+    handleDialogClose();
+  };
 
   const togglePublished = async (id: string, isPublished: boolean) => {
     try {
-      await mockAPI.updateSocialMediaItem(id, { is_published: !isPublished })
-      setSocialItems((prev) => prev.map((item) => (item.id === id ? { ...item, is_published: !isPublished } : item)))
-      toast.success(`Social media item ${!isPublished ? "published" : "unpublished"} successfully`)
-    } catch (error) {
-      toast.error("Failed to update social media item status")
+      await mockAPI.updateSocialMediaItem(id, { is_published: !isPublished });
+      setSocialItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, is_published: !isPublished } : item
+        )
+      );
+      toast.success(
+        `Social media item ${
+          !isPublished ? "published" : "unpublished"
+        } successfully`
+      );
+    } catch {
+      toast.error("Failed to update social media item status");
     }
-  }
+  };
 
   const getPlatformColor = (platform: string) => {
     switch (platform.toLowerCase()) {
       case "instagram":
-        return "bg-pink-100 text-pink-800"
+        return "bg-pink-100 text-pink-800";
       case "tiktok":
-        return "bg-black text-white"
+        return "bg-black text-white";
       case "youtube":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       case "facebook":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "twitter":
-        return "bg-sky-100 text-sky-800"
+        return "bg-sky-100 text-sky-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -147,7 +180,7 @@ export default function FollowUsPage() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -155,7 +188,9 @@ export default function FollowUsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Follow Us</h1>
-          <p className="text-muted-foreground">Manage your social media content and links</p>
+          <p className="text-muted-foreground">
+            Manage your social media content and links
+          </p>
         </div>
         <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -208,9 +243,13 @@ export default function FollowUsPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center">
               <Video className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No social media content found</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                No social media content found
+              </h3>
               <p className="text-muted-foreground mb-4">
-                {searchTerm || platformFilter !== "all" || contentTypeFilter !== "all"
+                {searchTerm ||
+                platformFilter !== "all" ||
+                contentTypeFilter !== "all"
                   ? "Try adjusting your search or filters"
                   : "Get started by adding your first social media content"}
               </p>
@@ -243,7 +282,10 @@ export default function FollowUsPage() {
                   </div>
                 )}
                 <div className="absolute top-2 left-2 flex gap-1">
-                  <Badge className={getPlatformColor(item.platform)} variant="secondary">
+                  <Badge
+                    className={getPlatformColor(item.platform)}
+                    variant="secondary"
+                  >
                     {item.platform}
                   </Badge>
                   <Badge variant="outline">{item.content_type}</Badge>
@@ -254,10 +296,22 @@ export default function FollowUsPage() {
                   </Badge>
                 </div>
                 <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="sm" variant="secondary" onClick={() => togglePublished(item.id, item.is_published)}>
-                    {item.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => togglePublished(item.id, item.is_published)}
+                  >
+                    {item.is_published ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
-                  <Button size="sm" variant="secondary" onClick={() => handleEdit(item)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => handleEdit(item)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
@@ -274,7 +328,9 @@ export default function FollowUsPage() {
                 <CardTitle className="text-sm font-medium truncate">
                   {item.title || `${item.platform} ${item.content_type}`}
                 </CardTitle>
-                <CardDescription className="text-xs mt-1 truncate">{item.url}</CardDescription>
+                <CardDescription className="text-xs mt-1 truncate">
+                  {item.url}
+                </CardDescription>
               </CardContent>
             </Card>
           ))}
@@ -288,5 +344,5 @@ export default function FollowUsPage() {
         onSaved={handleItemSaved}
       />
     </div>
-  )
+  );
 }

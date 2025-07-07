@@ -91,11 +91,11 @@ export function GalleryDialog({
 
     setUploading(true);
     try {
-      const imageUrl = await mockAPI.uploadFile(file, `gallery/${file.name}`);
+      const imageUrl = await mockAPI.uploadFile(file);
       form.setValue("image_url", imageUrl);
       toast.success("Image uploaded successfully");
-    } catch (error) {
-      toast.error("Failed to upload image");
+    } catch {
+      toast.error("Failed to upload image due to ");
     } finally {
       setUploading(false);
     }
@@ -107,12 +107,18 @@ export function GalleryDialog({
         await mockAPI.updateGalleryItem(item.id, data);
         toast.success("Gallery item updated successfully");
       } else {
-        await mockAPI.createGalleryItem(data);
+        await mockAPI.createGalleryItem({
+          order_index: 0,
+          image_url: data.image_url,
+          is_published: data.is_published,
+          title: data.title ?? "", // fallback to empty string
+          description: data.description ?? "", // fallback to empty string
+        });
         toast.success("Gallery item created successfully");
       }
 
       onSaved();
-    } catch (error) {
+    } catch {
       toast.error(`Failed to ${item ? "update" : "create"} gallery item`);
     }
   };
