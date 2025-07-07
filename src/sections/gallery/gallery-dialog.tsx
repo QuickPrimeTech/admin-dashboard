@@ -4,7 +4,6 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -31,22 +30,9 @@ import { mockAPI } from "@/lib/mock-api";
 import Image from "next/image";
 import { GalleryItem } from "@/types/gallery";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-const formSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  image_url: z.string().optional(),
-  is_published: z.boolean(),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
-interface GalleryDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  item?: GalleryItem | null;
-  onSaved: () => void;
-}
+import { GalleryDialogProps } from "@/types/gallery";
+import { formSchema } from "@/schemas/galllery-item-schema";
+import { FormData } from "@/schemas/galllery-item-schema";
 
 export function GalleryDialog({
   open,
