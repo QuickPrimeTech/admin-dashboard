@@ -73,15 +73,6 @@ export function GalleryDialog({
   }, [item, form]);
 
   const onSubmit = async (data: FormData) => {
-    if (!selectedFile && !data.image_url) {
-      toast.error("Please select an image to upload.");
-      return;
-    }
-
-    setUploading(true);
-    try {
-
-  const onSubmit = async (data: FormData) => {
     try {
       if (item) {
         await mockAPI.updateGalleryItem(item.id, data);
