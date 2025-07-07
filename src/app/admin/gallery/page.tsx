@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { mockAPI } from "@/lib/mock-api";
 import { GalleryDialog } from "@/sections/gallery/gallery-dialog";
 import { GalleryHeader } from "@/sections/gallery/gallery-header";
 import { GalleryFilters } from "@/sections/gallery/gallery-filters";
@@ -10,6 +9,7 @@ import { GalleryGrid } from "@/sections/gallery/gallery-grid";
 import { GalleryEmptyState } from "@/sections/gallery/gallery-empty-state";
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
 import { GalleryItem } from "@/types/gallery";
+import { deleteGalleryItem } from "@/helpers/galleryHelpers";
 
 export default function GalleryPage() {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
@@ -20,20 +20,27 @@ export default function GalleryPage() {
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchGalleryItems();
-  }, []);
-
+  // fetch the gallery items from your /api/gallery route
   const fetchGalleryItems = async () => {
     try {
-      const data = await mockAPI.getGalleryItems();
-      setGalleryItems(data);
+      const res = await fetch("/api/gallery");
+      const json = await res.json();
+
+      if (!json.success) {
+        throw new Error(json.message || "Failed to fetch gallery items");
+      }
+
+      setGalleryItems(json.data);
     } catch {
       toast.error("Failed to fetch gallery items");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchGalleryItems();
+  }, []);
 
   const filterItems = useCallback(() => {
     let filtered = galleryItems;
@@ -58,11 +65,10 @@ export default function GalleryPage() {
     filterItems();
   }, [filterItems]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
-      await mockAPI.deleteGalleryItem(id);
-      setGalleryItems((prev) => prev.filter((item) => item.id !== id));
-      toast.success("Gallery item deleted successfully");
+      await deleteGalleryItem(id);
+      fetchGalleryItems(); // refetch after delete
     } catch {
       toast.error("Failed to delete gallery item");
     }
@@ -83,22 +89,8 @@ export default function GalleryPage() {
     handleDialogClose();
   };
 
-  const togglePublished = async (id: string, isPublished: boolean) => {
-    try {
-      await mockAPI.updateGalleryItem(id, { is_published: !isPublished });
-      setGalleryItems((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, is_published: !isPublished } : item
-        )
-      );
-      toast.success(
-        `Gallery item ${
-          !isPublished ? "published" : "unpublished"
-        } successfully`
-      );
-    } catch {
-      toast.error("Failed to update gallery item status");
-    }
+  const togglePublished = async (id: number, isPublished: boolean) => {
+    console.log("toggling the publishing");
   };
 
   if (loading) return <GallerySkeletonGrid />;

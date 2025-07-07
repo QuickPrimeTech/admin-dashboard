@@ -33,7 +33,8 @@ export function GalleryDialog({
   onSaved,
 }: GalleryDialogProps) {
   // hook that handles all the logic
-  const { form, uploading, onSubmit } = useGalleryItemForm(item, onSaved);
+  const { form, uploading, onSubmit, existingImageUrl, setSelectedFile } =
+    useGalleryItemForm(item, onSaved);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -54,7 +55,7 @@ export function GalleryDialog({
               {/* Image Upload */}
               <FormField
                 control={form.control}
-                name="file"
+                name="image_url"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Image</FormLabel>
@@ -69,16 +70,33 @@ export function GalleryDialog({
                             const file = e.target.files?.[0];
                             if (file) {
                               field.onChange(file);
+                              const url = URL.createObjectURL(file);
+                              setSelectedFile(file);
+                              form.setValue("image_url", url);
                             }
                           }}
                           disabled={uploading}
                         />
 
                         {/* show preview if file is selected */}
-                        {form.watch("file") ? (
+                        {form.watch("image_url") ? (
                           <>
                             <Image
-                              src={URL.createObjectURL(form.watch("file"))}
+                              src={form.watch("image_url")}
+                              alt="Preview"
+                              fill
+                              className="absolute inset-0 object-cover rounded-md"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+                              <span className="text-white text-sm font-medium">
+                                Click to change
+                              </span>
+                            </div>
+                          </>
+                        ) : existingImageUrl ? (
+                          <>
+                            <Image
+                              src={existingImageUrl}
                               alt="Preview"
                               fill
                               className="absolute inset-0 object-cover rounded-md"

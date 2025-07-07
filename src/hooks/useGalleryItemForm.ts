@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import {
   formSchema,
   FormData as FormDataProps,
 } from "@/schemas/galllery-item-schema";
 import { GalleryItem } from "@/types/gallery"; // assume you have a type for existing item
+import { addGalleryImage, updateGalleryItem } from "@/helpers/galleryHelpers";
 
 export function useGalleryItemForm(
   item: GalleryItem | null | undefined,
   onSaved: () => void
 ) {
+  //setting the states that change the UI
   const [uploading, setUploading] = useState<boolean>(false);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<null | File>(null);
 
   const form = useForm<FormDataProps>({
     resolver: zodResolver(formSchema),
@@ -20,7 +23,7 @@ export function useGalleryItemForm(
       title: "",
       description: "",
       is_published: true,
-      file: undefined as unknown as File, // default to empty
+      image_url: "", // default to empty
     },
   });
 
@@ -30,55 +33,37 @@ export function useGalleryItemForm(
         title: item.title || "",
         description: item.description || "",
         is_published: item.is_published,
-        file: undefined as unknown as File,
+        image_url: item.image_url,
       });
+      setExistingImageUrl(item.image_url || null); // ADD THIS
     } else {
       form.reset({
         title: "",
         description: "",
         is_published: true,
-        file: undefined as unknown as File,
+        image_url: "",
       });
+      setSelectedFile(null);
+      setExistingImageUrl(null); // ADD THIS
     }
   }, [item, form]);
 
   const onSubmit = async (data: FormDataProps) => {
     setUploading(true);
-    try {
-      const formData = new FormData();
-      //Adding all the data to the form item
-      formData.append("title", data.title || "");
-      formData.append("description", data.description || "");
-      formData.append("is_published", String(data.is_published));
-      formData.append("file", data.file);
-
-      const res = await fetch("/api/gallery", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error(errorData);
-        toast.error(errorData.error || "Failed to upload");
-        setUploading(false);
-        return;
-      }
-
-      const savedItem = await res.json();
-      console.log(savedItem);
-      setUploading(false);
-      toast.success(savedItem.message);
-      onSaved();
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong");
+    if (item) {
+      const payload = { ...data, id: item.id };
+      updateGalleryItem(payload, setUploading, selectedFile, onSaved);
+    } else {
+      //Call the function for uploading the menu item
+      addGalleryImage(data, setUploading, selectedFile, onSaved);
     }
   };
 
   return {
     form,
+    setSelectedFile,
     uploading,
     onSubmit,
+    existingImageUrl, // ADD THIS
   };
 }
