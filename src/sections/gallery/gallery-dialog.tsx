@@ -1,6 +1,4 @@
 "use client";
-
-import type React from "react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,11 +22,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Upload, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
 import { toast } from "sonner";
 import { mockAPI } from "@/lib/mock-api";
 import Image from "next/image";
-import { GalleryItem } from "@/types/gallery";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GalleryDialogProps } from "@/types/gallery";
 import { formSchema } from "@/schemas/galllery-item-schema";
@@ -40,8 +37,8 @@ export function GalleryDialog({
   item,
   onSaved,
 }: GalleryDialogProps) {
-  const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading] = useState(false);
+  const [, setSelectedFile] = useState<File | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
