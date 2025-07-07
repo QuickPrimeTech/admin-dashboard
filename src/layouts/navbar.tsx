@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export function AppNavbar() {
   return (
@@ -24,7 +25,7 @@ export function AppNavbar() {
         <Button variant="ghost" size="icon">
           <Bell className="h-4 w-4" />
         </Button>
-
+        <ModeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar>
