@@ -25,7 +25,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { mockAPI } from "@/lib/mock-api";
 
 const formSchema = z.object({
   question: z.string().min(1, "Question is required"),
@@ -84,21 +83,50 @@ export function FAQDialog({
   const onSubmit = async (data: FormData) => {
     const payload = {
       ...data,
-      order_index: faq?.order_index ?? 0, // or calculate based on existing FAQs
+      order_index: faq?.order_index ?? 0,
+      id: faq?.id,
     };
 
     try {
       if (faq) {
-        await mockAPI.updateFAQ(faq.id, payload);
+        // PATCH request to update FAQ
+        const res = await fetch("/api/faqs", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok || !result.success) {
+          throw new Error(result.message || "Failed to update FAQ");
+        }
+
         toast.success("FAQ updated successfully");
       } else {
-        await mockAPI.createFAQ(payload);
+        // POST request to create new FAQ
+        const res = await fetch("/api/faqs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok || !result.success) {
+          throw new Error(result.message || "Failed to create FAQ");
+        }
+
         toast.success("FAQ created successfully");
       }
 
       onSaved();
-    } catch {
-      toast.error(`Failed to ${faq ? "update" : "create"} FAQ`);
+    } catch (error) {
+      toast.error(
+        `Failed to ${faq ? "update" : "create"} FAQ: ${
+          error instanceof Error ? error.message : ""
+        }`
+      );
     }
   };
 
