@@ -33,8 +33,10 @@ export function GalleryDialog({
   onSaved,
 }: GalleryDialogProps) {
   // hook that handles all the logic
-  const { form, uploading, selectedFile, setSelectedFile, onSubmit } =
-    useGalleryItemForm(item, onSaved, () => onOpenChange(false));
+  const { form, uploading, setSelectedFile, onSubmit } = useGalleryItemForm(
+    item,
+    onSaved
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -72,6 +74,7 @@ export function GalleryDialog({
                                 e.target.files[0]
                               );
                               form.setValue("image_url", url);
+                              setSelectedFile(e.target.files?.[0]);
                             }
                           }}
                           disabled={uploading}

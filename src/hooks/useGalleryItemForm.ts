@@ -8,8 +8,7 @@ import { GalleryItem } from "@/types/gallery"; // assume you have a type for exi
 
 export function useGalleryItemForm(
   item: GalleryItem | null | undefined,
-  onSaved: () => void,
-  onClose: () => void
+  onSaved: () => void
 ) {
   const [uploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
