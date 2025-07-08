@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase"; // Adjust if you use a different impo
 export async function POST(request: NextRequest) {
   try {
     const { updates } = await request.json();
-    console.log(updates);
+
     if (!Array.isArray(updates)) {
       return NextResponse.json(
         {

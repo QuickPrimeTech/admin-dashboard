@@ -1,5 +1,8 @@
 "use client";
+
 import { useState, useEffect, useRef } from "react";
+import { FaqFilterDropdown } from "@/sections/faqs/faq-filter-dropdown";
+import { sortFaqs } from "@/helpers/faqsHelper";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,7 +39,10 @@ export default function FAQsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filterValue, setFilterValue] = useState("Latest");
 
+  //sorting the faqs
+  const filteredFaqs = faqs.length > 0 ? sortFaqs(faqs, filterValue) : [];
   // creating the sensors for the drag and drop interface
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -44,7 +50,15 @@ export default function FAQsPage() {
         distance: 5, // optional: require moving 5px before dragging starts
       },
       // This cancels drag start when pointer down on these selectors
-      cancel: ["button", "input", "textarea", "select", "svg", "path"],
+      cancel: [
+        "button",
+        "input",
+        "textarea",
+        "select",
+        "svg",
+        "path",
+        "paragraph",
+      ],
     })
   );
 
@@ -92,6 +106,7 @@ export default function FAQsPage() {
       const res = await fetch("/api/faqs", { method: "GET" });
       if (res.ok) {
         const data = await res.json();
+        console.log(data.data);
         setFaqs(data.data);
       }
     } catch {
@@ -177,17 +192,21 @@ export default function FAQsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">FAQs</h1>
           <p className="text-muted-foreground">
             Manage frequently asked questions
           </p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add FAQ
-        </Button>
+
+        <div className="flex gap-2">
+          <FaqFilterDropdown value={filterValue} onChange={setFilterValue} />
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add FAQ
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -198,7 +217,7 @@ export default function FAQsPage() {
           ))}
         </div>
       ) : faqs.length === 0 ? (
-        <FAQEmptyState setIsDialogOpen={setIsDeleteDialogOpen} />
+        <FAQEmptyState setIsDialogOpen={setIsDialogOpen} />
       ) : (
         <DndContext
           sensors={sensors}
@@ -210,7 +229,7 @@ export default function FAQsPage() {
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-4">
-              {faqs.map((faq) => (
+              {filteredFaqs.map((faq) => (
                 <SortableFAQCard key={faq.id} id={faq.id}>
                   <FAQCard
                     faq={faq}
@@ -234,7 +253,7 @@ export default function FAQsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent aria-describedby="Delete the faq">
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
           </DialogHeader>

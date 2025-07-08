@@ -10,3 +10,10 @@ export interface FAQ {
 export type FAQEmptyStateProps = {
   setIsDialogOpen: (open: boolean) => void;
 };
+
+export type FAQDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  faq?: FAQ | null;
+  onSaved: () => void;
+};

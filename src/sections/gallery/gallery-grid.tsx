@@ -11,7 +11,6 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { Tooltip as TooltipPrimitive } from "@radix-ui/react-tooltip";
 import {
   AlertDialog,
   AlertDialogTrigger,
