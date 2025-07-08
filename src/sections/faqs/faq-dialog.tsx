@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { FAQ } from "@/types/faqs";
 
 const formSchema = z.object({
   question: z.string().min(1, "Question is required"),
@@ -33,14 +34,6 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
-
-interface FAQ {
-  id: string;
-  question: string;
-  answer: string;
-  order_index: number;
-  is_published: boolean;
-}
 
 interface FAQDialogProps {
   open: boolean;

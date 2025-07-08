@@ -1,13 +1,6 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,8 +8,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, GripVertical } from "lucide-react";
-import { FAQDialog } from "@/components/admin/faq-dialog";
+import { Plus } from "lucide-react";
+import { FAQDialog } from "@/sections/faqs/faq-dialog";
 import { toast } from "sonner";
 import { FaqCardSkeleton } from "@/components/skeletons/faq-skeleton";
 import {
@@ -35,6 +28,8 @@ import {
 import { SortableFAQCard } from "@/components/sortable-faq-card";
 import { FAQ } from "@/types/faqs";
 import { updateFAQOrderInDB } from "@/helpers/faqsHelper";
+import { FAQEmptyState } from "@/sections/faqs/faq-empty-state";
+import { FAQCard } from "@/sections/faqs/faq-card";
 
 export default function FAQsPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
@@ -43,7 +38,15 @@ export default function FAQsPage() {
   const [loading, setLoading] = useState(true);
 
   // creating the sensors for the drag and drop interface
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // optional: require moving 5px before dragging starts
+      },
+      // This cancels drag start when pointer down on these selectors
+      cancel: ["button", "input", "textarea", "select", "svg", "path"],
+    })
+  );
 
   // Inside your component
   const faqsRef = useRef<FAQ[]>(faqs);
@@ -144,7 +147,7 @@ export default function FAQsPage() {
     handleDialogClose();
   };
 
-  const togglePublished = async (id: string, isPublished: boolean) => {
+  const togglePublished = async (id: number, isPublished: boolean) => {
     try {
       const res = await fetch("/api/faqs", {
         method: "PATCH",
@@ -195,20 +198,7 @@ export default function FAQsPage() {
           ))}
         </div>
       ) : faqs.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">No FAQs found</h3>
-              <p className="text-muted-foreground mb-4">
-                Get started by adding your first FAQ
-              </p>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add FAQ
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <FAQEmptyState setIsDialogOpen={setIsDeleteDialogOpen} />
       ) : (
         <DndContext
           sensors={sensors}
@@ -222,49 +212,12 @@ export default function FAQsPage() {
             <div className="space-y-4">
               {faqs.map((faq) => (
                 <SortableFAQCard key={faq.id} id={faq.id}>
-                  <Card>
-                    <CardContent>
-                      <div className="flex items-start justify-between">
-                        <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant={faq.is_published ? "default" : "outline"}
-                            size="sm"
-                            onClick={() =>
-                              togglePublished(faq.id, faq.is_published)
-                            }
-                          >
-                            {faq.is_published ? "Published" : "Draft"}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(faq)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => confirmDelete(faq)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 flex-1">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">
-                            {faq.question}
-                          </CardTitle>
-                          <CardDescription className="mt-2">
-                            {faq.answer}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <FAQCard
+                    faq={faq}
+                    handleEdit={handleEdit}
+                    confirmDelete={confirmDelete}
+                    togglePublished={togglePublished}
+                  />
                 </SortableFAQCard>
               ))}
             </div>
