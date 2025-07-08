@@ -1,5 +1,5 @@
 "use client";
-
+import { SettingsSkeleton } from "./settings-skeleton";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/lib/supabase";
 import {
   Save,
   Instagram,
@@ -25,8 +26,6 @@ import {
   MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
-import { mockAPI } from "@/lib/mock-api";
-
 interface RestaurantSettings {
   id?: string;
   restaurant_name: string;
@@ -67,14 +66,47 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchSettings();
+
+    const channel = supabase
+      .channel("restaurant_settings_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // "INSERT", "UPDATE", or "DELETE"
+          schema: "public",
+          table: "restaurant_settings",
+        },
+        (payload) => {
+          console.log("Settings changed:", payload);
+          if (
+            payload.eventType === "UPDATE" ||
+            payload.eventType === "INSERT"
+          ) {
+            setSettings(payload.new as RestaurantSettings);
+            toast.success("Settings updated in real-time");
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchSettings = async () => {
     try {
-      const data = await mockAPI.getRestaurantSettings();
-      setSettings(data);
-    } catch {
+      const res = await fetch("/api/restaurant-settings");
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Failed to fetch settings");
+      }
+
+      setSettings(json.data); // Assuming json.data is your settings object
+    } catch (err) {
       toast.error("Failed to fetch settings");
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -92,8 +124,24 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    if (!settings.id) {
+      toast.error("Missing settings ID");
+      setSaving(false); // Add this
+      return;
+    }
     try {
-      await mockAPI.updateRestaurantSettings(settings);
+      const res = await fetch("/api/restaurant-settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings), // includes the `id` field
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Failed to save settings");
+      }
+
       toast.success("Settings saved successfully");
     } catch {
       toast.error("Failed to save settings");
@@ -101,17 +149,6 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Loading settings...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -127,233 +164,236 @@ export default function SettingsPage() {
           {saving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
-
-      <div className="grid gap-6">
-        {/* Restaurant Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Restaurant Information</CardTitle>
-            <CardDescription>
-              Basic information about your restaurant
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="restaurant_name">Restaurant Name</Label>
-                <Input
-                  id="restaurant_name"
-                  value={settings.restaurant_name}
-                  onChange={(e) =>
-                    handleInputChange("restaurant_name", e.target.value)
-                  }
-                  placeholder="Enter restaurant name"
-                />
-              </div>
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Currently Open</Label>
-                  <div className="text-sm text-muted-foreground">
-                    Toggle restaurant open/closed status
-                  </div>
+      {loading ? (
+        <SettingsSkeleton />
+      ) : (
+        <div className="grid gap-6">
+          {/* Restaurant Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Restaurant Information</CardTitle>
+              <CardDescription>
+                Basic information about your restaurant
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="restaurant_name">Restaurant Name</Label>
+                  <Input
+                    id="restaurant_name"
+                    value={settings.restaurant_name}
+                    onChange={(e) =>
+                      handleInputChange("restaurant_name", e.target.value)
+                    }
+                    placeholder="Enter restaurant name"
+                  />
                 </div>
-                <Switch
-                  checked={settings.is_open}
-                  onCheckedChange={(checked) =>
-                    handleInputChange("is_open", checked)
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={settings.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                placeholder="Describe your restaurant..."
-                className="resize-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="opening_hours">Opening Hours</Label>
-              <Textarea
-                id="opening_hours"
-                value={settings.opening_hours}
-                onChange={(e) =>
-                  handleInputChange("opening_hours", e.target.value)
-                }
-                placeholder="Mon-Fri: 11:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
-                className="resize-none"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Contact Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-            <CardDescription>How customers can reach you</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">
-                  <Phone className="inline h-4 w-4 mr-2" />
-                  Phone Number
-                </Label>
-                <Input
-                  id="phone"
-                  value={settings.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">
-                  <Mail className="inline h-4 w-4 mr-2" />
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={settings.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="info@restaurant.com"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">
-                <MapPin className="inline h-4 w-4 mr-2" />
-                Address
-              </Label>
-              <Textarea
-                id="address"
-                value={settings.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                placeholder="123 Main Street, City, State 12345"
-                className="resize-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="website">
-                <Globe className="inline h-4 w-4 mr-2" />
-                Website
-              </Label>
-              <Input
-                id="website"
-                value={settings.website}
-                onChange={(e) => handleInputChange("website", e.target.value)}
-                placeholder="https://www.restaurant.com"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Social Media Links */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Social Media Links</CardTitle>
-            <CardDescription>
-              Connect your social media accounts
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="instagram_url">
-                  <Instagram className="inline h-4 w-4 mr-2" />
-                  Instagram
-                </Label>
-                <Input
-                  id="instagram_url"
-                  value={settings.instagram_url}
-                  onChange={(e) =>
-                    handleInputChange("instagram_url", e.target.value)
-                  }
-                  placeholder="https://instagram.com/yourrestaurant"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="facebook_url">
-                  <Facebook className="inline h-4 w-4 mr-2" />
-                  Facebook
-                </Label>
-                <Input
-                  id="facebook_url"
-                  value={settings.facebook_url}
-                  onChange={(e) =>
-                    handleInputChange("facebook_url", e.target.value)
-                  }
-                  placeholder="https://facebook.com/yourrestaurant"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="twitter_url">
-                  <Twitter className="inline h-4 w-4 mr-2" />
-                  Twitter
-                </Label>
-                <Input
-                  id="twitter_url"
-                  value={settings.twitter_url}
-                  onChange={(e) =>
-                    handleInputChange("twitter_url", e.target.value)
-                  }
-                  placeholder="https://twitter.com/yourrestaurant"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="youtube_url">
-                  <Youtube className="inline h-4 w-4 mr-2" />
-                  YouTube
-                </Label>
-                <Input
-                  id="youtube_url"
-                  value={settings.youtube_url}
-                  onChange={(e) =>
-                    handleInputChange("youtube_url", e.target.value)
-                  }
-                  placeholder="https://youtube.com/@yourrestaurant"
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="tiktok_url">
-                  <div className="inline-flex items-center">
-                    <div className="h-4 w-4 mr-2 bg-black rounded-sm flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">T</span>
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Currently Open</Label>
+                    <div className="text-sm text-muted-foreground">
+                      Toggle restaurant open/closed status
                     </div>
-                    TikTok
                   </div>
-                </Label>
-                <Input
-                  id="tiktok_url"
-                  value={settings.tiktok_url}
+                  <Switch
+                    checked={settings.is_open}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("is_open", checked)
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={settings.description}
                   onChange={(e) =>
-                    handleInputChange("tiktok_url", e.target.value)
+                    handleInputChange("description", e.target.value)
                   }
-                  placeholder="https://tiktok.com/@yourrestaurant"
+                  placeholder="Describe your restaurant..."
+                  className="resize-none"
                 />
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={saving} size="lg">
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : "Save All Changes"}
-          </Button>
+              <div className="space-y-2">
+                <Label htmlFor="opening_hours">Opening Hours</Label>
+                <Textarea
+                  id="opening_hours"
+                  value={settings.opening_hours}
+                  onChange={(e) =>
+                    handleInputChange("opening_hours", e.target.value)
+                  }
+                  placeholder="Mon-Fri: 11:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
+                  className="resize-none"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+              <CardDescription>How customers can reach you</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">
+                    <Phone className="inline h-4 w-4 mr-2" />
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phone"
+                    value={settings.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">
+                    <Mail className="inline h-4 w-4 mr-2" />
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={settings.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder="info@restaurant.com"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">
+                  <MapPin className="inline h-4 w-4 mr-2" />
+                  Address
+                </Label>
+                <Textarea
+                  id="address"
+                  value={settings.address}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                  placeholder="123 Main Street, City, State 12345"
+                  className="resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="website">
+                  <Globe className="inline h-4 w-4 mr-2" />
+                  Website
+                </Label>
+                <Input
+                  id="website"
+                  value={settings.website}
+                  onChange={(e) => handleInputChange("website", e.target.value)}
+                  placeholder="https://www.restaurant.com"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Social Media Links */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Social Media Links</CardTitle>
+              <CardDescription>
+                Connect your social media accounts
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="instagram_url">
+                    <Instagram className="inline h-4 w-4 mr-2" />
+                    Instagram
+                  </Label>
+                  <Input
+                    id="instagram_url"
+                    value={settings.instagram_url}
+                    onChange={(e) =>
+                      handleInputChange("instagram_url", e.target.value)
+                    }
+                    placeholder="https://instagram.com/yourrestaurant"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="facebook_url">
+                    <Facebook className="inline h-4 w-4 mr-2" />
+                    Facebook
+                  </Label>
+                  <Input
+                    id="facebook_url"
+                    value={settings.facebook_url}
+                    onChange={(e) =>
+                      handleInputChange("facebook_url", e.target.value)
+                    }
+                    placeholder="https://facebook.com/yourrestaurant"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="twitter_url">
+                    <Twitter className="inline h-4 w-4 mr-2" />
+                    Twitter
+                  </Label>
+                  <Input
+                    id="twitter_url"
+                    value={settings.twitter_url}
+                    onChange={(e) =>
+                      handleInputChange("twitter_url", e.target.value)
+                    }
+                    placeholder="https://twitter.com/yourrestaurant"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="youtube_url">
+                    <Youtube className="inline h-4 w-4 mr-2" />
+                    YouTube
+                  </Label>
+                  <Input
+                    id="youtube_url"
+                    value={settings.youtube_url}
+                    onChange={(e) =>
+                      handleInputChange("youtube_url", e.target.value)
+                    }
+                    placeholder="https://youtube.com/@yourrestaurant"
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="tiktok_url">
+                    <div className="inline-flex items-center">
+                      <div className="h-4 w-4 mr-2 bg-black rounded-sm flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">T</span>
+                      </div>
+                      TikTok
+                    </div>
+                  </Label>
+                  <Input
+                    id="tiktok_url"
+                    value={settings.tiktok_url}
+                    onChange={(e) =>
+                      handleInputChange("tiktok_url", e.target.value)
+                    }
+                    placeholder="https://tiktok.com/@yourrestaurant"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Save Button */}
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={saving} size="lg">
+              <Save className="mr-2 h-4 w-4" />
+              {saving ? "Saving..." : "Save All Changes"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}{" "}
     </div>
   );
 }
