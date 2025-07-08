@@ -6,7 +6,7 @@ import { ReservationsList } from "@/sections/reservations/reservations-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ReservationStatus } from "@/types/mock-api";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/server/supabase";
 
 interface Reservation {
   id: string;

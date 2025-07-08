@@ -1,8 +1,8 @@
 // Import required types and utilities from Next.js and local libraries
 import { NextRequest, NextResponse } from "next/server";
 import { cleanFormData } from "@/lib/clean-form-data"; // Utility to clean and parse form data
-import { cloudinary } from "@/lib/cloudinary"; // Cloudinary client for image upload
-import { supabase } from "@/lib/supabase"; // Supabase client instance
+import { cloudinary } from "@/lib/server/cloudinary"; // Cloudinary client for image upload
+import { supabase } from "@/lib/server/supabase"; // Supabase client instance
 
 interface UploadResult {
   secure_url: string;
