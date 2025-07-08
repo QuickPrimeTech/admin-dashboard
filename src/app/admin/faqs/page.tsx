@@ -6,10 +6,8 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton"; // Make sure this import is at the top
 import {
   Dialog,
   DialogContent,
@@ -20,21 +18,55 @@ import {
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react";
 import { FAQDialog } from "@/components/admin/faq-dialog";
 import { toast } from "sonner";
-
-interface FAQ {
-  id: string;
-  question: string;
-  answer: string;
-  order_index: number;
-  is_published: boolean;
-  created_at: string;
-}
+import { FaqCardSkeleton } from "@/components/skeletons/faq-skeleton";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { SortableFAQCard } from "@/components/sortable-faq-card";
+import { FAQ } from "@/types/faqs";
+import { updateFAQOrderInDB } from "@/helpers/faqsHelper";
 
 export default function FAQsPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // creating the sensors for the drag and drop interface
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    setFaqs((prev) => {
+      const oldIndex = prev.findIndex((faq) => faq.id === active.id);
+      const newIndex = prev.findIndex((faq) => faq.id === over.id);
+      const newOrder = arrayMove(prev, oldIndex, newIndex);
+
+      // Optional: Update order_index locally for display
+      const updated = newOrder.map((faq, index) => ({
+        ...faq,
+        order_index: index,
+      }));
+
+      // Sync to DB
+      updateFAQOrderInDB(updated);
+
+      return updated;
+    });
+  };
 
   // State for delete confirmation
   const [faqToDelete, setFaqToDelete] = useState<FAQ | null>(null);
@@ -132,49 +164,6 @@ export default function FAQsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">FAQs</h1>
-            <p className="text-muted-foreground">
-              Manage frequently asked questions
-            </p>
-          </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add FAQ
-          </Button>
-        </div>
-
-        {/* Skeleton Cards */}
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <Skeleton className="h-5 w-5 mt-1 rounded" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4 rounded" />
-                      <Skeleton className="h-3 w-5/6 rounded" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-16 rounded" />
-                    <Skeleton className="h-8 w-8 rounded" />
-                    <Skeleton className="h-8 w-8 rounded" />
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -190,7 +179,14 @@ export default function FAQsPage() {
         </Button>
       </div>
 
-      {faqs.length === 0 ? (
+      {loading ? (
+        // Skeleton Cards while the data is being fetched
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <FaqCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : faqs.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center">
@@ -206,49 +202,66 @@ export default function FAQsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {faqs.map((faq) => (
-            <Card key={faq.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{faq.question}</CardTitle>
-                      <CardDescription className="mt-2">
-                        {faq.answer}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={faq.is_published ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => togglePublished(faq.id, faq.is_published)}
-                    >
-                      {faq.is_published ? "Published" : "Draft"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(faq)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => confirmDelete(faq)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={faqs.map((faq) => faq.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-4">
+              {faqs.map((faq) => (
+                <SortableFAQCard key={faq.id} id={faq.id}>
+                  <Card>
+                    <CardContent>
+                      <div className="flex items-start justify-between">
+                        <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant={faq.is_published ? "default" : "outline"}
+                            size="sm"
+                            onClick={() =>
+                              togglePublished(faq.id, faq.is_published)
+                            }
+                          >
+                            {faq.is_published ? "Published" : "Draft"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(faq)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => confirmDelete(faq)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">
+                            {faq.question}
+                          </CardTitle>
+                          <CardDescription className="mt-2">
+                            {faq.answer}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </SortableFAQCard>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       <FAQDialog
