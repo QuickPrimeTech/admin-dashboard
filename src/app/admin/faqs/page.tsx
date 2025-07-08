@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,27 +45,35 @@ export default function FAQsPage() {
   // creating the sensors for the drag and drop interface
   const sensors = useSensors(useSensor(PointerSensor));
 
+  // Inside your component
+  const faqsRef = useRef<FAQ[]>(faqs);
+
+  useEffect(() => {
+    faqsRef.current = faqs;
+  }, [faqs]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (!over || active.id === over.id) return;
 
-    setFaqs((prev) => {
-      const oldIndex = prev.findIndex((faq) => faq.id === active.id);
-      const newIndex = prev.findIndex((faq) => faq.id === over.id);
-      const newOrder = arrayMove(prev, oldIndex, newIndex);
+    // Get current FAQs from ref
+    const oldIndex = faqsRef.current.findIndex((faq) => faq.id === active.id);
+    const newIndex = faqsRef.current.findIndex((faq) => faq.id === over.id);
 
-      // Optional: Update order_index locally for display
-      const updated = newOrder.map((faq, index) => ({
-        ...faq,
-        order_index: index,
-      }));
+    // Create the new ordered array
+    const newOrder = arrayMove(faqsRef.current, oldIndex, newIndex);
 
-      // Sync to DB
-      updateFAQOrderInDB(updated);
+    // Update order_index for each item
+    const updated = newOrder.map((faq, index) => ({
+      ...faq,
+      order_index: index,
+    }));
 
-      return updated;
-    });
+    // Update React state once
+    setFaqs(updated);
+
+    // Sync to DB once
+    updateFAQOrderInDB(updated);
   };
 
   // State for delete confirmation

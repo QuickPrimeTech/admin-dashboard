@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase"; // Adjust if you use a different import
 
 export async function POST(request: NextRequest) {
-  //   console.log(updates);
   try {
     const { updates } = await request.json();
+    console.log(updates);
     if (!Array.isArray(updates)) {
       return NextResponse.json(
         {
