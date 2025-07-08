@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MenuIcon, Calendar, Camera, Users } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MenuIcon, Calendar, Camera, Users } from "lucide-react";
 
 export function StatsOverview() {
   const stats = [
@@ -12,13 +12,13 @@ export function StatsOverview() {
     {
       title: "Reservations",
       value: "12",
-      description: "Today's reservations",
+      description: "Active Reservations",
       icon: Calendar,
     },
     {
       title: "Private Events",
       value: "3",
-      description: "Pending requests",
+      description: "Requests for private-events",
       icon: Users,
     },
     {
@@ -27,7 +27,7 @@ export function StatsOverview() {
       description: "Total photos",
       icon: Camera,
     },
-  ]
+  ];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -44,5 +44,5 @@ export function StatsOverview() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
