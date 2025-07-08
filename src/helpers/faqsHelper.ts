@@ -23,7 +23,6 @@ export const updateFAQOrderInDB = async (faqs: FAQ[]) => {
     toast.success("FAQ order updated");
   } catch {
     toast.error("Error updating FAQ order");
-    console.log(err);
   }
 };
 
