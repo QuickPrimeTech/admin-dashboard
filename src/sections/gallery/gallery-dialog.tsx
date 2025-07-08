@@ -1,7 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Dialog,
   DialogContent,
@@ -22,14 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { UploadIcon } from "lucide-react";
-import { toast } from "sonner";
-import { mockAPI } from "@/lib/mock-api";
+import { Loader2, UploadIcon } from "lucide-react";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GalleryDialogProps } from "@/types/gallery";
-import { formSchema } from "@/schemas/galllery-item-schema";
-import { FormData } from "@/schemas/galllery-item-schema";
+import { useGalleryItemForm } from "@/hooks/useGalleryItemForm";
 
 export function GalleryDialog({
   open,
@@ -37,59 +32,9 @@ export function GalleryDialog({
   item,
   onSaved,
 }: GalleryDialogProps) {
-  const [uploading] = useState(false);
-  const [, setSelectedFile] = useState<File | null>(null);
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      image_url: "",
-      is_published: true,
-    },
-  });
-
-  useEffect(() => {
-    if (item) {
-      form.reset({
-        title: item.title || "",
-        description: item.description || "",
-        image_url: item.image_url,
-        is_published: item.is_published,
-      });
-    } else {
-      form.reset({
-        title: "",
-        description: "",
-        image_url: "",
-        is_published: true,
-      });
-    }
-    setSelectedFile(null);
-  }, [item, form]);
-
-  const onSubmit = async (data: FormData) => {
-    try {
-      if (item) {
-        await mockAPI.updateGalleryItem(item.id, data);
-        toast.success("Gallery item updated successfully");
-      } else {
-        await mockAPI.createGalleryItem({
-          order_index: 0,
-          image_url: data.image_url ?? "",
-          is_published: data.is_published,
-          title: data.title ?? "", // fallback to empty string
-          description: data.description ?? "", // fallback to empty string
-        });
-        toast.success("Gallery item created successfully");
-      }
-
-      onSaved();
-    } catch {
-      toast.error(`Failed to ${item ? "update" : "create"} gallery item`);
-    }
-  };
+  // hook that handles all the logic
+  const { form, uploading, onSubmit, existingImageUrl, setSelectedFile } =
+    useGalleryItemForm(item, onSaved);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -111,34 +56,47 @@ export function GalleryDialog({
               <FormField
                 control={form.control}
                 name="image_url"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Image</FormLabel>
                     <FormControl>
                       <label className="group relative mt-2 block cursor-pointer w-full h-32 rounded-md border border-dashed hover:border-primary transition">
-                        {/* The file input - hidden but still clickable via label */}
+                        {/* hidden file input */}
                         <Input
                           type="file"
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                              const url = URL.createObjectURL(
-                                e.target.files[0]
-                              );
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              field.onChange(file);
+                              const url = URL.createObjectURL(file);
+                              setSelectedFile(file);
                               form.setValue("image_url", url);
                             }
                           }}
                           disabled={uploading}
                         />
 
-                        {/* If there is an image URL, show preview */}
+                        {/* show preview if file is selected */}
                         {form.watch("image_url") ? (
                           <>
                             <Image
-                              src={
-                                form.watch("image_url") || "/placeholder.svg"
-                              }
+                              src={form.watch("image_url")}
+                              alt="Preview"
+                              fill
+                              className="absolute inset-0 object-cover rounded-md"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+                              <span className="text-white text-sm font-medium">
+                                Click to change
+                              </span>
+                            </div>
+                          </>
+                        ) : existingImageUrl ? (
+                          <>
+                            <Image
+                              src={existingImageUrl}
                               alt="Preview"
                               fill
                               className="absolute inset-0 object-cover rounded-md"
@@ -231,10 +189,11 @@ export function GalleryDialog({
                   Cancel
                 </Button>
                 <Button type="submit" disabled={uploading}>
+                  {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {uploading
                     ? item
-                      ? "Updating..."
-                      : "Creating..."
+                      ? "Updating"
+                      : "Creating"
                     : item
                     ? "Update"
                     : "Create"}{" "}
