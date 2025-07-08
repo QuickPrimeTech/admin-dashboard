@@ -8,7 +8,7 @@ import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
 import { toast } from "sonner";
 import { MenuItem } from "@/types/menu";
-import { MenuItemSkeleton } from "@/components/menu-item-skeleton";
+import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -108,37 +108,6 @@ export default function MenuManagement() {
     handleDialogClose();
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 items-start lg:flex-row justify-between lg:items-center">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Menu Management</h1>
-            <p className="text-muted-foreground">
-              Manage your restaurant&apos;s menu items
-            </p>
-          </div>
-          <Button onClick={handleAdd}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Menu Item
-          </Button>
-        </div>
-
-        <MenuFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <MenuItemSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 items-start lg:flex-row justify-between lg:items-center">
@@ -160,13 +129,20 @@ export default function MenuManagement() {
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
       />
-
-      <MenuGrid
-        items={filteredItems}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onAdd={handleAdd}
-      />
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <MenuItemSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <MenuGrid
+          items={filteredItems}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAdd={handleAdd}
+        />
+      )}
 
       <MenuItemDialog
         open={isDialogOpen}

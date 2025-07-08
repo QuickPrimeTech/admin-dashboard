@@ -6,10 +6,8 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton"; // Make sure this import is at the top
 import {
   Dialog,
   DialogContent,
@@ -20,6 +18,7 @@ import {
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react";
 import { FAQDialog } from "@/components/admin/faq-dialog";
 import { toast } from "sonner";
+import { FaqCardSkeleton } from "@/components/skeletons/faq-skeleton";
 
 interface FAQ {
   id: string;
@@ -132,49 +131,6 @@ export default function FAQsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">FAQs</h1>
-            <p className="text-muted-foreground">
-              Manage frequently asked questions
-            </p>
-          </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add FAQ
-          </Button>
-        </div>
-
-        {/* Skeleton Cards */}
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <Skeleton className="h-5 w-5 mt-1 rounded" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4 rounded" />
-                      <Skeleton className="h-3 w-5/6 rounded" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-16 rounded" />
-                    <Skeleton className="h-8 w-8 rounded" />
-                    <Skeleton className="h-8 w-8 rounded" />
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -190,7 +146,14 @@ export default function FAQsPage() {
         </Button>
       </div>
 
-      {faqs.length === 0 ? (
+      {loading ? (
+        // Skeleton Cards while the data is being fetched
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <FaqCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : faqs.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center">
@@ -209,17 +172,9 @@ export default function FAQsPage() {
         <div className="space-y-4">
           {faqs.map((faq) => (
             <Card key={faq.id}>
-              <CardHeader>
+              <CardContent>
                 <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{faq.question}</CardTitle>
-                      <CardDescription className="mt-2">
-                        {faq.answer}
-                      </CardDescription>
-                    </div>
-                  </div>
+                  <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
                   <div className="flex items-center gap-2">
                     <Button
                       variant={faq.is_published ? "default" : "outline"}
@@ -245,7 +200,15 @@ export default function FAQsPage() {
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">{faq.question}</CardTitle>
+                    <CardDescription className="mt-2">
+                      {faq.answer}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
