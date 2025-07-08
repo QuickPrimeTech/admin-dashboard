@@ -19,21 +19,54 @@ import { Plus, Edit, Trash2, GripVertical } from "lucide-react";
 import { FAQDialog } from "@/components/admin/faq-dialog";
 import { toast } from "sonner";
 import { FaqCardSkeleton } from "@/components/skeletons/faq-skeleton";
-
-interface FAQ {
-  id: string;
-  question: string;
-  answer: string;
-  order_index: number;
-  is_published: boolean;
-  created_at: string;
-}
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { SortableFAQCard } from "@/components/sortable-faq-card";
+import { FAQ } from "@/types/faqs";
+import { updateFAQOrderInDB } from "@/helpers/faqsHelper";
 
 export default function FAQsPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // creating the sensors for the drag and drop interface
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    setFaqs((prev) => {
+      const oldIndex = prev.findIndex((faq) => faq.id === active.id);
+      const newIndex = prev.findIndex((faq) => faq.id === over.id);
+      const newOrder = arrayMove(prev, oldIndex, newIndex);
+
+      // Optional: Update order_index locally for display
+      const updated = newOrder.map((faq, index) => ({
+        ...faq,
+        order_index: index,
+      }));
+
+      // Sync to DB
+      updateFAQOrderInDB(updated);
+
+      return updated;
+    });
+  };
 
   // State for delete confirmation
   const [faqToDelete, setFaqToDelete] = useState<FAQ | null>(null);
@@ -169,49 +202,66 @@ export default function FAQsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {faqs.map((faq) => (
-            <Card key={faq.id}>
-              <CardContent>
-                <div className="flex items-start justify-between">
-                  <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={faq.is_published ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => togglePublished(faq.id, faq.is_published)}
-                    >
-                      {faq.is_published ? "Published" : "Draft"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(faq)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => confirmDelete(faq)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{faq.question}</CardTitle>
-                    <CardDescription className="mt-2">
-                      {faq.answer}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={faqs.map((faq) => faq.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-4">
+              {faqs.map((faq) => (
+                <SortableFAQCard key={faq.id} id={faq.id}>
+                  <Card>
+                    <CardContent>
+                      <div className="flex items-start justify-between">
+                        <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant={faq.is_published ? "default" : "outline"}
+                            size="sm"
+                            onClick={() =>
+                              togglePublished(faq.id, faq.is_published)
+                            }
+                          >
+                            {faq.is_published ? "Published" : "Draft"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(faq)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => confirmDelete(faq)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">
+                            {faq.question}
+                          </CardTitle>
+                          <CardDescription className="mt-2">
+                            {faq.answer}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </SortableFAQCard>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       <FAQDialog

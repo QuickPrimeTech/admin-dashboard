@@ -7,7 +7,7 @@ export async function GET() {
     .from("faqs")
     .select("*")
     .eq("is_published", true)
-    .order("order_index", { ascending: true });
+    .order("order_index", { ascending: false });
 
   if (error) {
     console.error("Failed to fetch FAQs:", error.message);
