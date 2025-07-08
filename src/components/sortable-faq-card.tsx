@@ -6,19 +6,23 @@ export function SortableFAQCard({
   id,
   children,
 }: {
-  id: string;
+  id: number;
   children: ReactNode;
 }) {
-  const { setNodeRef, attributes, listeners, transform, transition } =
+  const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className="cursor-move"
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+    >
       {children}
     </div>
   );

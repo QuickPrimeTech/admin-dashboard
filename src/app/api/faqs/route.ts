@@ -6,7 +6,6 @@ export async function GET() {
   const { data, error } = await supabase
     .from("faqs")
     .select("*")
-    .eq("is_published", true)
     .order("order_index", { ascending: false });
 
   if (error) {
@@ -31,9 +30,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { question, answer, order_index, is_published } = body;
+    const { question, answer, is_published } = body;
 
-    if (!question || !answer || typeof order_index !== "number") {
+    if (!question || !answer) {
       return NextResponse.json(
         {
           success: false,
@@ -42,12 +41,21 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const { data: maxOrderFaq } = await supabase
+      .from("faqs")
+      .select("order_index")
+      .order("order_index", { ascending: false })
+      .limit(1)
+      .single();
+
+    const newOrderIndex =
+      maxOrderFaq?.order_index != null ? maxOrderFaq.order_index + 1 : 0;
 
     const { data, error } = await supabase.from("faqs").insert([
       {
         question,
         answer,
-        order_index,
+        order_index: newOrderIndex,
         is_published: is_published ?? true,
       },
     ]);
@@ -78,6 +86,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 // PATCH = update an existing FAQ
 export async function PATCH(request: NextRequest) {
   try {

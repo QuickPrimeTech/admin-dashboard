@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import * as z from "zod";
 import {
   Dialog,
@@ -25,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { FAQDialogProps } from "@/types/faqs";
 
 const formSchema = z.object({
   question: z.string().min(1, "Question is required"),
@@ -34,27 +36,14 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface FAQ {
-  id: string;
-  question: string;
-  answer: string;
-  order_index: number;
-  is_published: boolean;
-}
-
-interface FAQDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  faq?: FAQ | null;
-  onSaved: () => void;
-}
-
 export function FAQDialog({
   open,
   onOpenChange,
   faq,
   onSaved,
 }: FAQDialogProps) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,9 +70,9 @@ export function FAQDialog({
   }, [faq, form]);
 
   const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
     const payload = {
       ...data,
-      order_index: faq?.order_index ?? 0,
       id: faq?.id,
     };
 
@@ -99,9 +88,10 @@ export function FAQDialog({
         const result = await res.json();
 
         if (!res.ok || !result.success) {
-          throw new Error(result.message || "Failed to update FAQ");
+          setIsLoading(false);
+          toast.error(result.message || "Failed to update FAQ");
         }
-
+        setIsLoading(false);
         toast.success("FAQ updated successfully");
       } else {
         // POST request to create new FAQ
@@ -114,14 +104,20 @@ export function FAQDialog({
         const result = await res.json();
 
         if (!res.ok || !result.success) {
-          throw new Error(result.message || "Failed to create FAQ");
+          setIsLoading(false);
+          toast.error(result.message || "Failed to create FAQ");
         }
-
+        setIsLoading(false);
         toast.success("FAQ created successfully");
       }
-
+      form.reset({
+        question: "",
+        answer: "",
+        is_published: true,
+      });
       onSaved();
     } catch (error) {
+      setIsLoading(false);
       toast.error(
         `Failed to ${faq ? "update" : "create"} FAQ: ${
           error instanceof Error ? error.message : ""
@@ -205,7 +201,16 @@ export function FAQDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit">{faq ? "Update" : "Create"} FAQ</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {faq ? "Updating" : "Creating"} FAQ
+                  </>
+                ) : (
+                  <>{faq ? "Update" : "Create"} FAQ</>
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

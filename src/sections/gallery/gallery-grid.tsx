@@ -1,11 +1,16 @@
-"use client";
-
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -54,58 +59,10 @@ export function GalleryGrid({
                 {item.is_published ? "Published" : "Draft"}
               </Badge>
             </div>
-            <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => onTogglePublished(item.id, !item.is_published)}
-              >
-                {item.is_published ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => onEdit(item)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      this gallery item.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => onDelete(item.id)}
-                      className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                    >
-                      Yes, delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
           </div>
+
           {(item.title || item.description) && (
-            <CardContent className="p-4">
+            <CardContent>
               {item.title && (
                 <CardTitle className="text-sm font-medium truncate">
                   {item.title}
@@ -118,6 +75,91 @@ export function GalleryGrid({
               )}
             </CardContent>
           )}
+
+          <CardFooter className="flex gap-1">
+            <TooltipProvider>
+              {/* Publish / Unpublish */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() =>
+                      onTogglePublished(item.id, !item.is_published)
+                    }
+                  >
+                    {item.is_published ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{item.is_published ? "Unpublish" : "Publish"}</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Edit */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => onEdit(item)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Delete */}
+              <Tooltip>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                  </AlertDialogTrigger>
+
+                  <TooltipContent
+                    className="bg-destructive text-destructive-foreground border-none"
+                    sideOffset={5}
+                  >
+                    <p>Delete</p>
+                  </TooltipContent>
+
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete this gallery item.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => onDelete(item.id)}
+                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                      >
+                        Yes, delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </Tooltip>
+            </TooltipProvider>
+          </CardFooter>
         </Card>
       ))}
     </div>

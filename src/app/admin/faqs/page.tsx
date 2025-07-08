@@ -1,13 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { FaqFilterDropdown } from "@/sections/faqs/faq-filter-dropdown";
+import { sortFaqs } from "@/helpers/faqsHelper";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,8 +11,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, GripVertical } from "lucide-react";
-import { FAQDialog } from "@/components/admin/faq-dialog";
+import { Plus } from "lucide-react";
+import { FAQDialog } from "@/sections/faqs/faq-dialog";
 import { toast } from "sonner";
 import { FaqCardSkeleton } from "@/components/skeletons/faq-skeleton";
 import {
@@ -35,37 +31,66 @@ import {
 import { SortableFAQCard } from "@/components/sortable-faq-card";
 import { FAQ } from "@/types/faqs";
 import { updateFAQOrderInDB } from "@/helpers/faqsHelper";
+import { FAQEmptyState } from "@/sections/faqs/faq-empty-state";
+import { FAQCard } from "@/sections/faqs/faq-card";
 
 export default function FAQsPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filterValue, setFilterValue] = useState("Latest");
 
+  //sorting the faqs
+  const filteredFaqs = faqs.length > 0 ? sortFaqs(faqs, filterValue) : [];
   // creating the sensors for the drag and drop interface
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // optional: require moving 5px before dragging starts
+      },
+      // This cancels drag start when pointer down on these selectors
+      cancel: [
+        "button",
+        "input",
+        "textarea",
+        "select",
+        "svg",
+        "path",
+        "paragraph",
+      ],
+    })
+  );
+
+  // Inside your component
+  const faqsRef = useRef<FAQ[]>(faqs);
+
+  useEffect(() => {
+    faqsRef.current = faqs;
+  }, [faqs]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (!over || active.id === over.id) return;
 
-    setFaqs((prev) => {
-      const oldIndex = prev.findIndex((faq) => faq.id === active.id);
-      const newIndex = prev.findIndex((faq) => faq.id === over.id);
-      const newOrder = arrayMove(prev, oldIndex, newIndex);
+    // Get current FAQs from ref
+    const oldIndex = faqsRef.current.findIndex((faq) => faq.id === active.id);
+    const newIndex = faqsRef.current.findIndex((faq) => faq.id === over.id);
 
-      // Optional: Update order_index locally for display
-      const updated = newOrder.map((faq, index) => ({
-        ...faq,
-        order_index: index,
-      }));
+    // Create the new ordered array
+    const newOrder = arrayMove(faqsRef.current, oldIndex, newIndex);
 
-      // Sync to DB
-      updateFAQOrderInDB(updated);
+    // Update order_index for each item
+    const updated = newOrder.map((faq, index) => ({
+      ...faq,
+      order_index: index,
+    }));
 
-      return updated;
-    });
+    // Update React state once
+    setFaqs(updated);
+
+    // Sync to DB once
+    updateFAQOrderInDB(updated);
   };
 
   // State for delete confirmation
@@ -81,6 +106,7 @@ export default function FAQsPage() {
       const res = await fetch("/api/faqs", { method: "GET" });
       if (res.ok) {
         const data = await res.json();
+        console.log(data.data);
         setFaqs(data.data);
       }
     } catch {
@@ -136,7 +162,7 @@ export default function FAQsPage() {
     handleDialogClose();
   };
 
-  const togglePublished = async (id: string, isPublished: boolean) => {
+  const togglePublished = async (id: number, isPublished: boolean) => {
     try {
       const res = await fetch("/api/faqs", {
         method: "PATCH",
@@ -166,17 +192,21 @@ export default function FAQsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">FAQs</h1>
           <p className="text-muted-foreground">
             Manage frequently asked questions
           </p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add FAQ
-        </Button>
+
+        <div className="flex gap-2">
+          <FaqFilterDropdown value={filterValue} onChange={setFilterValue} />
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add FAQ
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -187,20 +217,7 @@ export default function FAQsPage() {
           ))}
         </div>
       ) : faqs.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">No FAQs found</h3>
-              <p className="text-muted-foreground mb-4">
-                Get started by adding your first FAQ
-              </p>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add FAQ
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <FAQEmptyState setIsDialogOpen={setIsDialogOpen} />
       ) : (
         <DndContext
           sensors={sensors}
@@ -212,51 +229,14 @@ export default function FAQsPage() {
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-4">
-              {faqs.map((faq) => (
+              {filteredFaqs.map((faq) => (
                 <SortableFAQCard key={faq.id} id={faq.id}>
-                  <Card>
-                    <CardContent>
-                      <div className="flex items-start justify-between">
-                        <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-move" />
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant={faq.is_published ? "default" : "outline"}
-                            size="sm"
-                            onClick={() =>
-                              togglePublished(faq.id, faq.is_published)
-                            }
-                          >
-                            {faq.is_published ? "Published" : "Draft"}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(faq)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => confirmDelete(faq)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 flex-1">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">
-                            {faq.question}
-                          </CardTitle>
-                          <CardDescription className="mt-2">
-                            {faq.answer}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <FAQCard
+                    faq={faq}
+                    handleEdit={handleEdit}
+                    confirmDelete={confirmDelete}
+                    togglePublished={togglePublished}
+                  />
                 </SortableFAQCard>
               ))}
             </div>
@@ -273,7 +253,7 @@ export default function FAQsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent aria-describedby="Delete the faq">
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
           </DialogHeader>
