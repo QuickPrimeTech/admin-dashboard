@@ -1,5 +1,4 @@
-"use client";
-
+import { RestaurantName } from "@/components/restaurant/restaurantName";
 import {
   Sidebar,
   SidebarContent,
@@ -13,66 +12,12 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import {
-  LayoutDashboard,
-  MenuIcon,
-  Calendar,
-  HelpCircle,
-  Camera,
-  Users,
-  Video,
-  Settings,
-  LogOut,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-const menuItems = [
-  {
-    title: "Dashboard",
-    url: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Menu Items",
-    url: "/admin/menu",
-    icon: MenuIcon,
-  },
-  {
-    title: "Reservations",
-    url: "/admin/reservations",
-    icon: Calendar,
-  },
-  {
-    title: "Private Events",
-    url: "/admin/events",
-    icon: Users,
-  },
-  {
-    title: "Gallery",
-    url: "/admin/gallery",
-    icon: Camera,
-  },
-  {
-    title: "FAQs",
-    url: "/admin/faqs",
-    icon: HelpCircle,
-  },
-  {
-    title: "Follow Us",
-    url: "/admin/follow-us",
-    icon: Video,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: Settings,
-  },
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { MenuIcon, LogOut } from "lucide-react";
+import { Suspense } from "react";
+import { SidebarItems } from "./sidebar-menu-items";
 
 export function AppSidebar() {
-  const pathname = usePathname();
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -84,9 +29,11 @@ export function AppSidebar() {
                   <MenuIcon className="h-4 w-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    Restaurant Admin
-                  </span>
+                  <Suspense
+                    fallback={<Skeleton className="h-5 w-40 rounded-md" />}
+                  >
+                    <RestaurantName />
+                  </Suspense>
                   <span className="truncate text-xs">Dashboard</span>
                 </div>
               </div>
@@ -100,20 +47,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarItems />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
