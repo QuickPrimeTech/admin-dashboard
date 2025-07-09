@@ -1,37 +1,49 @@
-// Reusable invalid link UI
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const InvalidLinkMessage = ({ message }: { message: string }) => (
-  <div className="text-center py-16 px-6 max-w-lg mx-auto">
-    {/* Icon with gradient background */}
-    <div className="mx-auto w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
-      <AlertTriangle className="w-8 h-8 text-white" />
+export const InvalidLinkMessage = ({ message }: { message: string }) => {
+  // creating the whatsapp message for somebody getting the error
+  const whatsappMessage =
+    "Hey, I realized my invite link was invalid. Could I please get another one?";
+  const whatsappLink = `https://wa.me/254717448835?text=${encodeURIComponent(
+    whatsappMessage
+  )}`;
+
+  return (
+    <div className="flex items-center justify-center min-h-[60vh] px-4">
+      <Card className="w-full max-w-md text-center shadow-xl">
+        <CardHeader>
+          {/* Icon Container */}
+          <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center shadow-md bg-destructive">
+            <AlertTriangle className="w-8 h-8 text-white" />
+          </div>
+          {/* Gradient Title */}
+          <CardTitle className="text-2xl mt-4 font-bold text-destructive">
+            Invalid or Expired Invite Link
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          {/* Message */}
+          <p className="text-muted-foreground mb-6 leading-relaxed">
+            {message}
+          </p>
+
+          {/* Support Button */}
+          <Link
+            href={whatsappLink}
+            className="inline-block bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-600 text-white px-5 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            Contact QuickPrimeTech Support
+          </Link>
+
+          {/* Help Text */}
+          <p className="text-sm text-muted-foreground mt-6">
+            We typically respond within 2 hours
+          </p>
+        </CardContent>
+      </Card>
     </div>
-
-    {/* Title with gradient text */}
-    <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-      Invalid or Expired Invite Link
-    </h2>
-
-    {/* Description */}
-    <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-      {message}
-    </p>
-
-    {/* Contact button */}
-    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-purple-500 hover:from-primary hover:to-purple-700 text-primary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl group">
-      <Link
-        href="mailto:support@quickprimetech.com"
-        className="no-underline text-white"
-      >
-        Contact QuickPrimeTech Support
-      </Link>
-    </div>
-
-    {/* Additional help text */}
-    <p className="text-sm text-gray-500 dark:text-gray-400 mt-6">
-      We typically respond within 24 hours
-    </p>
-  </div>
-);
+  );
+};

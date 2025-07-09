@@ -70,6 +70,7 @@ export function InviteSignupForm() {
       email: values.email,
       password: values.password,
       restaurantName: values.restaurantName,
+      token: token ?? "",
     });
     setLoading(false);
     if (result.success) {
