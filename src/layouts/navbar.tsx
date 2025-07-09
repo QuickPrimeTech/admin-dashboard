@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
+import { logout } from "@/app/login/actions";
 
 export function AppNavbar() {
   return (
@@ -41,7 +42,9 @@ export function AppNavbar() {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Sign out</DropdownMenuItem>
+            <DropdownMenuItem variant={"destructive"} onClick={logout}>
+              Sign out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
