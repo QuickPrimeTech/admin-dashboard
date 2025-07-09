@@ -1,6 +1,6 @@
 // app/api/faqs/route.ts
 import { NextResponse, NextRequest } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/server/supabase";
 
 export async function GET() {
   const { data, error } = await supabase

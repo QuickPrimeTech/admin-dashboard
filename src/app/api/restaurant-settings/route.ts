@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/server/supabase";
 
 // GET: fetch the restaurant settings (assumes only 1 row)
 export async function GET() {

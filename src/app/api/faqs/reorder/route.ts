@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase"; // Adjust if you use a different import
+import { supabase } from "@/lib/server/supabase"; // Adjust if you use a different import
 
 export async function POST(request: NextRequest) {
   //   console.log(updates);
