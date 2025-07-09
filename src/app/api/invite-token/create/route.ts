@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/server/supabase"; // your supabase client helper
+import { supabase } from "@/lib/server/supabase"; // your supabase client helper
 import crypto from "crypto";
 
 export async function POST() {
-  const supabase = createServerSupabaseClient();
-
   // Generate secure random token
   const token = crypto.randomBytes(32).toString("hex");
 

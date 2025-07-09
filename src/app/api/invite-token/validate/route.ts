@@ -1,10 +1,9 @@
 // app/api/invite-token/validate/route.ts
 import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/server/supabase"; // your helper
+import { supabase } from "@/lib/server/supabase"; // your helper
 import { isAfter } from "date-fns";
 
 export async function GET(req: Request) {
-  const supabase = createServerSupabaseClient();
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
 
