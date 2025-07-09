@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { cloudinary } from "@/lib/cloudinary";
+import { supabase } from "@/lib/server/supabase";
+import { cloudinary } from "@/lib/server/cloudinary";
 import { GalleryItemInsert } from "@/types/gallery";
 import { UploadApiResponse } from "cloudinary";
 

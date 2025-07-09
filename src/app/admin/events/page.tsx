@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { ReservationStatus } from "@/types/mock-api";
 import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
 import { Events } from "@/components/admin/events-skeleton";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/server/supabase";
 
 interface PrivateEvent {
   id: string;
