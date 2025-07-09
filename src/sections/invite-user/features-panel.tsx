@@ -34,7 +34,7 @@ export function FeaturesPanel() {
                   Menu Management
                 </h3>
                 <p className="text-slate-300 text-xs md:text-sm">
-                  Easily manage your restaurant's menu items and pricing
+                  Easily manage your restaurant&apos;s menu items and pricing
                 </p>
               </div>
             </div>

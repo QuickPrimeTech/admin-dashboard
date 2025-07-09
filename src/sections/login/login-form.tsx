@@ -1,7 +1,5 @@
 "use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,8 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Loader2, AlertCircle, ChefHat } from "lucide-react";
+import { login } from "@/app/login/actions";
 import { toast } from "sonner";
-import { mockAuth } from "@/lib/mock-auth";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -38,7 +36,6 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   // ❗️ NO GENERIC PARAMETER HERE
   const form = useForm({
@@ -53,34 +50,15 @@ export function LoginForm() {
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setError("");
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("password", data.password);
 
-    try {
-      const result = await mockAuth.login(
-        data.email,
-        data.password,
-        data.rememberMe
-      );
-
-      if (result.success) {
-        toast.success("Login successful! Redirecting to dashboard...");
-        router.push("/admin");
-      } else {
-        setError(result.error || "Login failed");
-      }
-    } catch {
-      setError("An unexpected error occurred. Please try again. Due to ");
-    } finally {
-      setIsLoading(false);
+    const response = await login(formData);
+    if (!response.success) {
+      toast.error(response.message);
     }
-  };
-
-  const handleDemoLogin = async () => {
-    form.setValue("email", "admin@restaurant.com");
-    form.setValue("password", "password123");
-
-    setTimeout(() => {
-      form.handleSubmit(onSubmit)();
-    }, 100);
+    setIsLoading(false);
   };
 
   return (
@@ -214,38 +192,6 @@ export function LoginForm() {
               </Button>
             </form>
           </Form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or try demo
-                </span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full mt-4 bg-transparent"
-              onClick={handleDemoLogin}
-              disabled={isLoading}
-            >
-              Demo Login
-            </Button>
-          </div>
-
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Demo credentials:</p>
-            <p className="font-mono text-xs mt-1">
-              Email: admin@restaurant.com
-              <br />
-              Password: password123
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

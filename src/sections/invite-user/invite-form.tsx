@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 import {
   Form,
   FormField,
@@ -19,8 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ChefHat, Eye, EyeOff } from "lucide-react";
-import { InvalidLinkMessage } from "./invalid-message";
-import { InviteSignupSkeleton } from "@/components/skeletons/invite-signup-skeleton";
+import { signup } from "@/app/login/actions";
 
 const formSchema = z
   .object({
@@ -41,10 +40,8 @@ export function InviteSignupForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [validToken, setValidToken] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -57,33 +54,21 @@ export function InviteSignupForm() {
     },
   });
 
-  useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      return;
+  useEffect(() => {}, [token]);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const result = await signup({
+      email: values.email,
+      password: values.password,
+      restaurantName: values.restaurantName,
+    });
+
+    if (result.success) {
+      toast.success("Account created successfully!");
+    } else {
+      toast.error(result.error || "Signup failed.");
     }
-
-    fetch(`/api/invite-token/validate?token=${token}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid) {
-          setValidToken(true);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [token]);
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("Form submitted", values);
   };
-
-  if (!token || (!loading && !validToken)) {
-    return <InvalidLinkMessage />;
-  }
-
-  if (loading) {
-    return <InviteSignupSkeleton />;
-  }
 
   return (
     <div className="flex-1 flex items-center justify-center p-6 md:p-12 min-h-screen lg:min-h-0">

@@ -2,7 +2,7 @@
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
-export const InvalidLinkMessage = () => (
+export const InvalidLinkMessage = ({ message }: { message: string }) => (
   <div className="text-center py-16 px-6 max-w-lg mx-auto">
     {/* Icon with gradient background */}
     <div className="mx-auto w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
@@ -16,8 +16,7 @@ export const InvalidLinkMessage = () => (
 
     {/* Description */}
     <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-      This invitation has expired or is no longer valid. Please contact our
-      support team for a new invitation.
+      {message}
     </p>
 
     {/* Contact button */}

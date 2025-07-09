@@ -31,8 +31,10 @@ export default function InviteAdminPage() {
       setInviteLink(data.inviteUrl);
 
       toast.success("Invite link generated successfully.");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to generate invite link.");
+    } catch {
+      toast.error(
+        "Failed to generate invite link. Please check your internet connection"
+      );
     } finally {
       setLoading(false);
     }
