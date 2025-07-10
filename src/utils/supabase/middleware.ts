@@ -39,17 +39,26 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth") &&
-    !request.nextUrl.pathname.startsWith("/invite-user") &&
-    !request.nextUrl.pathname.startsWith("/api/invite-token/create") &&
-    !request.nextUrl.pathname.startsWith("/create-link")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const pathname = request.nextUrl.pathname;
+
+  // Redirect unauthenticated users trying to access protected routes
+  const isProtected =
+    !pathname.startsWith("/login") &&
+    !pathname.startsWith("/auth") &&
+    !pathname.startsWith("/invite-user") &&
+    !pathname.startsWith("/api/invite-token/create") &&
+    !pathname.startsWith("/create-link");
+
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // ✅ Redirect authenticated users *away* from the login page
+  if (user && pathname === "/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin";
     return NextResponse.redirect(url);
   }
 

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -9,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Form,
@@ -19,7 +21,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ChefHat, Eye, EyeOff } from "lucide-react";
-import { signup } from "@/app/login/actions";
+import { signup } from "@/app/auth/actions/actions";
+import { useRouter } from "next/navigation";
 
 const formSchema = z
   .object({
@@ -37,11 +40,16 @@ const formSchema = z
   });
 
 export function InviteSignupForm() {
+  // declaring th router so that I can redirect the user to another page when they are created
+  const router = useRouter();
+
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -57,14 +65,19 @@ export function InviteSignupForm() {
   useEffect(() => {}, [token]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
     const result = await signup({
       email: values.email,
       password: values.password,
       restaurantName: values.restaurantName,
+      token: token ?? "",
     });
-
+    setLoading(false);
     if (result.success) {
       toast.success("Account created successfully!");
+      router.push(
+        `/auth/verify-pending?email=${encodeURIComponent(values.email)}`
+      );
     } else {
       toast.error(result.error || "Signup failed.");
     }
@@ -101,6 +114,7 @@ export function InviteSignupForm() {
               {/* All your FormFields stay the same */}
               <FormField
                 control={form.control}
+                disabled={loading}
                 name="restaurantName"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
@@ -117,6 +131,7 @@ export function InviteSignupForm() {
               <FormField
                 control={form.control}
                 name="email"
+                disabled={loading}
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
                     <FormLabel className="text-sm text-card-foreground">
@@ -132,6 +147,7 @@ export function InviteSignupForm() {
               <FormField
                 control={form.control}
                 name="password"
+                disabled={loading}
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
                     <FormLabel className="text-sm text-card-foreground">
@@ -162,6 +178,7 @@ export function InviteSignupForm() {
               />
               <FormField
                 control={form.control}
+                disabled={loading}
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
@@ -196,6 +213,7 @@ export function InviteSignupForm() {
               <FormField
                 control={form.control}
                 name="terms"
+                disabled={loading}
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
                     <div className="flex items-start space-x-2">
@@ -230,8 +248,13 @@ export function InviteSignupForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2"
+                disabled={loading}
+              >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading ? "Creating account" : "Create Account"}
               </Button>
             </form>
           </Form>

@@ -106,7 +106,6 @@ export default function FAQsPage() {
       const res = await fetch("/api/faqs", { method: "GET" });
       if (res.ok) {
         const data = await res.json();
-        console.log(data.data);
         setFaqs(data.data);
       }
     } catch {

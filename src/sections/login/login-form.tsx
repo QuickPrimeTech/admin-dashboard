@@ -1,4 +1,7 @@
+//sections/login/login-form.tsx
+
 "use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Loader2, AlertCircle, ChefHat } from "lucide-react";
-import { login } from "@/app/login/actions";
+import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
 
 const formSchema = z.object({
