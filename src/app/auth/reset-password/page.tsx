@@ -1,6 +1,5 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -24,7 +23,6 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { EyeOff, Eye } from "lucide-react";
-import { _email } from "zod/v4/core";
 
 const schema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -46,7 +44,7 @@ export default function ResetPasswordPage() {
   const onSubmit = async (value: z.infer<typeof schema>) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         password: value.password,
       });
       if (error) {
