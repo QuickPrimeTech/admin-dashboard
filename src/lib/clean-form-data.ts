@@ -41,5 +41,12 @@ export function cleanFormData(formData: FormData): CleanedFormData {
     }
   }
 
+  // ✅ Ensure dietary_preference is always an array
+  if (data["dietary_preference"]) {
+    if (typeof data["dietary_preference"] === "string") {
+      data["dietary_preference"] = [data["dietary_preference"]];
+    }
+  }
+
   return data;
 }
