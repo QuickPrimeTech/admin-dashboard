@@ -39,7 +39,7 @@ export default function FAQsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filterValue, setFilterValue] = useState("Latest");
+  const [filterValue, setFilterValue] = useState("Order");
 
   //sorting the faqs
   const filteredFaqs = faqs.length > 0 ? sortFaqs(faqs, filterValue) : [];
@@ -217,7 +217,7 @@ export default function FAQsPage() {
         </div>
       ) : faqs.length === 0 ? (
         <FAQEmptyState setIsDialogOpen={setIsDialogOpen} />
-      ) : (
+      ) : filterValue === "Order" ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -241,6 +241,18 @@ export default function FAQsPage() {
             </div>
           </SortableContext>
         </DndContext>
+      ) : (
+        <div className="space-y-4">
+          {filteredFaqs.map((faq) => (
+            <FAQCard
+              key={faq.id}
+              faq={faq}
+              handleEdit={handleEdit}
+              confirmDelete={confirmDelete}
+              togglePublished={togglePublished}
+            />
+          ))}
+        </div>
       )}
 
       <FAQDialog
