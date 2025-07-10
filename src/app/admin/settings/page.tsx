@@ -123,25 +123,44 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    if (!settings.id) {
-      toast.error("Missing settings ID");
-      setSaving(false); // Add this
-      return;
-    }
+
     try {
-      const res = await fetch("/api/restaurant-settings", {
-        method: "PATCH",
+      // Step 1: Check if this user's settings exist
+      const checkRes = await fetch("/api/restaurant-settings");
+      const checkJson = await checkRes.json();
+
+      const userSettings =
+        checkRes.ok && checkJson.success ? checkJson.data : null;
+
+      const method = userSettings ? "PATCH" : "POST";
+
+      const payload = {
+        ...settings,
+        ...(userSettings?.id ? { id: userSettings.id } : {}),
+      };
+
+      // Step 2: Save with correct method
+      const saveRes = await fetch("/api/restaurant-settings", {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings), // includes the `id` field
+        body: JSON.stringify(payload),
       });
 
-      const json = await res.json();
+      const saveJson = await saveRes.json();
 
-      if (!res.ok || !json.success) {
-        throw new Error(json.message || "Failed to save settings");
+      if (!saveRes.ok || !saveJson.success) {
+        throw new Error(saveJson.message || "Failed to save settings");
       }
 
-      toast.success("Settings saved successfully");
+      toast.success(
+        method === "POST"
+          ? "Settings created successfully"
+          : "Settings updated successfully"
+      );
+
+      if (saveJson.data?.id) {
+        setSettings((prev) => ({ ...prev, id: saveJson.data.id }));
+      }
     } catch {
       toast.error("Failed to save settings");
     } finally {
