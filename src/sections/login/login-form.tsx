@@ -28,6 +28,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Loader2, AlertCircle, ChefHat } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -173,14 +174,13 @@ export function LoginForm() {
                   )}
                 />
 
-                <Button
+                <Link
+                  href={"/auth/forgot-password/"}
                   type="button"
-                  variant="link"
-                  className="px-0 font-normal text-sm"
-                  disabled={isLoading}
+                  className="px-0 font-normal text-sm text-primary"
                 >
                   Forgot password?
-                </Button>
+                </Link>
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>

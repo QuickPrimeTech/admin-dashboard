@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { EyeOff, Eye } from "lucide-react";
+import { _email } from "zod/v4/core";
 
 const schema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -42,15 +43,17 @@ export default function ResetPasswordPage() {
     defaultValues: { password: "" },
   });
 
-  const onSubmit = async (data: z.infer<typeof schema>) => {
+  const onSubmit = async (value: z.infer<typeof schema>) => {
     setLoading(true);
-
     try {
-      const { error } = await supabase.auth.updateUser({ data });
+      const { data, error } = await supabase.auth.updateUser({
+        password: value.password,
+      });
       if (error) {
         toast.error("An error occurred while resetting your password.");
         return;
       }
+      toast.success("Your password was successfully changed.");
       // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/admin");
     } catch (error: unknown) {
@@ -80,7 +83,7 @@ export default function ResetPasswordPage() {
                       <div className="relative">
                         <Input
                           type={showPassword ? "text" : "password"}
-                          placeholder="New passwor  d"
+                          placeholder="New password"
                           {...field}
                           className="pr-10"
                         />
