@@ -5,6 +5,7 @@ export interface FAQ {
   order_index: number;
   is_published: boolean;
   created_at: string;
+  user_id: string;
 }
 
 export type FAQEmptyStateProps = {

@@ -1,26 +1,39 @@
 // app/api/reservations/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/server/supabase";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-// Schema (for reference)
-/*
-interface Reservation {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  date: string;
-  time: string;
-  guests: number;
-  status: string;
-  notes?: string;
-  created_at: string;
+async function createSupabaseServerClient() {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => cookieStore.get(name)?.value,
+      },
+    }
+  );
 }
-*/
 
-// GET: fetch all reservations
 export async function GET() {
-  const { data, error } = await supabase.from("reservations").select("*");
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("reservations")
+    .select("*")
+    .eq("user_id", user.id);
 
   if (error) {
     return NextResponse.json(
@@ -32,11 +45,24 @@ export async function GET() {
       { status: 500 }
     );
   }
+
   return NextResponse.json({ success: true, data });
 }
 
-// POST: create a new reservation
 export async function POST(req: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const body = await req.json();
   const {
     name,
@@ -66,6 +92,7 @@ export async function POST(req: NextRequest) {
       guests,
       status,
       notes,
+      user_id: user.id,
     },
   ]);
 
@@ -87,8 +114,20 @@ export async function POST(req: NextRequest) {
   });
 }
 
-// PATCH: update reservation status or other fields
 export async function PATCH(req: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const body = await req.json();
   const { id, ...fieldsToUpdate } = body;
 
@@ -103,6 +142,7 @@ export async function PATCH(req: NextRequest) {
     .from("reservations")
     .update(fieldsToUpdate)
     .eq("id", id)
+    .eq("user_id", user.id)
     .select();
 
   if (error) {
@@ -123,8 +163,20 @@ export async function PATCH(req: NextRequest) {
   });
 }
 
-// DELETE: remove a reservation
 export async function DELETE(req: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const body = await req.json();
   const { id } = body;
 
@@ -135,7 +187,11 @@ export async function DELETE(req: NextRequest) {
     );
   }
 
-  const { error } = await supabase.from("reservations").delete().eq("id", id);
+  const { error } = await supabase
+    .from("reservations")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
 
   if (error) {
     return NextResponse.json(

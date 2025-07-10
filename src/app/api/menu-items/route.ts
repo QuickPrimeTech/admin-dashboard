@@ -1,8 +1,9 @@
-// Import required types and utilities from Next.js and local libraries
+// app/api/menu-items/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { cleanFormData } from "@/lib/clean-form-data"; // Utility to clean and parse form data
-import { cloudinary } from "@/lib/server/cloudinary"; // Cloudinary client for image upload
-import { supabase } from "@/lib/server/supabase"; // Supabase client instance
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+import { cleanFormData } from "@/lib/clean-form-data";
+import { cloudinary } from "@/lib/server/cloudinary";
 
 interface UploadResult {
   secure_url: string;
@@ -20,8 +21,33 @@ interface FormDataFields {
   image_url?: string;
 }
 
-// Handle POST requests for creating a new menu item
+async function createSupabaseServerClient() {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => cookieStore.get(name)?.value,
+      },
+    }
+  );
+}
+
 export async function POST(request: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const data = cleanFormData(formData) as unknown as FormDataFields;
@@ -29,7 +55,6 @@ export async function POST(request: NextRequest) {
     let publicId = "";
 
     const imageFile = formData.get("image") as File | null;
-
     if (imageFile) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -49,31 +74,29 @@ export async function POST(request: NextRequest) {
       publicId = uploadResult.public_id;
     }
 
-    if (publicId) {
-      const newMenuItem = {
-        name: data.name,
-        description: data.description,
-        price: parseFloat(data.price),
-        category: data.category,
-        is_available:
-          data.is_available === "true" || data.is_available === true,
-        dietary_preference: data.dietary_preference || [],
-        image_url: uploadedImageUrl,
-        public_id: publicId,
-      };
+    const newMenuItem = {
+      name: data.name,
+      description: data.description,
+      price: parseFloat(data.price),
+      category: data.category,
+      is_available: data.is_available === "true" || data.is_available === true,
+      dietary_preference: data.dietary_preference || [],
+      image_url: uploadedImageUrl,
+      public_id: publicId,
+      user_id: user.id,
+    };
 
-      const { error } = await supabase.from("menu_items").insert([newMenuItem]);
+    const { error } = await supabase.from("menu_items").insert([newMenuItem]);
 
-      if (error) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Failed to save item",
-            error: error.message,
-          },
-          { status: 500 }
-        );
-      }
+    if (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to save item",
+          error: error.message,
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -89,11 +112,24 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle GET requests to fetch all menu items from Supabase
 export async function GET() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("menu_items")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -114,12 +150,25 @@ export async function GET() {
   });
 }
 
-// Handle PATCH requests to update a menu item
 export async function PATCH(request: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const data = cleanFormData(formData) as unknown as FormDataFields;
     const id = data.id;
+
     if (!id) {
       return NextResponse.json(
         { success: false, message: "Missing menu item ID" },
@@ -131,14 +180,15 @@ export async function PATCH(request: NextRequest) {
       .from("menu_items")
       .select("public_id")
       .eq("id", id)
+      .eq("user_id", user.id)
       .single();
 
-    if (fetchError) {
+    if (fetchError || !currentItem) {
       return NextResponse.json(
         {
           success: false,
           message: "Item not found",
-          error: fetchError.message,
+          error: fetchError?.message,
         },
         { status: 404 }
       );
@@ -146,7 +196,6 @@ export async function PATCH(request: NextRequest) {
 
     let uploadedImageUrl = data.image_url || "";
     let newPublicId = currentItem?.public_id || "";
-
     const imageFile = formData.get("image") as File | null;
 
     if (imageFile) {
@@ -180,13 +229,14 @@ export async function PATCH(request: NextRequest) {
       is_available: data.is_available === "true" || data.is_available === true,
       dietary_preference: data.dietary_preference || [],
       public_id: newPublicId,
-      ...(uploadedImageUrl !== "" && { image_url: uploadedImageUrl }),
+      ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
     };
 
     const { data: updated, error: updateError } = await supabase
       .from("menu_items")
       .update(updatedMenuItem)
-      .eq("id", parseInt(id));
+      .eq("id", parseInt(id))
+      .eq("user_id", user.id);
 
     if (updateError) {
       return NextResponse.json(
@@ -213,8 +263,20 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// Function to delete the images from Cloudinary and the entry in Supabase
 export async function DELETE(request: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -230,6 +292,7 @@ export async function DELETE(request: NextRequest) {
       .from("menu_items")
       .select("public_id")
       .eq("id", id)
+      .eq("user_id", user.id)
       .single();
 
     if (fetchError || !item) {
@@ -250,7 +313,8 @@ export async function DELETE(request: NextRequest) {
     const { error: deleteError } = await supabase
       .from("menu_items")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
 
     if (deleteError) {
       return NextResponse.json(
