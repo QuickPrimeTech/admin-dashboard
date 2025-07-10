@@ -1,11 +1,39 @@
+// app/api/private-events/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/server/supabase";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-// GET: Fetch all private events
+async function createSupabaseServerClient() {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => cookieStore.get(name)?.value,
+      },
+    }
+  );
+}
+
 export async function GET() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("private_events")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -22,8 +50,20 @@ export async function GET() {
   return NextResponse.json({ success: true, data });
 }
 
-// POST: Create a new private event
 export async function POST(req: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const body = await req.json();
   const {
     name,
@@ -53,6 +93,7 @@ export async function POST(req: NextRequest) {
       guests,
       notes,
       status,
+      user_id: user.id,
     },
   ]);
 
@@ -74,8 +115,20 @@ export async function POST(req: NextRequest) {
   });
 }
 
-// PATCH: Update a private event (status or other fields)
 export async function PATCH(req: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const body = await req.json();
   const { id, ...fieldsToUpdate } = body;
 
@@ -90,6 +143,7 @@ export async function PATCH(req: NextRequest) {
     .from("private_events")
     .update(fieldsToUpdate)
     .eq("id", id)
+    .eq("user_id", user.id)
     .select();
 
   if (error) {
@@ -110,8 +164,20 @@ export async function PATCH(req: NextRequest) {
   });
 }
 
-// DELETE: Remove a private event
 export async function DELETE(req: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const body = await req.json();
   const { id } = body;
 
@@ -122,7 +188,11 @@ export async function DELETE(req: NextRequest) {
     );
   }
 
-  const { error } = await supabase.from("private_events").delete().eq("id", id);
+  const { error } = await supabase
+    .from("private_events")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
 
   if (error) {
     return NextResponse.json(
@@ -135,8 +205,5 @@ export async function DELETE(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    message: "Private event deleted",
-  });
+  return NextResponse.json({ success: true, message: "Private event deleted" });
 }

@@ -7,6 +7,7 @@ export type MenuItem = {
   dietary_preference: string[];
   image_url?: string;
   is_available: boolean;
+  user_id: string;
 };
 
 export type MenuItemForm = {

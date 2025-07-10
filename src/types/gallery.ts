@@ -7,6 +7,7 @@ export type GalleryItem = {
   is_published: boolean;
   created_at: string;
   file: File;
+  user_id: string;
 };
 
 export type GalleryDialogProps = {
@@ -22,6 +23,7 @@ export type GalleryItemInsert = {
   is_published: boolean;
   image_url: string;
   public_id: string;
+  user_id: string;
 };
 
 export type CloudinaryUploadResult = {
