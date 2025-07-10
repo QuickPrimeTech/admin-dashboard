@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ChefHat, Eye, EyeOff } from "lucide-react";
-import { signup } from "@/app/login/actions";
+import { signup } from "@/app/auth/actions/actions";
 import { useRouter } from "next/navigation";
 
 const formSchema = z

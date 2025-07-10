@@ -76,8 +76,7 @@ export async function POST(req: NextRequest) {
       cloudinary: uploadResult,
       message: "Image uploaded to Cloudinary successfully",
     });
-  } catch (err) {
-    console.log(err);
+  } catch {
     return NextResponse.json({
       success: false,
       message: "An error occured while uploading your gallery item",

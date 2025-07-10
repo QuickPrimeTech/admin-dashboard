@@ -86,13 +86,6 @@ export function useMenuItemForm(
       }
       if (itemRef.current) {
         formData.append("id", itemRef.current.id);
-        console.log(
-          "current item ---->",
-          itemRef.current,
-          "form data ---->",
-          formData
-        );
-
         const response = await fetch("/api/menu-items", {
           method: "PATCH",
           body: formData,

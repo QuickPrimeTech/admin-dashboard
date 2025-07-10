@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
-import { logout } from "@/app/login/actions";
+import { logout } from "@/app/auth/actions/actions";
 
 export function AppNavbar() {
   return (

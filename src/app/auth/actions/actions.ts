@@ -17,7 +17,6 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    console.log(error);
     return {
       success: false,
       message: "Your username or password might be wrong",
@@ -39,7 +38,6 @@ export async function signup({
   token: string;
 }) {
   const supabase = await createClient();
-  console.log("the token is ------>", token);
 
   // ✅ Validate token (exists, not used, not expired)
   const { data: invite, error: inviteError } = await supabase

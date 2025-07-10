@@ -77,7 +77,6 @@ export default function SettingsPage() {
           table: "restaurant_settings",
         },
         (payload) => {
-          console.log("Settings changed:", payload);
           if (
             payload.eventType === "UPDATE" ||
             payload.eventType === "INSERT"
@@ -104,9 +103,8 @@ export default function SettingsPage() {
       }
 
       setSettings(json.data); // Assuming json.data is your settings object
-    } catch (err) {
+    } catch {
       toast.error("Failed to fetch settings");
-      console.log(err);
     } finally {
       setLoading(false);
     }
