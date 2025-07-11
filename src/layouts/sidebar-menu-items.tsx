@@ -2,13 +2,14 @@
 
 import {
   LayoutDashboard,
-  MenuIcon,
   Calendar,
   Users,
   Camera,
   HelpCircle,
   Video,
   Settings,
+  Utensils,
+  QrCode,
 } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import Link from "next/link";
@@ -23,7 +24,12 @@ const menuItems = [
   {
     title: "Menu Items",
     url: "/admin/menu",
-    icon: MenuIcon,
+    icon: Utensils,
+  },
+  {
+    title: "QR Code",
+    url: "/admin/qrcode-generator",
+    icon: QrCode,
   },
   {
     title: "Reservations",
