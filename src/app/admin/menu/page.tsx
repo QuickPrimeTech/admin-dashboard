@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, QrCode } from "lucide-react";
 import { MenuItemDialog } from "@/sections/menu/menu-item-dialog";
 import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
 import { toast } from "sonner";
 import { MenuItem } from "@/types/menu";
 import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
+import Link from "next/link";
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -117,10 +118,18 @@ export default function MenuManagement() {
             Manage your restaurant&apos;s menu items
           </p>
         </div>
-        <Button onClick={handleAdd}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Menu Item
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleAdd}>
+            <Plus className="size-4" />
+            Add Menu Item
+          </Button>
+          <Button variant={"secondary"} asChild>
+            <Link href="/admin/qrcode-generator">
+              <QrCode className="size-4" />
+              Get QR Code
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <MenuFilters

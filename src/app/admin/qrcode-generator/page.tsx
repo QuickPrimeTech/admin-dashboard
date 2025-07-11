@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon, Upload } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function ClientQR() {
   const [options, setOptions] = useState<Options>({
@@ -202,14 +203,29 @@ export default function ClientQR() {
         </div>
 
         <Tabs defaultValue="content" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="appearance">Background</TabsTrigger>
-            <TabsTrigger value="image">Image</TabsTrigger>
-            <TabsTrigger value="dots">Dots</TabsTrigger>
-            <TabsTrigger value="cornersSquare">Corners Square</TabsTrigger>
-            <TabsTrigger value="cornersDot">Corners Dot</TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <TabsList className="flex w-max space-x-2 rounded-lg border p-3 h-fit">
+              <TabsTrigger value="content" className="flex-shrink-0">
+                Content
+              </TabsTrigger>
+              <TabsTrigger value="appearance" className="flex-shrink-0">
+                Background
+              </TabsTrigger>
+              <TabsTrigger value="image" className="flex-shrink-0">
+                Image
+              </TabsTrigger>
+              <TabsTrigger value="dots" className="flex-shrink-0">
+                Dots
+              </TabsTrigger>
+              <TabsTrigger value="cornersSquare" className="flex-shrink-0">
+                Corners Square
+              </TabsTrigger>
+              <TabsTrigger value="cornersDot" className="flex-shrink-0">
+                Corners Dot
+              </TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           {/* === CONTENT TAB === */}
           <TabsContent value="content">
@@ -338,7 +354,7 @@ export default function ClientQR() {
               {/* Wrapper to style the input as a clickable dropzone */}
               <div className="relative h-16 flex  items-center justify-center rounded-md border border-dashed border-gray-300 bg-muted p-6 text-center text-sm text-muted-foreground hover:bg-muted/80 transition">
                 <Upload className="mr-2 h-5 w-5" />
-                <span>Click or drag file here to upload (PNG or SVG)</span>
+                <span>Click here to upload (PNG or SVG)</span>
                 {/* Keep the actual input but hide it */}
                 <Input
                   type="file"
@@ -516,7 +532,6 @@ export default function ClientQR() {
             </div>
           </TabsContent>
         </Tabs>
-
         {/* === DOWNLOAD SECTION === */}
         <div className="grid gap-4">
           <Label>Download Format</Label>
