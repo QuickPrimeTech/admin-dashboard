@@ -336,7 +336,7 @@ export default function ClientQR() {
             <div className="grid gap-4 mt-4">
               <Label>Upload Logo</Label>
               {/* Wrapper to style the input as a clickable dropzone */}
-              <div className="flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-muted p-6 text-center text-sm text-muted-foreground hover:bg-muted/80 transition">
+              <div className="relative h-16 flex  items-center justify-center rounded-md border border-dashed border-gray-300 bg-muted p-6 text-center text-sm text-muted-foreground hover:bg-muted/80 transition">
                 <Upload className="mr-2 h-5 w-5" />
                 <span>Click or drag file here to upload (PNG or SVG)</span>
                 {/* Keep the actual input but hide it */}
@@ -344,7 +344,7 @@ export default function ClientQR() {
                   type="file"
                   accept="image/png,image/svg+xml"
                   onChange={handleImageUpload}
-                  className="absolute opacity-0 pointer-events-none"
+                  className="absolute h-full opacity-0 cursor-pointer"
                 />
               </div>
 
