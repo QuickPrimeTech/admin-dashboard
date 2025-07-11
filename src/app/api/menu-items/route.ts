@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const data = cleanFormData(formData) as unknown as FormDataFields;
     let uploadedImageUrl = "";
     let publicId = "";
-
+    console.log(data);
     const imageFile = formData.get("image") as File | null;
     if (imageFile) {
       const arrayBuffer = await imageFile.arrayBuffer();

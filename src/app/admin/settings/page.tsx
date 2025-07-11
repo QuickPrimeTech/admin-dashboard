@@ -67,31 +67,6 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchSettings();
-
-    const channel = supabase
-      .channel("restaurant_settings_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*", // "INSERT", "UPDATE", or "DELETE"
-          schema: "public",
-          table: "restaurant_settings",
-        },
-        (payload) => {
-          if (
-            payload.eventType === "UPDATE" ||
-            payload.eventType === "INSERT"
-          ) {
-            setSettings(payload.new as RestaurantSettings);
-            toast.success("Settings updated in real-time");
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const fetchSettings = async () => {
