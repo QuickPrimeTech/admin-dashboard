@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MenuIcon, Calendar, Camera, Users } from "lucide-react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function StatsOverview() {
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,11 @@ export function StatsOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : stat.value}
+              {loading ? (
+                <Skeleton className="h-8 w-20 rounded-md" />
+              ) : (
+                stat.value
+              )}
             </div>
             <p className="text-xs text-muted-foreground">{stat.description}</p>
           </CardContent>

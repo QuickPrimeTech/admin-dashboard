@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, ChangeEvent } from "react";
+import { useEffect, useRef, useState, ChangeEvent } from "react";
 import QRCodeStyling, { Options, FileExtension } from "qr-code-styling";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -197,7 +197,7 @@ export default function ClientQR() {
         <CardTitle className="text-lg">Custom QR Code Generator</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex justify-center border rounded-md p-4 bg-white">
+        <div className="flex justify-center border rounded-md p-4 bg-background">
           <div ref={ref} />
         </div>
 
@@ -520,9 +520,12 @@ export default function ClientQR() {
         {/* === DOWNLOAD SECTION === */}
         <div className="grid gap-4">
           <Label>Download Format</Label>
-          <Select value={fileExt} onValueChange={setFileExt}>
+          <Select
+            value={fileExt}
+            onValueChange={(value) => setFileExt(value as FileExtension)}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Select format" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="svg">SVG</SelectItem>
