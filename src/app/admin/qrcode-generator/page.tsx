@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, ChangeEvent } from "react";
-import QRCodeStyling, { Options, FileExtension } from "qr-code-styling";
+import QRCodeStyling, {
+  Options,
+  FileExtension,
+  Gradient,
+} from "qr-code-styling";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,20 +60,23 @@ export default function ClientQR() {
     },
   });
 
-  const [fileExt, setFileExt] = useState<FileExtension>("svg");
+  const [fileExt, setFileExt] = useState<FileExtension>("png");
   const [qrCode, setQrCode] = useState<QRCodeStyling>();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setQrCode(new QRCodeStyling(options));
-  }, []);
+    import("qr-code-styling").then(({ default: QRCodeStyling }) => {
+      const qr = new QRCodeStyling(options);
+      setQrCode(qr);
+    });
+  }, [options]);
 
   useEffect(() => {
-    if (ref.current) {
+    if (qrCode && ref.current) {
       ref.current.innerHTML = "";
-      qrCode?.append(ref.current);
+      qrCode.append(ref.current);
     }
-  }, [qrCode, ref]);
+  }, [qrCode]);
 
   useEffect(() => {
     if (!qrCode) return;
@@ -93,12 +100,12 @@ export default function ClientQR() {
   const updateNestedOption = (
     section: keyof Options,
     key: string,
-    value: any
+    value: Options | Gradient | undefined | string | number
   ) => {
     setOptions((prev) => ({
       ...prev,
       [section]: {
-        ...(prev[section] as any),
+        ...(prev[section] as Options),
         [key]: value,
       },
     }));
@@ -195,7 +202,10 @@ export default function ClientQR() {
   return (
     <Card className="w-full max-w-4xl mx-auto mt-10">
       <CardHeader>
-        <CardTitle className="text-lg">Custom QR Code Generator</CardTitle>
+        <CardTitle className="flex flex-col md:flex-row items-center w-full gap-2 justify-between">
+          <span className="text-lg">Custom QR Code Generator</span>
+          <Button variant={"secondary"}>Go Back to Menu</Button>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex justify-center border rounded-md p-4 bg-background">
@@ -271,7 +281,10 @@ export default function ClientQR() {
                   options.backgroundOptions?.gradient ? "gradient" : "single"
                 }
                 onValueChange={(value) =>
-                  handleGradientToggle("backgroundOptions", value as any)
+                  handleGradientToggle(
+                    "backgroundOptions",
+                    value as "gradient" | "single"
+                  )
                 }
               >
                 <SelectTrigger>
@@ -407,7 +420,10 @@ export default function ClientQR() {
               <Select
                 value={options.dotsOptions?.gradient ? "gradient" : "single"}
                 onValueChange={(value) =>
-                  handleGradientToggle("dotsOptions", value as any)
+                  handleGradientToggle(
+                    "dotsOptions",
+                    value as "gradient" | "single"
+                  )
                 }
               >
                 <SelectTrigger>

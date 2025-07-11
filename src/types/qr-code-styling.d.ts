@@ -10,7 +10,7 @@ declare module "qr-code-styling" {
     colorStops: GradientColorStop[];
   };
 
-  export type FileExtension = "png" | "svg";
+  type FileExtension = "png" | "jpeg" | "webp" | "svg";
 
   export type Options = {
     width: number;
