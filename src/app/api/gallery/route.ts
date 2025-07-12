@@ -6,10 +6,12 @@ import {
   deleteImageFromCloudinary,
   errorResponse,
   successResponse,
+  getSanitizedRestaurantName,
 } from "@/helpers/common";
 import { GalleryItemInsert } from "@/types/gallery";
 
 export async function POST(req: NextRequest) {
+  //checking if the user is authenticated
   const { user, supabase, response } = await getAuthenticatedUser();
   if (!user) return response;
 
@@ -22,7 +24,11 @@ export async function POST(req: NextRequest) {
 
     if (!file) return errorResponse("No file uploaded", 400);
 
-    const uploadResult = await uploadImageToCloudinary(file, "gallery");
+    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    const uploadResult = await uploadImageToCloudinary(
+      file,
+      `${sanitizedRestaurantName}/gallery`
+    );
 
     const galleryItem: GalleryItemInsert = {
       title: title || null,
@@ -56,6 +62,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
+  //checking if the user is authenticated
   const { user, supabase, response } = await getAuthenticatedUser();
   if (!user) return response;
 
@@ -76,6 +83,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
+  //checking if the user is authenticated
   const { user, supabase, response } = await getAuthenticatedUser();
   if (!user) return response;
 
@@ -98,9 +106,13 @@ export async function PATCH(req: NextRequest) {
 
   let uploadedImageUrl = "";
   let publicId = data.public_id;
-
   if (file) {
-    const uploadResult = await uploadAndReplaceImage(file, publicId, "gallery");
+    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    const uploadResult = await uploadAndReplaceImage(
+      file,
+      publicId,
+      `${sanitizedRestaurantName}/gallery`
+    );
     uploadedImageUrl = uploadResult.secure_url;
     publicId = uploadResult.public_id;
   }
