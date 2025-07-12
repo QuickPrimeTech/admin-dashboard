@@ -132,7 +132,7 @@ export function GalleryGrid({
                   </AlertDialogTrigger>
 
                   <TooltipContent
-                    className="bg-destructive text-destructive-foreground border-none"
+                    className="bg-destructive text-white border-none"
                     sideOffset={5}
                   >
                     <p>Delete</p>
@@ -150,7 +150,7 @@ export function GalleryGrid({
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => onDelete(item.id)}
-                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                        className="bg-destructive text-white hover:bg-destructive/90"
                       >
                         Yes, delete
                       </AlertDialogAction>
