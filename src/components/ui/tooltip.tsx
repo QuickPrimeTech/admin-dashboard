@@ -42,7 +42,7 @@ function TooltipContent({
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
   // Detect background class (you can extend this)
   const backgroundClass = className.match(/bg-(\S+)/)?.[0] ?? "bg-primary";
-  const fillClass = backgroundClass.replace("bg-", "fill-");
+  const fillClass = backgroundClass.replace("bg-", "text-");
 
   return (
     <TooltipPrimitive.Portal>
@@ -58,9 +58,8 @@ function TooltipContent({
         {children}
         <TooltipPrimitive.Arrow
           className={cn(
-            backgroundClass,
             fillClass,
-            "z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]"
+            "z-50 size-2.5 translate-y-[calc(-50%)] rounded-[4px] fill-current"
           )}
         />
       </TooltipPrimitive.Content>
