@@ -1,7 +1,7 @@
 // app/api/menu-items/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@/utils/supabase/server";
 import { cleanFormData } from "@/lib/clean-form-data";
 import { cloudinary } from "@/lib/server/cloudinary";
 
@@ -21,21 +21,9 @@ interface FormDataFields {
   image_url?: string;
 }
 
-async function createSupabaseServerClient() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-      },
-    }
-  );
-}
-
 export async function POST(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
+  // checking if the client is authenticated to add a menu item
+  const supabase = await createClient();
   const {
     data: { user },
     error: userError,
@@ -50,29 +38,58 @@ export async function POST(request: NextRequest) {
 
   try {
     const formData = await request.formData();
+    //making the form data match the shape of the table that is being inserted to
     const data = cleanFormData(formData) as unknown as FormDataFields;
+    // declaring intial values in order to determine later if the image was sent to cloudinary
     let uploadedImageUrl = "";
     let publicId = "";
-    console.log(data);
+    //Getting the image file sent by the user
     const imageFile = formData.get("image") as File | null;
-    if (imageFile) {
-      const arrayBuffer = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
 
-      const uploadResult = await new Promise<UploadResult>(
-        (resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({ folder: "menu-items" }, (error, result) => {
-              if (error || !result) return reject(error);
-              resolve(result as UploadResult);
-            })
-            .end(buffer);
-        }
+    if (!imageFile) {
+      return NextResponse.json(
+        { success: false, message: "Your menu item requires an image" },
+        { status: 403 }
       );
-
-      uploadedImageUrl = uploadResult.secure_url;
-      publicId = uploadResult.public_id;
     }
+
+    // since the user exist we can fetch the restaurant name from supabase through the user.id
+    const { data: restaurant, error: restaurantError } = await supabase
+      .from("restaurants")
+      .select("name")
+      .eq("user_id", user.id)
+      .single();
+    //checking if the restaurant name exists and if not we are going to return an error
+    if (!restaurant || restaurantError) {
+      return NextResponse.json(
+        { success: false, message: "Restaurant not found" },
+        { status: 404 }
+      );
+    }
+    // Now that we have the restaurant name we will sanitise it into a cloudinary friendly name
+    const sanitizedRestaurantName = restaurant.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "");
+
+    // preparing the image to upload to cloudinary
+    const arrayBuffer = await imageFile.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const uploadResult = await new Promise<UploadResult>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          { folder: `${sanitizedRestaurantName}/menu-items` },
+          (error, result) => {
+            if (error || !result) return reject(error);
+            resolve(result as UploadResult);
+          }
+        )
+        .end(buffer);
+    });
+
+    uploadedImageUrl = uploadResult.secure_url;
+    publicId = uploadResult.public_id;
 
     const newMenuItem = {
       name: data.name,
@@ -113,7 +130,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createClient();
   const {
     data: { user },
     error: userError,
@@ -151,7 +168,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createClient();
   const {
     data: { user },
     error: userError,
@@ -163,6 +180,24 @@ export async function PATCH(request: NextRequest) {
       { status: 401 }
     );
   }
+  const { data: restaurant, error: restaurantError } = await supabase
+    .from("restaurants")
+    .select("name")
+    .eq("user_id", user.id)
+    .single();
+
+  //checking if the restaurant name exists and if not we are going to return an error
+  if (!restaurant || restaurantError) {
+    return NextResponse.json(
+      { success: false, message: "Restaurant not found" },
+      { status: 404 }
+    );
+  }
+  // Now that we have the restaurant name we will sanitise it into a cloudinary friendly name
+  const sanitizedRestaurantName = restaurant.name
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
 
   try {
     const formData = await request.formData();
@@ -206,13 +241,18 @@ export async function PATCH(request: NextRequest) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
+      // inserting the image to the cloudinary folder that matches the restaurant name
+      //for organisation purposes
       const uploadResult = await new Promise<UploadResult>(
         (resolve, reject) => {
           cloudinary.uploader
-            .upload_stream({ folder: "menu-items" }, (error, result) => {
-              if (error || !result) return reject(error);
-              resolve(result as UploadResult);
-            })
+            .upload_stream(
+              { folder: `${sanitizedRestaurantName}/menu-items` },
+              (error, result) => {
+                if (error || !result) return reject(error);
+                resolve(result as UploadResult);
+              }
+            )
             .end(buffer);
         }
       );
@@ -264,7 +304,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createClient();
   const {
     data: { user },
     error: userError,
