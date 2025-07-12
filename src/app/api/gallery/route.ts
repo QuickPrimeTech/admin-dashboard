@@ -1,37 +1,17 @@
-// app/api/gallery/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { cloudinary } from "@/lib/server/cloudinary";
+import {
+  getAuthenticatedUser,
+  uploadImageToCloudinary,
+  uploadAndReplaceImage,
+  deleteImageFromCloudinary,
+  errorResponse,
+  successResponse,
+} from "@/helpers/common";
 import { GalleryItemInsert } from "@/types/gallery";
-import { UploadApiResponse } from "cloudinary";
-
-async function createSupabaseServerClient() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-      },
-    }
-  );
-}
 
 export async function POST(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   try {
     const formData = await req.formData();
@@ -40,26 +20,9 @@ export async function POST(req: NextRequest) {
     const is_published = formData.get("is_published") === "true";
     const file = formData.get("file") as File | null;
 
-    if (!file) {
-      return NextResponse.json(
-        { success: false, message: "No file uploaded" },
-        { status: 400 }
-      );
-    }
+    if (!file) return errorResponse("No file uploaded", 400);
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const uploadResult: UploadApiResponse = await new Promise(
-      (resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "gallery" }, (error, result) => {
-            if (error || !result) reject(error || new Error("Upload failed"));
-            else resolve(result);
-          })
-          .end(buffer);
-      }
-    );
+    const uploadResult = await uploadImageToCloudinary(file, "gallery");
 
     const galleryItem: GalleryItemInsert = {
       title: title || null,
@@ -73,40 +36,28 @@ export async function POST(req: NextRequest) {
     const { error: supabaseError } = await supabase
       .from("gallery")
       .insert(galleryItem);
-
-    if (supabaseError) {
-      return NextResponse.json(
-        { success: false, message: "Failed to insert into Supabase" },
-        { status: 500 }
+    if (supabaseError)
+      return errorResponse(
+        "Failed to insert into Supabase",
+        500,
+        supabaseError.message
       );
-    }
 
-    return NextResponse.json({
-      success: true,
-      cloudinary: uploadResult,
-      message: "Image uploaded to Cloudinary successfully",
-    });
-  } catch {
-    return NextResponse.json({
-      success: false,
-      message: "An error occurred while uploading your gallery item",
-    });
+    return successResponse("Image uploaded to Cloudinary successfully", [
+      uploadResult.secure_url,
+    ]);
+  } catch (error) {
+    return errorResponse(
+      "An error occurred while uploading your gallery item",
+      500,
+      String(error)
+    );
   }
 }
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   try {
     const { data, error } = await supabase
@@ -115,42 +66,25 @@ export async function GET() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: 500 }
-      );
-    }
+    if (error)
+      return errorResponse("Failed to fetch gallery items", 500, error.message);
 
     return NextResponse.json({ success: true, data }, { status: 200 });
-  } catch {
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 }
-    );
+  } catch (error) {
+    return errorResponse("Server error", 500, String(error));
   }
 }
 
 export async function PATCH(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   const formData = await req.formData();
   const id = formData.get("id") as string;
   const file = formData.get("file") as File | null;
-  const title = formData.get("title");
-  const description = formData.get("description");
-  const is_published = formData.get("is_published");
+  const title = formData.get("title") as string | null;
+  const description = formData.get("description") as string | null;
+  const is_published = formData.get("is_published") === "true";
 
   const { data, error } = await supabase
     .from("gallery")
@@ -159,39 +93,21 @@ export async function PATCH(req: NextRequest) {
     .eq("user_id", user.id)
     .single();
 
-  if (error) {
-    return NextResponse.json(
-      { success: false, message: "Item not found or unauthorized" },
-      { status: 404 }
-    );
-  }
+  if (error)
+    return errorResponse("Item not found or unauthorized", 404, error.message);
 
   let uploadedImageUrl = "";
   let publicId = data.public_id;
 
   if (file) {
-    await cloudinary.uploader.destroy(publicId, { invalidate: true });
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const uploadResult: UploadApiResponse = await new Promise(
-      (resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "gallery" }, (error, result) => {
-            if (error || !result) reject(error || new Error("Upload failed"));
-            else resolve(result);
-          })
-          .end(buffer);
-      }
-    );
-
+    const uploadResult = await uploadAndReplaceImage(file, publicId, "gallery");
     uploadedImageUrl = uploadResult.secure_url;
     publicId = uploadResult.public_id;
   }
 
   const galleryItem = {
-    title: title || null,
-    description: description || null,
+    title,
+    description,
     is_published,
     ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
     ...(publicId && { public_id: publicId }),
@@ -203,42 +119,24 @@ export async function PATCH(req: NextRequest) {
     .eq("id", parseInt(id))
     .eq("user_id", user.id);
 
-  if (updateError) {
-    return NextResponse.json(
-      { success: false, message: updateError.message },
-      { status: 500 }
+  if (updateError)
+    return errorResponse(
+      "Failed to update gallery item",
+      500,
+      updateError.message
     );
-  }
 
-  return NextResponse.json({
-    success: true,
-    message: "Successfully updated your gallery photo.",
-  });
+  return successResponse("Successfully updated your gallery photo.");
 }
 
 export async function DELETE(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  if (!id) {
-    return NextResponse.json(
-      { success: false, message: "Missing gallery item ID" },
-      { status: 400 }
-    );
-  }
+  if (!id) return errorResponse("Missing gallery item ID", 400);
 
   const { data: item, error: fetchError } = await supabase
     .from("gallery")
@@ -248,18 +146,11 @@ export async function DELETE(request: NextRequest) {
     .single();
 
   if (fetchError || !item) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Gallery item not found",
-        error: fetchError?.message,
-      },
-      { status: 404 }
-    );
+    return errorResponse("Gallery item not found", 404, fetchError?.message);
   }
 
   if (item.public_id) {
-    await cloudinary.uploader.destroy(item.public_id);
+    await deleteImageFromCloudinary(item.public_id);
   }
 
   const { error: deleteError } = await supabase
@@ -268,15 +159,12 @@ export async function DELETE(request: NextRequest) {
     .eq("id", id)
     .eq("user_id", user.id);
 
-  if (deleteError) {
-    return NextResponse.json(
-      { success: false, message: deleteError.message },
-      { status: 500 }
+  if (deleteError)
+    return errorResponse(
+      "Failed to delete gallery item",
+      500,
+      deleteError.message
     );
-  }
 
-  return NextResponse.json({
-    success: true,
-    message: "Gallery photo deleted successfully",
-  });
+  return successResponse("Gallery photo deleted successfully");
 }
