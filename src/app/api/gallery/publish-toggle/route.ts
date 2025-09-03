@@ -1,34 +1,11 @@
 // app/api/gallery/publish/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-
-async function createSupabaseServerClient() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-      },
-    }
-  );
-}
+import { getAuthenticatedUser } from "@/helpers/common";
 
 export async function PATCH(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  //checking if the user is authenticated
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   try {
     const { id, is_published } = await req.json();
