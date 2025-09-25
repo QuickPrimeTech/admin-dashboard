@@ -12,7 +12,7 @@ export const menuItemSchema = z.object({
   category: z.string().min(1, "Category is required"),
   dietary_preference: z.array(z.string()).optional(),
   is_available: z.boolean(),
-  image_url: z.string().min(1, "Image is required"),
+  image_url: z.string().optional(),
 });
 
 // If you also want a TypeScript type:

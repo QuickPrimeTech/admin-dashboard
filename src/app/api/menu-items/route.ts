@@ -25,26 +25,25 @@ export async function POST(request: NextRequest) {
     const data = cleanFormData(formData) as unknown as FormDataFields;
 
     // declaring intial values in order to determine later if the image was sent to cloudinary
-    let uploadedImageUrl = "";
-    let publicId = "";
+    let uploadedImageUrl = null;
+    let publicId = null;
 
     //Getting the image file sent by the user
     const imageFile = formData.get("image") as File | null;
-    if (!imageFile) {
-      return errorResponse("Your menu item requires an image", 403);
-    }
 
     // since the user exist we can fetch the restaurant name from supabase through the user.id
     const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
 
-    // preparing the image to upload to cloudinary
-    const uploadResult = await uploadImageToCloudinary(
-      imageFile,
-      `${sanitizedRestaurantName}/menu-items`
-    );
+    if (imageFile) {
+      // preparing the image to upload to cloudinary
+      const uploadResult = await uploadImageToCloudinary(
+        imageFile,
+        `${sanitizedRestaurantName}/menu-items`
+      );
 
-    uploadedImageUrl = uploadResult.secure_url;
-    publicId = uploadResult.public_id;
+      uploadedImageUrl = uploadResult.secure_url;
+      publicId = uploadResult.public_id;
+    }
 
     const newMenuItem = {
       name: data.name,
@@ -57,10 +56,10 @@ export async function POST(request: NextRequest) {
       public_id: publicId,
       user_id: user.id,
     };
-
+    console.log("New Menu Item:", newMenuItem);
     const { error } = await supabase.from("menu_items").insert([newMenuItem]);
-
     if (error) {
+      console.log("Supabase Insert Error:", error);
       return errorResponse("Failed to save item", 500, error.message);
     }
 
