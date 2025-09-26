@@ -89,75 +89,64 @@ export async function GET() {
   return successResponse("Menu items fetched successfully", data);
 }
 
-export async function PATCH(request: NextRequest) {
-  // Checking if the user is authenticated
+export async function PATCH(req: NextRequest) {
   const { user, supabase, response } = await getAuthenticatedUser();
   if (response) return response;
 
-  const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+  const formData = await req.formData();
+  const name = formData.get("name") as string;
+  const description = formData.get("description") as string;
+  const price = formData.get("price") as string;
+  const category = formData.get("category") as string;
+  const imageFile = formData.get("image") as File | null;
+  const menuId = formData.get("id") as string;
 
-  try {
-    const formData = await request.formData();
-    const data = cleanFormData(formData) as unknown as FormDataFields;
-    const id = data.id;
+  if (!menuId) {
+    return errorResponse("Missing menu item ID", 400);
+  }
 
-    if (!id) {
-      return errorResponse("Missing menu item ID", 400);
-    }
+  // 1️⃣ Get current menu item
+  const { data: currentItem, error } = await getMenuItemById(user.id, menuId);
+  if (error || !currentItem) return errorResponse("Item not found", 404);
 
-    const { data: currentItem, error: fetchError } = await getMenuItemById(
-      user.id,
-      id
+  let imageUrl = currentItem.image_url;
+  let publicId = currentItem.public_id;
+
+  // 2️⃣ If a new image is uploaded
+  if (imageFile && imageFile.size > 0) {
+    // Only delete existing Cloudinary image if it exists
+    const folderPath = `restaurants/${user.id}/menu-items`;
+
+    const uploadResult = await uploadAndReplaceImage(
+      imageFile,
+      folderPath,
+      publicId || undefined // this line makes it null-safe
     );
 
-    if (fetchError || !currentItem) {
-      return errorResponse("Menu item not found", 404, fetchError?.message);
-    }
-
-    let uploadedImageUrl = data.image_url;
-    let newPublicId = currentItem.public_id;
-    const imageFile = formData.get("image") as File | null;
-
-    if (imageFile) {
-      const uploadResult = await uploadAndReplaceImage(
-        imageFile,
-        currentItem.public_id,
-        `${sanitizedRestaurantName}/menu-items`
-      );
-      uploadedImageUrl = uploadResult.secure_url;
-      newPublicId = uploadResult.public_id;
-    }
-
-    const updatedMenuItem = {
-      name: data.name,
-      description: data.description,
-      price: parseFloat(data.price),
-      category: data.category,
-      is_available: data.is_available === "true" || data.is_available === true,
-      dietary_preference: data.dietary_preference || [],
-      public_id: newPublicId,
-      image_url: uploadedImageUrl,
-    };
-
-    const { error: updateError } = await supabase
-      .from("menu_items")
-      .update(updatedMenuItem)
-      .eq("id", parseInt(id))
-      .eq("user_id", user.id);
-
-    if (updateError) {
-      return errorResponse(
-        "Failed to update menu item",
-        500,
-        updateError.message
-      );
-    }
-
-    return successResponse("Menu item updated successfully");
-  } catch (err) {
-    const error = err as Error;
-    return errorResponse("Server error", 500, error.message);
+    imageUrl = uploadResult.secure_url;
+    publicId = uploadResult.public_id;
   }
+
+  // 3️⃣ Update Supabase row
+  const { data: updatedItem, error: updateError } = await supabase
+    .from("menu_items")
+    .update({
+      name,
+      description,
+      price,
+      category,
+      image_url: imageUrl ?? null, // safe assignment
+      public_id: publicId ?? null, // safe assignment
+    })
+    .eq("id", menuId)
+    .eq("user_id", user.id)
+    .select()
+    .single();
+
+  if (updateError)
+    return errorResponse("Error updating menu item", 500, updateError.message);
+
+  return successResponse("Menu item updated successfully");
 }
 
 export async function DELETE(request: NextRequest) {
