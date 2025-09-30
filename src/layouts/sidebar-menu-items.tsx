@@ -10,6 +10,7 @@ import {
   Settings,
   Utensils,
   QrCode,
+  ShoppingBag,
 } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import Link from "next/link";
@@ -25,6 +26,11 @@ const menuItems = [
     title: "Menu Items",
     url: "/admin/menu",
     icon: Utensils,
+  },
+  {
+    title: "Orders",
+    url: "/admin/orders",
+    icon: ShoppingBag,
   },
   {
     title: "QR Code",

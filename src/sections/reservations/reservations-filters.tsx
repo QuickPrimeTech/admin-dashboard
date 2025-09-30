@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface ReservationsFiltersProps {
-  searchTerm: string
-  onSearchChange: (value: string) => void
-  statusFilter: string
-  onStatusChange: (status: string) => void
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  statusFilter: string;
+  onStatusChange: (status: string) => void;
 }
 
-const statusOptions = ["all", "pending", "confirmed", "cancelled"]
+const statusOptions = ["all", "pending", "confirmed", "cancelled"];
 
 export function ReservationsFilters({
   searchTerm,
@@ -44,5 +44,5 @@ export function ReservationsFilters({
         ))}
       </div>
     </div>
-  )
+  );
 }

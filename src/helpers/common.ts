@@ -84,11 +84,13 @@ export async function uploadImageToCloudinary(
 
 export async function uploadAndReplaceImage(
   imageFile: File,
-  currentPublicId: string,
-  folderPath: string
+  folderPath: string,
+  currentPublicId?: string
 ): Promise<UploadResult> {
   //deleting the original image so that the new one can come and replace it
-  await deleteImageFromCloudinary(currentPublicId);
+  if (currentPublicId) {
+    await deleteImageFromCloudinary(currentPublicId);
+  }
 
   // buffering the image because cloudinary only allows buffers
   const arrayBuffer = await imageFile.arrayBuffer();

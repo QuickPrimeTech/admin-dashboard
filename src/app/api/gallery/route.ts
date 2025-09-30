@@ -110,8 +110,8 @@ export async function PATCH(req: NextRequest) {
     const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
     const uploadResult = await uploadAndReplaceImage(
       file,
-      publicId,
-      `${sanitizedRestaurantName}/gallery`
+      `${sanitizedRestaurantName}/gallery`,
+      publicId
     );
     uploadedImageUrl = uploadResult.secure_url;
     publicId = uploadResult.public_id;
