@@ -33,6 +33,7 @@ interface MenuGridProps {
 }
 
 export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
+  console.log(items);
   if (items.length === 0) {
     return (
       <Card>
@@ -56,16 +57,14 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <Card key={item.id} className="py-0 pb-5 overflow-hidden">
-          {item.image_url && (
-            <div className="relative h-48">
-              <Image
-                src={item.image_url || "/placeholder.svg"}
-                alt={item.name}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
+          <div className="relative h-48">
+            <Image
+              src={item.image_url || "/placeholder.jpg"}
+              alt={item.name}
+              fill
+              className="object-cover"
+            />
+          </div>
           <CardHeader>
             <div className="flex justify-between items-start">
               <CardTitle className="text-lg">{item.name}</CardTitle>

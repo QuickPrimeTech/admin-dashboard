@@ -128,7 +128,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   // 3️⃣ Update Supabase row
-  const { data: updatedItem, error: updateError } = await supabase
+  const { error: updateError } = await supabase
     .from("menu_items")
     .update({
       name,
