@@ -13,6 +13,7 @@ import {
   successResponse,
 } from "@/helpers/common";
 import { FormDataFields } from "@/types/menu";
+import { revalidatePage } from "@/helpers/revalidator";
 
 export async function POST(request: NextRequest) {
   // checking if the client is authenticated to add a menu item
@@ -56,13 +57,13 @@ export async function POST(request: NextRequest) {
       public_id: publicId,
       user_id: user.id,
     };
-    console.log("New Menu Item:", newMenuItem);
     const { error } = await supabase.from("menu_items").insert([newMenuItem]);
     if (error) {
-      console.log("Supabase Insert Error:", error);
       return errorResponse("Failed to save item", 500, error.message);
     }
-
+    //revalidating the page in the frontend for the menu items to be rendered
+    await revalidatePage("/menu");
+    // returning a response to the frontend
     return successResponse("Menu item created successfully");
   } catch (err) {
     const error = err as Error;
@@ -145,7 +146,9 @@ export async function PATCH(req: NextRequest) {
 
   if (updateError)
     return errorResponse("Error updating menu item", 500, updateError.message);
-
+  //revalidating the page in the frontend for the menu items to be rendered
+  await revalidatePage("/menu");
+  //  returning a success message to the frontend
   return successResponse("Menu item updated successfully");
 }
 
@@ -190,7 +193,9 @@ export async function DELETE(request: NextRequest) {
         deleteError.message
       );
     }
-
+    //revalidating the page in the frontend for the menu items to be rendered
+    await revalidatePage("/menu");
+    //  returning a success message to the frontend
     return successResponse("Menu item deleted successfully");
   } catch (err) {
     const error = err as Error;
