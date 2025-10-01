@@ -75,7 +75,10 @@ export function CategorySelect({
   return (
     <FormItem>
       <FormLabel>Category</FormLabel>
-      <Select value={field.value} onValueChange={handleSelectChange}>
+      <Select
+        value={field.value.toLowerCase()}
+        onValueChange={handleSelectChange}
+      >
         <FormControl>
           <SelectTrigger>
             <SelectValue placeholder="Select a category" />
@@ -87,7 +90,7 @@ export function CategorySelect({
             .map((category) => (
               <SelectItem
                 key={category}
-                value={category}
+                value={category.toLocaleLowerCase()}
                 className="capitalize"
               >
                 {category}
