@@ -33,7 +33,6 @@ interface MenuGridProps {
 }
 
 export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
-  console.log(items);
   if (items.length === 0) {
     return (
       <Card>

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { UploadIcon } from "lucide-react";
+import { Loader, UploadIcon } from "lucide-react";
 import {
   Form,
   FormField,
@@ -220,9 +220,7 @@ export function MenuItemForm({
             type="submit"
             disabled={uploading || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting && (
-              <span className="mr-2 animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
-            )}
+            {form.formState.isSubmitting && <Loader className="animate-spin" />}
             {item ? "Update" : "Create"} Menu Item
           </Button>
         </DialogFooter>

@@ -12,25 +12,35 @@ export function useMenuItemForm(
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [uploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const itemRef = useRef<MenuItem | null | undefined>(item);
+  const prevId = useRef<string | undefined>(item?.id);
 
+  // ✅ Initialize form with item values if provided
   const form = useForm<MenuItemFormData>({
     resolver: zodResolver(menuItemSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      price: undefined,
-      category: "",
-      dietary_preference: [],
-      is_available: true,
-      image_url: "",
-    },
+    defaultValues: item
+      ? {
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          category: item.category,
+          dietary_preference: item.dietary_preference || [],
+          is_available: item.is_available,
+          image_url: item.image_url || "",
+        }
+      : {
+          name: "",
+          description: "",
+          price: undefined,
+          category: "",
+          dietary_preference: [],
+          is_available: true,
+          image_url: "",
+        },
   });
 
-  // When item changes, reset form values
+  // ✅ Only reset when the item actually changes
   useEffect(() => {
-    if (item) {
-      itemRef.current = item;
+    if (item && item.id !== prevId.current) {
       form.reset({
         name: item.name,
         description: item.description,
@@ -41,9 +51,7 @@ export function useMenuItemForm(
         image_url: item.image_url || "",
       });
       setSelectedTypes(item.dietary_preference || []);
-    } else {
-      form.reset();
-      setSelectedTypes([]);
+      prevId.current = item.id;
     }
   }, [item, form]);
 
@@ -62,7 +70,6 @@ export function useMenuItemForm(
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     setSelectedFile(file);
   };
 
@@ -76,7 +83,6 @@ export function useMenuItemForm(
       formData.append("category", data.category);
       formData.append("is_available", String(data.is_available));
 
-      // Important: Append using the key "dietary_preference"
       data.dietary_preference?.forEach((t) => {
         formData.append("dietary_preference", t);
       });
@@ -84,40 +90,36 @@ export function useMenuItemForm(
       if (selectedFile) {
         formData.append("image", selectedFile);
       }
-      if (itemRef.current) {
-        formData.append("id", itemRef.current.id);
-        const response = await fetch("/api/menu-items", {
-          method: "PATCH",
-          body: formData,
-        });
 
-        const result = await response.json();
-        if (response.ok) {
-          toast.success(result.message || "Menu item updated successfully!");
-          onSaved();
-        } else {
-          toast.error(result.message || "Failed to update menu item.");
-        }
+      const method = item ? "PATCH" : "POST";
+      if (item) {
+        formData.append("id", item.id);
+      }
+
+      const response = await fetch("/api/menu-items", {
+        method,
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(
+          result.message ||
+            (item
+              ? "Menu item updated successfully!"
+              : "Menu item submitted successfully!")
+        );
+        onSaved();
       } else {
-        const response = await fetch("/api/menu-items", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          toast.success(result.message || "Menu item submitted successfully!");
-          onSaved();
-        } else {
-          toast.error(result.message || "Failed to submit menu item.");
-        }
+        toast.error(result.message || "Failed to save menu item.");
       }
     } catch {
       toast.error(
-        "Failed to submit menu item. Please Check your internet connection"
+        "Failed to submit menu item. Please check your internet connection."
       );
     }
   };
+
   return {
     form,
     selectedTypes,

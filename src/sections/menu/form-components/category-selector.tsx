@@ -38,7 +38,6 @@ export function CategorySelect({
   const [localCategories, setLocalCategories] = useState<string[]>(categories);
   const [openDialog, setOpenDialog] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
-
   useEffect(() => {
     setLocalCategories(categories);
   }, [categories]);
