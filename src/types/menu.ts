@@ -11,11 +11,12 @@ export type MenuItem = {
   public_id?: string; // Add this line
 };
 
-export type MenuItemForm = {
+export interface MenuItemForm {
   item?: MenuItem | null;
   onSaved: () => void;
   onOpenChange: (open: boolean) => void;
-};
+  categories: string[]; // 👈 add this
+}
 
 export type FormDataFields = {
   id?: string;

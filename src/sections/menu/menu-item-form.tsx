@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { UploadIcon } from "lucide-react";
 import {
@@ -13,27 +12,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DialogFooter } from "@/components/ui/dialog";
 import { useMenuItemForm } from "@/hooks/useMenuItemForm";
 import { MenuItemForm as MenuItemFormProps } from "@/types/menu";
-import { categories, dietaryTypes } from "@/constants/menu";
+import { dietaryTypes } from "@/constants/menu";
 import { X } from "lucide-react";
 import Image from "next/image";
+import { CategorySelect } from "./form-components/category-selector";
 
 export function MenuItemForm({
   item,
   onSaved,
   onOpenChange,
+  categories,
 }: MenuItemFormProps) {
   const {
     form,
@@ -112,31 +106,7 @@ export function MenuItemForm({
             control={form.control}
             name="category"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select
-                  defaultValue={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem
-                        key={category}
-                        value={category}
-                        className="capitalize"
-                      >
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
+              <CategorySelect field={field} categories={categories} />
             )}
           />
 

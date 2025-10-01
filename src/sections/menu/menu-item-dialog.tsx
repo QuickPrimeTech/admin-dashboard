@@ -15,6 +15,7 @@ interface MenuItemDialogProps {
   onOpenChange: (open: boolean) => void;
   item?: MenuItem | null;
   onSaved: () => void;
+  categories: string[]; // 👈 add this
 }
 
 export function MenuItemDialog({
@@ -22,6 +23,7 @@ export function MenuItemDialog({
   onOpenChange,
   item,
   onSaved,
+  categories,
 }: MenuItemDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,6 +42,7 @@ export function MenuItemDialog({
           item={item}
           onOpenChange={onOpenChange}
           onSaved={onSaved}
+          categories={categories} // 👈 pass down
         />
       </DialogContent>
     </Dialog>

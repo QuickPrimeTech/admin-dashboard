@@ -174,6 +174,7 @@ export default function MenuManagement() {
         onOpenChange={handleDialogClose}
         item={editingItem}
         onSaved={handleItemSaved}
+        categories={categories} // 👈 pass categories here
       />
     </div>
   );
