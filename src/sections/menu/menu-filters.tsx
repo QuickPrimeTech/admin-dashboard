@@ -3,26 +3,28 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface MenuFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
+  categories: string[];
 }
-
-const categories = ["all", "starter", "main", "dessert", "beverage"];
 
 export function MenuFilters({
   searchTerm,
   onSearchChange,
   selectedCategory,
   onCategoryChange,
+  categories,
 }: MenuFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+    <div className="flex w-full flex-col md:flex-row gap-4 items-center">
+      {/* Search */}
+      <div className="relative w-full md:max-w-sm flex-shrink-0">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           placeholder="Search menu items..."
           value={searchTerm}
@@ -30,21 +32,23 @@ export function MenuFilters({
           className="pl-10"
         />
       </div>
-      <div className="overflow-x-auto">
-        <div className="flex gap-2 w-max px-1">
+
+      <ScrollArea className="min-w-0 rounded-full max-w-3xl shrink">
+        <div className="flex gap-2 py-2 px-4 whitespace-nowrap bg-accent/40">
           {categories.map((category) => (
             <Button
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
               onClick={() => onCategoryChange(category)}
-              className="capitalize whitespace-nowrap"
+              className="capitalize"
             >
               {category}
             </Button>
           ))}
         </div>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }

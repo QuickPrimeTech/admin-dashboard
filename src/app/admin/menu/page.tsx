@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { MenuItem } from "@/types/menu";
 import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
 import Link from "next/link";
+import { MenuFiltersSkeleton } from "@/components/skeletons/menu-filter-skeleton";
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -19,6 +20,7 @@ export default function MenuManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<string[]>(["all"]);
 
   const filterItems = useCallback(() => {
     let filtered = menuItems;
@@ -60,7 +62,15 @@ export default function MenuManagement() {
       const result = await res.json();
 
       if (result.success) {
-        setMenuItems(result.data);
+        const items = result.data as MenuItem[];
+        setMenuItems(items);
+
+        // Extract unique categories
+        const uniqueCategories = Array.from(
+          new Set(items.map((item) => item.category.toLowerCase()))
+        );
+
+        setCategories(["all", ...uniqueCategories]);
       } else {
         toast.error("Server error: " + result.message);
       }
@@ -132,12 +142,18 @@ export default function MenuManagement() {
         </div>
       </div>
 
-      <MenuFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-      />
+      {loading ? (
+        <MenuFiltersSkeleton />
+      ) : (
+        <MenuFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          categories={categories}
+        />
+      )}
+
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
