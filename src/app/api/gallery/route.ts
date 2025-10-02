@@ -9,6 +9,7 @@ import {
   getSanitizedRestaurantName,
 } from "@/helpers/common";
 import { GalleryItemInsert } from "@/types/gallery";
+import { revalidatePage } from "@/helpers/revalidator";
 
 export async function POST(req: NextRequest) {
   //checking if the user is authenticated
@@ -50,8 +51,8 @@ export async function POST(req: NextRequest) {
         500,
         supabaseError.message
       );
-
-    return successResponse("Image uploaded to Cloudinary successfully", [
+    await revalidatePage("/gallery");
+    return successResponse("Image uploaded to successfully", [
       uploadResult.secure_url,
     ]);
   } catch (error) {
@@ -141,7 +142,7 @@ export async function PATCH(req: NextRequest) {
       500,
       updateError.message
     );
-
+  await revalidatePage("/gallery");
   return successResponse("Successfully updated your gallery photo.");
 }
 
@@ -181,6 +182,6 @@ export async function DELETE(request: NextRequest) {
       500,
       deleteError.message
     );
-
+  await revalidatePage("/gallery");
   return successResponse("Gallery photo deleted successfully");
 }
