@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   const newOrderIndex =
     maxOrderFaq?.order_index != null ? maxOrderFaq.order_index + 1 : 0;
 
-  const { data, error } = await supabase.from("faqs").insert([
+  const { error } = await supabase.from("faqs").insert([
     {
       question,
       answer,
