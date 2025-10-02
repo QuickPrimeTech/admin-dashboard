@@ -61,19 +61,17 @@ export function GalleryGrid({
             </div>
           </div>
 
-          {(item.title || item.description) && (
-            <CardContent>
-              {item.title && (
-                <CardTitle className="text-sm font-medium truncate">
-                  {item.title}
-                </CardTitle>
-              )}
-              <CardDescription className="text-xs mt-1 line-clamp-2">
-                {item.description && item.description}
-              </CardDescription>
-              <Badge variant="outline">{item.category}</Badge>
-            </CardContent>
-          )}
+          <CardContent>
+            {item.title && (
+              <CardTitle className="text-sm font-medium truncate">
+                {item.title}
+              </CardTitle>
+            )}
+            <CardDescription className="text-xs mt-1 line-clamp-2">
+              {item.description && item.description}
+            </CardDescription>
+            <Badge variant="outline">{item.category}</Badge>
+          </CardContent>
 
           <CardFooter className="flex gap-1">
             <TooltipProvider>
