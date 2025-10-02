@@ -8,6 +8,7 @@ export type GalleryItem = {
   created_at: string;
   file: File;
   user_id: string;
+  category: string;
 };
 
 export type GalleryDialogProps = {
@@ -22,6 +23,7 @@ export type GalleryItemInsert = {
   description: string | null;
   is_published: boolean;
   image_url: string;
+  category: string;
   public_id: string;
   user_id: string;
 };

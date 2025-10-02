@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const description = formData.get("description") as string | null;
     const is_published = formData.get("is_published") === "true";
     const file = formData.get("file") as File | null;
+    const category = formData.get("category") as string;
 
     if (!file) return errorResponse("No file uploaded", 400);
 
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
       title: title || null,
       description: description || null,
       is_published,
+      category,
       image_url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
       user_id: user.id,
@@ -93,6 +95,7 @@ export async function PATCH(req: NextRequest) {
   const title = formData.get("title") as string | null;
   const description = formData.get("description") as string | null;
   const is_published = formData.get("is_published") === "true";
+  const category = formData.get("category") as string | null;
 
   const { data, error } = await supabase
     .from("gallery")
@@ -121,6 +124,7 @@ export async function PATCH(req: NextRequest) {
     title,
     description,
     is_published,
+    category,
     ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
     ...(publicId && { public_id: publicId }),
   };

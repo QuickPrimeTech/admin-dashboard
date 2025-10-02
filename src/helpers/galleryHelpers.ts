@@ -15,12 +15,15 @@ export async function addGalleryImage(
     toast.error("Please select an image.");
     return;
   }
+
   try {
     const formData = new FormData();
-    //Adding all the data to the form item
+
+    // Add all form fields to payload
     formData.append("title", data.title || "");
     formData.append("description", data.description || "");
     formData.append("is_published", String(data.is_published));
+    formData.append("category", data.category || "");
     formData.append("file", selectedFile);
 
     const res = await fetch("/api/gallery", {
@@ -41,6 +44,7 @@ export async function addGalleryImage(
     toast.success(savedItem.message);
     onSaved();
   } catch {
+    setUploading(false);
     toast.error("Something went wrong");
   }
 }
@@ -53,11 +57,13 @@ export async function updateGalleryItem(
 ) {
   try {
     const formData = new FormData();
-    //Adding all the data to the form item
+
+    // Add all form fields to payload
     formData.append("id", String(data.id));
     formData.append("title", data.title || "");
     formData.append("description", data.description || "");
     formData.append("is_published", String(data.is_published));
+    formData.append("category", data.category || "");
 
     if (selectedFile) {
       formData.append("file", selectedFile);
@@ -76,9 +82,10 @@ export async function updateGalleryItem(
       toast.success(res.message);
     } else {
       setUploading(false);
-      toast.error("Gallery Item wasn't successfully made");
+      toast.error("Gallery item wasn’t successfully updated");
     }
   } catch {
+    setUploading(false);
     toast.error("Something went wrong");
   }
 }
@@ -88,12 +95,15 @@ export async function deleteGalleryItem(id: number) {
     const res = await fetch(`/api/gallery?id=${id}`, {
       method: "DELETE",
     });
+
     const data = await res.json();
-    if (!res.ok) toast.error(data.message || "Could not delete item");
+    if (!res.ok) {
+      toast.error(data.message || "Could not delete item");
+      return;
+    }
+
     toast.success(data.message);
   } catch {
-    toast.error(
-      "There was an error that occurred in creating the gallery item"
-    );
+    toast.error("There was an error while deleting the gallery item");
   }
 }

@@ -24,6 +24,7 @@ export function useGalleryItemForm(
       description: "",
       is_published: true,
       image_url: "", // default to empty
+      category: "",
     },
   });
 
@@ -34,6 +35,7 @@ export function useGalleryItemForm(
         description: item.description || "",
         is_published: item.is_published,
         image_url: item.image_url,
+        category: item.category || "",
       });
       setExistingImageUrl(item.image_url || null); // ADD THIS
     } else {
@@ -42,6 +44,7 @@ export function useGalleryItemForm(
         description: "",
         is_published: true,
         image_url: "",
+        category: "",
       });
       setSelectedFile(null);
       setExistingImageUrl(null); // ADD THIS

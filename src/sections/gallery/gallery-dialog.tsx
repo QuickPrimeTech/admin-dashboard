@@ -20,11 +20,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, UploadIcon } from "lucide-react";
+import { Loader, UploadIcon } from "lucide-react";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GalleryDialogProps } from "@/types/gallery";
 import { useGalleryItemForm } from "@/hooks/useGalleryItemForm";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function GalleryDialog({
   open,
@@ -156,28 +163,55 @@ export function GalleryDialog({
                   </FormItem>
                 )}
               />
-
-              {/* Published Toggle */}
-              <FormField
-                control={form.control}
-                name="is_published"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Published</FormLabel>
-                      <div className="text-sm text-muted-foreground">
-                        Make this image visible in the gallery
+              <div className="flex gap-2">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Food">Food</SelectItem>
+                            <SelectItem value="Drinks">Drinks</SelectItem>
+                            <SelectItem value="Interior">Interior</SelectItem>
+                            <SelectItem value="Events">Events</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="is_published"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Published</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Make this image visible in the gallery
+                        </div>
                       </div>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Published Toggle */}
 
               {/* Buttons */}
               <DialogFooter>
@@ -189,7 +223,7 @@ export function GalleryDialog({
                   Cancel
                 </Button>
                 <Button type="submit" disabled={uploading}>
-                  {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {uploading && <Loader className="animate-spin" />}
                   {uploading
                     ? item
                       ? "Updating"

@@ -68,11 +68,10 @@ export function GalleryGrid({
                   {item.title}
                 </CardTitle>
               )}
-              {item.description && (
-                <CardDescription className="text-xs mt-1 line-clamp-2">
-                  {item.description}
-                </CardDescription>
-              )}
+              <CardDescription className="text-xs mt-1 line-clamp-2">
+                {item.description && item.description}
+              </CardDescription>
+              <Badge variant="outline">{item.category}</Badge>
             </CardContent>
           )}
 
