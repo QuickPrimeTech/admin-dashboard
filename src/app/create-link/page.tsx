@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Loader2, LinkIcon } from "lucide-react";
+import { Copy, LinkIcon, Loader } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -62,7 +62,7 @@ export default function InviteAdminPage() {
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader className="animate-spin" />
                 Generating...
               </>
             ) : (

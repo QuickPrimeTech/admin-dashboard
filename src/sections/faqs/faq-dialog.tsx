@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import * as z from "zod";
 import {
   Dialog,
@@ -204,7 +204,7 @@ export function FAQDialog({
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader className="animate-spin" />
                     {faq ? "Updating" : "Creating"} FAQ
                   </>
                 ) : (

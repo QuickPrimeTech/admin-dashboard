@@ -1,33 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
-
-async function createSupabaseServerClient() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-      },
-    }
-  );
-}
+// @/app/api/faqs/route.ts
+import { NextRequest } from "next/server";
+import {
+  getAuthenticatedUser,
+  errorResponse,
+  successResponse,
+} from "@/helpers/common";
+import { revalidatePage } from "@/helpers/revalidator";
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   const { data, error } = await supabase
     .from("faqs")
@@ -35,41 +17,19 @@ export async function GET() {
     .eq("user_id", user.id)
     .order("order_index", { ascending: false });
 
-  if (error) {
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch FAQs", error: error.message },
-      { status: 500 }
-    );
-  }
+  if (error) return errorResponse("Failed to fetch FAQs", 500, error.message);
 
-  return NextResponse.json({
-    success: true,
-    message: "Fetched successfully",
-    data,
-  });
+  return successResponse("Fetched successfully", data);
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   const { question, answer, is_published } = await request.json();
 
   if (!question || !answer) {
-    return NextResponse.json(
-      { success: false, message: "Missing fields" },
-      { status: 400 }
-    );
+    return errorResponse("Missing fields", 400);
   }
 
   const { data: maxOrderFaq } = await supabase
@@ -93,39 +53,19 @@ export async function POST(request: NextRequest) {
     },
   ]);
 
-  if (error) {
-    return NextResponse.json(
-      { success: false, message: "Insert failed", error: error.message },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ success: true, message: "Inserted", data });
+  if (error) return errorResponse("Insert failed", 500, error.message);
+  await revalidatePage("/");
+  return successResponse("The Faq was successfully created");
 }
 
 export async function PATCH(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   const { id, question, answer, is_published, order_index } =
     await request.json();
 
-  if (!id) {
-    return NextResponse.json(
-      { success: false, message: "Missing ID" },
-      { status: 400 }
-    );
-  }
+  if (!id) return errorResponse("Missing ID", 400);
 
   const { data, error } = await supabase
     .from("faqs")
@@ -134,38 +74,18 @@ export async function PATCH(request: NextRequest) {
     .eq("user_id", user.id)
     .select();
 
-  if (error) {
-    return NextResponse.json(
-      { success: false, message: "Update failed", error: error.message },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ success: true, message: "Updated", data });
+  if (error) return errorResponse("Update failed", 500, error.message);
+  await revalidatePage("/");
+  return successResponse("Updated", data);
 }
 
 export async function DELETE(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (!user) return response;
 
   const { id } = await request.json();
 
-  if (!id) {
-    return NextResponse.json(
-      { success: false, message: "Missing ID" },
-      { status: 400 }
-    );
-  }
+  if (!id) return errorResponse("Missing ID", 400);
 
   const { error } = await supabase
     .from("faqs")
@@ -173,12 +93,7 @@ export async function DELETE(request: NextRequest) {
     .eq("id", id)
     .eq("user_id", user.id);
 
-  if (error) {
-    return NextResponse.json(
-      { success: false, message: "Delete failed", error: error.message },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ success: true, message: "Deleted" });
+  if (error) return errorResponse("Delete failed", 500, error.message);
+  await revalidatePage("/");
+  return successResponse("Deleted");
 }

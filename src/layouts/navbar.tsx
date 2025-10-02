@@ -8,7 +8,7 @@ import {
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Bell, Loader2, User } from "lucide-react";
+import { Bell, Loader, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -56,7 +56,7 @@ export function AppNavbar() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    <Loader2 className="animate-spin" />
+                    <Loader className="animate-spin" />
                     Signing Out
                   </DialogTitle>
                 </DialogHeader>

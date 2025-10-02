@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Loader2, AlertCircle, ChefHat } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, ChefHat, Loader } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -186,7 +186,7 @@ export function LoginForm() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
                     Signing in...
                   </>
                 ) : (

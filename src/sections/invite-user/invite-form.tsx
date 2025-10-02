@@ -10,7 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import {
   Form,
@@ -253,7 +253,7 @@ export function InviteSignupForm() {
                 className="w-full flex items-center justify-center gap-2"
                 disabled={loading}
               >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading && <Loader className="animate-spin" />}
                 {loading ? "Creating account" : "Create Account"}
               </Button>
             </form>
