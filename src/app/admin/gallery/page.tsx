@@ -42,6 +42,10 @@ export default function GalleryPage() {
     fetchGalleryItems();
   }, []);
 
+  const categories = Array.from(
+    new Set(galleryItems.map((item) => item.category).filter(Boolean))
+  );
+
   const filterItems = useCallback(() => {
     let filtered = galleryItems;
 
@@ -139,6 +143,7 @@ export default function GalleryPage() {
       )}
 
       <GalleryDialog
+        categories={categories}
         open={isDialogOpen}
         onOpenChange={handleDialogClose}
         item={editingItem}

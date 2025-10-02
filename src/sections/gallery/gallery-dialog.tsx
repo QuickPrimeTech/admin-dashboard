@@ -25,19 +25,14 @@ import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GalleryDialogProps } from "@/types/gallery";
 import { useGalleryItemForm } from "@/hooks/useGalleryItemForm";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { CategorySelect } from "../menu/form-components/category-selector";
 
 export function GalleryDialog({
   open,
   onOpenChange,
   item,
   onSaved,
+  categories,
 }: GalleryDialogProps) {
   // hook that handles all the logic
   const { form, uploading, onSubmit, existingImageUrl, setSelectedFile } =
@@ -168,26 +163,7 @@ export function GalleryDialog({
                   control={form.control}
                   name="category"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Food">Food</SelectItem>
-                            <SelectItem value="Drinks">Drinks</SelectItem>
-                            <SelectItem value="Interior">Interior</SelectItem>
-                            <SelectItem value="Events">Events</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                    <CategorySelect field={field} categories={categories} />
                   )}
                 />
                 <FormField

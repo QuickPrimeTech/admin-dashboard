@@ -25,19 +25,21 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { ControllerRenderProps } from "react-hook-form";
-import { MenuItemFormData } from "@/schemas/menu-item-schema";
+import { ControllerRenderProps, FieldValues } from "react-hook-form";
 
-export function CategorySelect({
+type CategorySelectProps<TFieldValues extends FieldValues> = {
+  field: ControllerRenderProps<TFieldValues>;
+  categories: string[];
+};
+
+export function CategorySelect<TFieldValues extends FieldValues>({
   field,
   categories,
-}: {
-  field: ControllerRenderProps<MenuItemFormData, "category">; // ✅ precise type
-  categories: string[];
-}) {
+}: CategorySelectProps<TFieldValues>) {
   const [localCategories, setLocalCategories] = useState<string[]>(categories);
   const [openDialog, setOpenDialog] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
+
   useEffect(() => {
     setLocalCategories(categories);
   }, [categories]);
@@ -52,18 +54,12 @@ export function CategorySelect({
 
   const handleAddCustom = () => {
     if (!customCategory.trim()) return;
-
     const newCategory = customCategory.trim();
 
-    // ✅ Add to localCategories first, then update form value
-    setLocalCategories((prev) => {
-      if (!prev.includes(newCategory)) {
-        return [...prev, newCategory];
-      }
-      return prev;
-    });
+    setLocalCategories((prev) =>
+      prev.includes(newCategory) ? prev : [...prev, newCategory]
+    );
 
-    // Delay field update until after categories update
     requestAnimationFrame(() => {
       field.onChange(newCategory);
     });
@@ -75,10 +71,7 @@ export function CategorySelect({
   return (
     <FormItem>
       <FormLabel>Category</FormLabel>
-      <Select
-        value={field.value.toLowerCase()}
-        onValueChange={handleSelectChange}
-      >
+      <Select value={field.value} onValueChange={handleSelectChange}>
         <FormControl>
           <SelectTrigger>
             <SelectValue placeholder="Select a category" />
@@ -88,11 +81,7 @@ export function CategorySelect({
           {localCategories
             .filter((c) => c !== "all")
             .map((category) => (
-              <SelectItem
-                key={category}
-                value={category.toLocaleLowerCase()}
-                className="capitalize"
-              >
+              <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>
             ))}
@@ -105,13 +94,13 @@ export function CategorySelect({
         </SelectContent>
       </Select>
 
-      {/* Dialog for custom category */}
+      {/* Dialog for adding a custom category */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Custom Category</DialogTitle>
             <DialogDescription>
-              Enter a new category name to add it to your menu.
+              Enter a new category name to add it to your list.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">

@@ -16,6 +16,7 @@ export type GalleryDialogProps = {
   onOpenChange: (open: boolean) => void;
   item?: GalleryItem | null;
   onSaved: () => void;
+  categories: string[];
 };
 
 export type GalleryItemInsert = {
