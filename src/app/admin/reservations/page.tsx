@@ -7,19 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ReservationStatus } from "@/types/mock-api";
 import { supabase } from "@/lib/server/supabase";
-
-interface Reservation {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  date: string;
-  time: string;
-  guests: number;
-  status: string;
-  notes?: string;
-  created_at: string;
-}
+import { Reservation } from "@/types/reservations";
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -33,12 +21,13 @@ export default function ReservationsPage() {
   useEffect(() => {
     fetchReservations();
 
+    // realtime subscription
     const channel = supabase
       .channel("realtime:reservations")
       .on(
         "postgres_changes",
         {
-          event: "*", // listen for INSERT, UPDATE, DELETE
+          event: "*", // INSERT, UPDATE, DELETE
           schema: "public",
           table: "reservations",
         },
@@ -51,10 +40,12 @@ export default function ReservationsPage() {
                 return [newRow as Reservation, ...prev];
               case "UPDATE":
                 return prev.map((r) =>
-                  r.id === newRow.id ? (newRow as Reservation) : r
+                  r.id === (newRow as Reservation).id
+                    ? (newRow as Reservation)
+                    : r
                 );
               case "DELETE":
-                return prev.filter((r) => r.id !== oldRow.id);
+                return prev.filter((r) => r.id !== (oldRow as Reservation).id);
               default:
                 return prev;
             }
@@ -115,7 +106,7 @@ export default function ReservationsPage() {
   }, [filterReservations]);
 
   const updateReservationStatus = async (
-    id: string,
+    id: number,
     status: ReservationStatus
   ) => {
     try {
@@ -139,12 +130,13 @@ export default function ReservationsPage() {
         )
       );
 
-      toast.success(`Reservation ${status} successfully`);
+      toast.success(`Reservation marked as ${status}`);
     } catch {
       toast.error("Failed to update reservation status");
     }
   };
-  const deleteReservation = async (id: string) => {
+
+  const deleteReservation = async (id: number) => {
     try {
       const res = await fetch("/api/reservations", {
         method: "DELETE",

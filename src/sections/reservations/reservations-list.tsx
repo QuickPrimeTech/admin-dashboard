@@ -19,23 +19,12 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { ReservationStatus } from "@/types/mock-api";
-
-interface Reservation {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  date: string;
-  time: string;
-  guests: number;
-  status: string;
-  notes?: string;
-}
+import { Reservation } from "@/types/reservations";
 
 interface ReservationsListProps {
   reservations: Reservation[];
-  onUpdateStatus: (id: string, status: ReservationStatus) => void;
-  onDelete: (id: string) => void;
+  onUpdateStatus: (id: number, status: ReservationStatus) => void;
+  onDelete: (id: number) => void;
 }
 
 export function ReservationsList({
@@ -118,14 +107,28 @@ export function ReservationsList({
                 </div>
               </div>
 
-              {reservation.notes && (
+              {reservation.requests && (
                 <div className="mb-4">
                   <p className="text-sm text-muted-foreground">
-                    <strong>Notes:</strong> {reservation.notes}
+                    <strong>Requests:</strong> {reservation.requests}
                   </p>
                 </div>
               )}
-              <div className="flex justify-between">
+
+              {reservation.dining_preference && (
+                <p className="text-sm text-muted-foreground">
+                  <strong>Dining Preference:</strong>{" "}
+                  {reservation.dining_preference}
+                </p>
+              )}
+
+              {reservation.occasion && (
+                <p className="text-sm text-muted-foreground">
+                  <strong>Occasion:</strong> {reservation.occasion}
+                </p>
+              )}
+
+              <div className="flex justify-between mt-4">
                 <div className="flex gap-2">
                   {reservation.status !== "confirmed" && (
                     <Button
