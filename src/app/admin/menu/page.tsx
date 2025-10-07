@@ -34,9 +34,7 @@ export default function MenuManagement() {
     }
 
     if (selectedCategory !== "all") {
-      filtered = filtered.filter(
-        (item) => item.category.toLowerCase() === selectedCategory
-      );
+      filtered = filtered.filter((item) => item.category === selectedCategory);
     }
 
     setFilteredItems(filtered);
@@ -67,9 +65,8 @@ export default function MenuManagement() {
 
         // Extract unique categories
         const uniqueCategories = Array.from(
-          new Set(items.map((item) => item.category.toLowerCase()))
+          new Set(items.map((item) => item.category))
         );
-
         setCategories(["all", ...uniqueCategories]);
       } else {
         toast.error("Server error: " + result.message);

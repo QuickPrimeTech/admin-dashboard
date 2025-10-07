@@ -43,7 +43,6 @@ export function CategorySelect<TFieldValues extends FieldValues>({
   useEffect(() => {
     setLocalCategories(categories);
   }, [categories]);
-
   const handleSelectChange = (value: string) => {
     if (value === "__custom") {
       setOpenDialog(true);
