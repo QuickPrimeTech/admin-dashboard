@@ -14,7 +14,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import {
+  ArrowUpDown,
+  Copy,
+  MoreHorizontal,
+  ShoppingBag,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -23,7 +29,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -37,16 +42,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 export type Payment = {
   id: string;
-  checkout_request_id: string;
+  order_id: string;
   phone: string;
   amount: number;
-  status: "pending" | "completed" | "failed";
+  status: "pending" | "success" | "failed";
   created_at: string;
   user_id: string;
-  order_id: string;
   order?: {
     name: string;
   };
@@ -58,17 +63,17 @@ type ApiResponse = {
   message: string;
   data?: Payment[];
 };
+type TransactionsTableProps = {
+  phone?: string;
+};
 
-export function TransactionsTable() {
-  const {
-    data: response,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<ApiResponse, Error>({
-    queryKey: ["payments"],
+export function TransactionsTable({ phone }: TransactionsTableProps) {
+  const { data: response, isLoading } = useQuery<ApiResponse, Error>({
+    queryKey: ["payments", phone],
     queryFn: async () => {
-      const res = await fetch("/api/transactions");
+      let url = "/api/transactions";
+      if (phone) url += `?phone=${phone}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch transactions");
       return res.json();
     },
@@ -86,12 +91,10 @@ export function TransactionsTable() {
 
   const columns: ColumnDef<Payment>[] = [
     {
-      accessorKey: "checkout_request_id",
-      header: "Request ID",
+      accessorKey: "order_id",
+      header: "Order ID",
       cell: ({ row }) => (
-        <div className="font-mono text-sm">
-          {row.getValue("checkout_request_id")}
-        </div>
+        <div className="font-mono text-sm">{row.getValue("order_id")}</div>
       ),
     },
 
@@ -189,23 +192,33 @@ export function TransactionsTable() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
+                <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() =>
-                  navigator.clipboard.writeText(
-                    row.original.checkout_request_id
-                  )
+                  navigator.clipboard.writeText(row.original.order_id)
                 }
               >
+                <Copy />
                 Copy request ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>View details</DropdownMenuItem>
-              <DropdownMenuItem>View customer</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/admin/transactions/order/${row.original.order_id}`}
+                >
+                  <ShoppingBag />
+                  View Order
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/transactions/user/${row.original.phone}`}>
+                  <User />
+                  View customer
+                </Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
