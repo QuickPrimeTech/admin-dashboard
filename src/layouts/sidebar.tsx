@@ -3,9 +3,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -15,7 +12,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { MenuIcon, LogOut } from "lucide-react";
 import { Suspense } from "react";
-import { SidebarItems } from "./sidebar-menu-items";
+import { SidebarMenuGroups } from "./sidebar-menu-items"; // ✅ single import
 
 export function AppSidebar() {
   return (
@@ -43,14 +40,8 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarItems />
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* ✅ All menu groups rendered from client component */}
+        <SidebarMenuGroups />
       </SidebarContent>
 
       <SidebarFooter>
@@ -63,6 +54,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
