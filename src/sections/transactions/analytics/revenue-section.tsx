@@ -1,7 +1,7 @@
 "use client";
 import { TrendingUp, DollarSign, ShoppingBag, Percent } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-
+import { CountingNumber } from "@/components/ui/shadcn-io/counting-number";
 import {
   Card,
   CardContent,
@@ -29,7 +29,28 @@ export function RevenueSection({ data, isLoading }: RevenueSectionProps) {
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Transactions (30d)
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              <div className="text-2xl font-bold">
+                <CountingNumber
+                  number={totals?.totalPayments || 0}
+                  inView={true}
+                  transition={{ stiffness: 100, damping: 30 }}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -43,7 +64,12 @@ export function RevenueSection({ data, isLoading }: RevenueSectionProps) {
             ) : (
               <>
                 <div className="text-2xl font-bold">
-                  KES {totals?.totalRevenue.toLocaleString()}
+                  KES{" "}
+                  <CountingNumber
+                    number={totals?.totalRevenue || 0}
+                    inView={true}
+                    transition={{ stiffness: 100, damping: 30 }}
+                  />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Last 7d: KES {totals?.revenue7d.toLocaleString()}
@@ -63,9 +89,15 @@ export function RevenueSection({ data, isLoading }: RevenueSectionProps) {
               <Skeleton className="h-8 w-24" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{totals?.totalOrders}</div>
+                <div className="text-2xl font-bold">
+                  <CountingNumber
+                    number={totals?.totalOrders || 0}
+                    inView={true}
+                    transition={{ stiffness: 100, damping: 30 }}
+                  />
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {totals?.completedOrders} completed
+                  {totals?.successfulOrders} completed
                 </p>
               </>
             )}
@@ -85,7 +117,12 @@ export function RevenueSection({ data, isLoading }: RevenueSectionProps) {
             ) : (
               <>
                 <div className="text-2xl font-bold">
-                  KES {totals?.avgOrderValue.toFixed(0)}
+                  KES{" "}
+                  <CountingNumber
+                    number={totals?.avgOrderValue || 0}
+                    inView={true}
+                    transition={{ stiffness: 100, damping: 30 }}
+                  />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Per successful order
@@ -97,7 +134,9 @@ export function RevenueSection({ data, isLoading }: RevenueSectionProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Payment Success Rate
+            </CardTitle>
             <Percent className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>

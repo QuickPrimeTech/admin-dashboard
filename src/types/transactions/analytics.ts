@@ -2,16 +2,19 @@ export type AnalyticsData = {
   success: boolean;
   data: {
     totals: {
+      totalPayments: number;
       totalRevenue: number;
       totalOrders: number;
       avgOrderValue: number;
       successRate: number;
+      failRate: number;
+      pendingRate: number;
       revenue24h: number;
       revenue7d: number;
       revenue30d: number;
-      completedOrders: number;
+      successfulOrders: number;
       pendingOrders: number;
-      cancelledOrders: number;
+      failedOrders: number;
     };
     trends: {
       revenueByDay: Array<{ date: string; revenue: number; orders: number }>;

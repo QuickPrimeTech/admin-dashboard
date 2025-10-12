@@ -3,29 +3,41 @@ import { AnalyticsData } from "@/types/transactions/analytics";
 export function useTransformAnalytics(raw: any): AnalyticsData {
   const { payments = [], orders = [] } = raw;
 
+  //calculating the total payments
+  const totalPayments = payments.length;
+
+  //determining the success rates for the payments
   const successPayments = payments.filter((p: any) => p.status === "success");
   const failedPayments = payments.filter((p: any) => p.status === "failed");
   const pendingPayments = payments.filter((p: any) => p.status === "pending");
+
+  //Calculating the rates of success, pending and failed
+  const successRate = totalPayments
+    ? (successPayments.length / totalPayments) * 100
+    : 0;
+  const failRate = totalPayments
+    ? (failedPayments.length / totalPayments) * 100
+    : 0;
+  const pendingRate = totalPayments
+    ? (pendingPayments.length / totalPayments) * 100
+    : 0;
 
   const totalRevenue = successPayments.reduce(
     (sum: number, p: any) => sum + p.amount,
     0
   );
+
   const totalOrders = orders.length;
-  const completedOrders = orders.filter(
-    (o: any) => o.status === "completed"
+  const successfulOrders = orders.filter(
+    (o: any) => o.status === "success"
   ).length;
   const pendingOrders = orders.filter(
     (o: any) => o.status === "pending"
   ).length;
-  const cancelledOrders = orders.filter(
-    (o: any) => o.status === "cancelled"
-  ).length;
-  const avgOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
+  const failedOrders = orders.filter((o: any) => o.status === "failed").length;
 
-  const successRate = payments.length
-    ? (successPayments.length / payments.length) * 100
-    : 0;
+  //Calculating the avgOrderValue
+  const avgOrderValue = totalOrders ? totalRevenue / successfulOrders : 0;
 
   const now = new Date();
   const revenue24h = successPayments
@@ -147,16 +159,19 @@ export function useTransformAnalytics(raw: any): AnalyticsData {
     success: true,
     data: {
       totals: {
+        totalPayments,
         totalRevenue,
         totalOrders,
         avgOrderValue,
         successRate,
+        failRate,
+        pendingRate,
         revenue24h,
         revenue7d,
         revenue30d,
-        completedOrders,
+        successfulOrders,
         pendingOrders,
-        cancelledOrders,
+        failedOrders,
       },
       trends: {
         revenueByDay,
