@@ -110,13 +110,17 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
             </Link>
           </HoverCardTrigger>
           <HoverCardContent>
-            <div className="flex justify-between gap-4">
-              <span className="p-2 bg-accent rounded-full h-fit">
-                <ShoppingBag className="size-6" />
-              </span>
-              <div className="space-y-1">
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-2 items-center">
+                <span className="p-2 bg-accent rounded-full">
+                  <ShoppingBag className="size-4" />
+                </span>
                 <h4 className="text-sm font-semibold">Order</h4>
-                <p className="text-sm">See the order for this payment</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm">
+                  See the order details for this payment
+                </p>
                 <div className="text-muted-foreground text-xs">
                   Order made on {formatDate(row.original.created_at)} at{" "}
                   {formatTime12Hour(row.original.created_at)}

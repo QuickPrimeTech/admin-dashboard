@@ -10,9 +10,10 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MenuIcon, LogOut } from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import { Suspense } from "react";
 import { SidebarMenuGroups } from "./sidebar-menu-items"; // ✅ single import
+import { SidebarLogout } from "./sidebar-logout";
 
 export function AppSidebar() {
   return (
@@ -47,9 +48,8 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Sign Out">
-              <LogOut />
-              <span>Sign Out</span>
+            <SidebarMenuButton tooltip="Sign Out" asChild>
+              <SidebarLogout />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -19,9 +19,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import React from "react";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export function AppBreadcrumb() {
   const pathname = usePathname();
+  const router = useRouter();
 
   // Split path into segments
   const segments = pathname.split("/").filter(Boolean);
@@ -77,15 +81,27 @@ export function AppBreadcrumb() {
     : breadcrumbs;
 
   return (
-    <Breadcrumb className="mb-6">
-      <BreadcrumbList>
-        {visibleBreadcrumbs.map((crumb, i) => (
-          <React.Fragment key={i}>
-            {crumb}
-            {i < visibleBreadcrumbs.length - 1 && <BreadcrumbSeparator />}
-          </React.Fragment>
-        ))}
-      </BreadcrumbList>
-    </Breadcrumb>
+    <div className="flex items-center gap-3 mb-6">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft />
+        <span>Back</span>
+      </Button>
+
+      <Breadcrumb>
+        <BreadcrumbList>
+          {visibleBreadcrumbs.map((crumb, i) => (
+            <React.Fragment key={i}>
+              {crumb}
+              {i < visibleBreadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </React.Fragment>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
   );
 }
