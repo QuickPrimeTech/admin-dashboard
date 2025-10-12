@@ -26,23 +26,23 @@ import {
 
 // Define all menu groups here in the client component
 const menuGroups = {
-  general: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard }],
+  general: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }],
   management: [
-    { title: "Menu Items", url: "/admin/menu", icon: Utensils },
-    { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
-    { title: "Reservations", url: "/admin/reservations", icon: Calendar },
-    { title: "Private Events", url: "/admin/events", icon: Users },
-    { title: "Gallery", url: "/admin/gallery", icon: Camera },
+    { title: "Menu Items", url: "/dashboard/menu", icon: Utensils },
+    { title: "Orders", url: "/dashboard/orders", icon: ShoppingBag },
+    { title: "Reservations", url: "/dashboard/reservations", icon: Calendar },
+    { title: "Private Events", url: "/dashboard/events", icon: Users },
+    { title: "Gallery", url: "/dashboard/gallery", icon: Camera },
   ],
   finance: [
-    { title: "Transactions", url: "/admin/transactions", icon: CreditCard },
+    { title: "Transactions", url: "/dashboard/transactions", icon: CreditCard },
   ],
   marketing: [
-    { title: "QR Code", url: "/admin/qrcode-generator", icon: QrCode },
-    { title: "FAQs", url: "/admin/faqs", icon: HelpCircle },
-    { title: "Follow Us", url: "/admin/follow-us", icon: Video },
+    { title: "QR Code", url: "/dashboard/qrcode-generator", icon: QrCode },
+    { title: "FAQs", url: "/dashboard/faqs", icon: HelpCircle },
+    { title: "Follow Us", url: "/dashboard/follow-us", icon: Video },
   ],
-  settings: [{ title: "Settings", url: "/admin/settings", icon: Settings }],
+  settings: [{ title: "Settings", url: "/dashboard/settings", icon: Settings }],
 };
 
 export function SidebarMenuGroups() {

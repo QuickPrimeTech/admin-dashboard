@@ -14,7 +14,7 @@ export default function TransactionsPage() {
           </p>
         </div>
         <Button className="flex items-center gap-2" asChild>
-          <Link href="/admin/transactions/analytics">
+          <Link href="dashboardtransactions/analytics">
             <BarChart />
             View Analytics
           </Link>

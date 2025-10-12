@@ -103,7 +103,7 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
         <HoverCard>
           <HoverCardTrigger asChild>
             <Link
-              href={`/admin/transactions/order/${row.original.order_id}`}
+              href={`/dashboard/transactions/order/${row.original.order_id}`}
               className="font-medium hover:underline"
             >
               {row.getValue("order_id")}
@@ -136,7 +136,7 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
           <HoverCard>
             <HoverCardTrigger asChild>
               <Link
-                href={`/admin/transactions/user/${row.original.phone}`}
+                href={`/dashboard/transactions/user/${row.original.phone}`}
                 className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
               >
                 {name}
@@ -261,7 +261,7 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link
-                  href={`/admin/transactions/order/${row.original.order_id}`}
+                  href={`/dashboard/transactions/order/${row.original.order_id}`}
                 >
                   <ShoppingBag />
                   View Order
@@ -269,7 +269,9 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
               </DropdownMenuItem>
               {!phone && (
                 <DropdownMenuItem asChild>
-                  <Link href={`/admin/transactions/user/${row.original.phone}`}>
+                  <Link
+                    href={`/dashboard/transactions/user/${row.original.phone}`}
+                  >
                     <User />
                     View customer
                   </Link>

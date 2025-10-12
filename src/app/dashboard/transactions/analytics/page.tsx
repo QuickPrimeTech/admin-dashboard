@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { OrdersSection } from "@/sections/transactions/analytics/orders-section"
 import { CustomersSection } from "@/sections/transactions/analytics/customers-section";
 import { TimePatterns } from "@/sections/transactions/analytics/time-patterns";
 import { PopularItems } from "@/sections/transactions/analytics/popular-items";
-
+import { ButtonGroup } from "@/components/ui/button-group";
 import { AnalyticsData } from "@/types/transactions/analytics";
 import { useTransformAnalytics } from "@/hooks/transactions/analytics/use-analytics";
 
@@ -44,12 +44,18 @@ export default function AnalyticsPage() {
             Actionable insights to help you improve performance and revenue
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href="/admin/transactions">
-            <ArrowLeft className="mr-2" />
-            Back to Transactions
-          </Link>
-        </Button>
+        <ButtonGroup aria-label="back to transaction and timeline button">
+          <Button variant="secondary" asChild>
+            <Link href="/dashboard/transactions">
+              <ArrowLeft />
+              Back to Transactions
+            </Link>
+          </Button>
+          <Button variant="outline">
+            Timeline
+            <ChevronDown />
+          </Button>
+        </ButtonGroup>
       </div>
 
       {/* Revenue Overview */}

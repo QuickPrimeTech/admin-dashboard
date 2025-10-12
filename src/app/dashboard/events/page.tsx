@@ -14,8 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Calendar, Users, Phone, Mail, Search } from "lucide-react";
 import { toast } from "sonner";
 import { ReservationStatus } from "@/types/mock-api";
-import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
-import { Events } from "@/components/admin/events-skeleton";
+import { ConfirmDeleteDialog } from "@/components/dashboard/confirm-delete-dialog";
+import { Events } from "@/components/dashboard/events-skeleton";
 import { supabase } from "@/lib/server/supabase";
 
 interface PrivateEvent {

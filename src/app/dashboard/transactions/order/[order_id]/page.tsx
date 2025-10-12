@@ -144,7 +144,7 @@ export default function Page(props: Props) {
             Please verify the order ID or contact our support team.
           </p>
           <Button asChild>
-            <Link href={"/admin/transactions"}>Go to Transactions</Link>
+            <Link href={"/dashboard/transactions"}>Go to Transactions</Link>
           </Button>
         </Card>
       </div>

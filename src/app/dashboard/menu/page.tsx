@@ -131,7 +131,7 @@ export default function MenuManagement() {
             Add Menu Item
           </Button>
           <Button variant={"secondary"} asChild>
-            <Link href="/admin/qrcode-generator">
+            <Link href="/dashboard/qrcode-generator">
               <QrCode className="size-4" />
               Get QR Code
             </Link>
