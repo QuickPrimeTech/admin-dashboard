@@ -148,7 +148,7 @@ export function RevenueSection({ data, isLoading }: RevenueSectionProps) {
                   {totals?.successRate.toFixed(1)}%
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Order completion rate
+                  Percentage of payment that are successful
                 </p>
               </>
             )}
