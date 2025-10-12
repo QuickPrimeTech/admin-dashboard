@@ -2,7 +2,7 @@ import { getAuthenticatedUser } from "@/helpers/common";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const { supabase, user } = await getAuthenticatedUser();
+  const { supabase } = await getAuthenticatedUser();
 
   try {
     // Fetch essential data only (raw payments + orders)
@@ -38,10 +38,10 @@ export async function GET() {
         orders,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Analytics fetch error:", err);
     return NextResponse.json(
-      { success: false, error: err.message },
+      { success: false, error: err ?? "An error occurred" },
       { status: 500 }
     );
   }

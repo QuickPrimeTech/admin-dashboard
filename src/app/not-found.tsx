@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowUpRightIcon, ChevronLeft, CircleX } from "lucide-react";
+import { ChevronLeft, CircleX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ export default function NotFound() {
           <EmptyMedia variant="icon">
             <CircleX className="text-destructive h-10 w-10" />
           </EmptyMedia>
-          <EmptyTitle>This page doesn't exist</EmptyTitle>
+          <EmptyTitle>This page doesn&apos;t exist</EmptyTitle>
           <EmptyDescription>
             You haven&apos;t created any projects yet. Get started by creating
             your first project.

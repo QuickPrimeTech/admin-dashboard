@@ -1,17 +1,17 @@
 import { AnalyticsData } from "@/types/transactions/analytics";
+import { RawAnalyticsResponse } from "@/types/transactions/analytics";
 
-export function useTransformAnalytics(raw: any): AnalyticsData {
+export function useTransformAnalytics(
+  raw: RawAnalyticsResponse
+): AnalyticsData {
   const { payments = [], orders = [] } = raw;
 
-  //calculating the total payments
   const totalPayments = payments.length;
 
-  //determining the success rates for the payments
-  const successPayments = payments.filter((p: any) => p.status === "success");
-  const failedPayments = payments.filter((p: any) => p.status === "failed");
-  const pendingPayments = payments.filter((p: any) => p.status === "pending");
+  const successPayments = payments.filter((p) => p.status === "success");
+  const failedPayments = payments.filter((p) => p.status === "failed");
+  const pendingPayments = payments.filter((p) => p.status === "pending");
 
-  //Calculating the rates of success, pending and failed
   const successRate = totalPayments
     ? (successPayments.length / totalPayments) * 100
     : 0;
@@ -22,51 +22,35 @@ export function useTransformAnalytics(raw: any): AnalyticsData {
     ? (pendingPayments.length / totalPayments) * 100
     : 0;
 
-  const totalRevenue = successPayments.reduce(
-    (sum: number, p: any) => sum + p.amount,
-    0
-  );
+  const totalRevenue = successPayments.reduce((sum, p) => sum + p.amount, 0);
 
   const totalOrders = orders.length;
-  const successfulOrders = orders.filter(
-    (o: any) => o.status === "success"
-  ).length;
-  const pendingOrders = orders.filter(
-    (o: any) => o.status === "pending"
-  ).length;
-  const failedOrders = orders.filter((o: any) => o.status === "failed").length;
+  const successfulOrders = orders.filter((o) => o.status === "success").length;
+  const pendingOrders = orders.filter((o) => o.status === "pending").length;
+  const failedOrders = orders.filter((o) => o.status === "failed").length;
 
-  //Calculating the avgOrderValue
-  const avgOrderValue = totalOrders ? totalRevenue / successfulOrders : 0;
+  const avgOrderValue = successfulOrders ? totalRevenue / successfulOrders : 0;
 
   const now = new Date();
-  const revenue24h = successPayments
-    .filter(
-      (p: any) =>
-        now.getTime() - new Date(p.created_at).getTime() <= 24 * 60 * 60 * 1000
-    )
-    .reduce((sum: number, p: any) => sum + p.amount, 0);
-  const revenue7d = successPayments
-    .filter(
-      (p: any) =>
-        now.getTime() - new Date(p.created_at).getTime() <=
-        7 * 24 * 60 * 60 * 1000
-    )
-    .reduce((sum: number, p: any) => sum + p.amount, 0);
-  const revenue30d = successPayments
-    .filter(
-      (p: any) =>
-        now.getTime() - new Date(p.created_at).getTime() <=
-        30 * 24 * 60 * 60 * 1000
-    )
-    .reduce((sum: number, p: any) => sum + p.amount, 0);
+  const getRevenueWithin = (days: number) =>
+    successPayments
+      .filter(
+        (p) =>
+          now.getTime() - new Date(p.created_at).getTime() <=
+          days * 24 * 60 * 60 * 1000
+      )
+      .reduce((sum, p) => sum + p.amount, 0);
+
+  const revenue24h = getRevenueWithin(1);
+  const revenue7d = getRevenueWithin(7);
+  const revenue30d = getRevenueWithin(30);
 
   // Trends
   const revenueByDay: Array<{ date: string; revenue: number; orders: number }> =
     [];
   const groupedByDate: Record<string, { revenue: number; orders: number }> = {};
 
-  successPayments.forEach((p: any) => {
+  successPayments.forEach((p) => {
     const date = new Date(p.created_at).toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
@@ -84,18 +68,19 @@ export function useTransformAnalytics(raw: any): AnalyticsData {
   const hourlyOrders: Array<{ hour: string; orders: number }> = [];
   const hourlyStats: Record<string, number> = {};
 
-  orders.forEach((o: any) => {
+  orders.forEach((o) => {
     const hour = new Date(o.created_at).getHours();
     hourlyStats[hour] = (hourlyStats[hour] || 0) + 1;
   });
+
   for (const [hour, count] of Object.entries(hourlyStats)) {
     hourlyOrders.push({ hour: `${hour}:00`, orders: count });
   }
 
   // Popular items
   const itemStats: Record<string, { quantity: number; revenue: number }> = {};
-  orders.forEach((o: any) => {
-    o.items.forEach((item: any) => {
+  orders.forEach((o) => {
+    o.items.forEach((item) => {
       if (!itemStats[item.name])
         itemStats[item.name] = { quantity: 0, revenue: 0 };
       itemStats[item.name].quantity += item.quantity;
@@ -110,7 +95,7 @@ export function useTransformAnalytics(raw: any): AnalyticsData {
 
   // Orders by status
   const ordersByStatus = ["pending", "completed", "cancelled"].map((status) => {
-    const count = orders.filter((o: any) => o.status === status).length;
+    const count = orders.filter((o) => o.status === status).length;
     const percentage = totalOrders ? (count / totalOrders) * 100 : 0;
     return { status, count, percentage };
   });
@@ -118,7 +103,7 @@ export function useTransformAnalytics(raw: any): AnalyticsData {
   // Payment methods
   const paymentMethodsMap: Record<string, { count: number; revenue: number }> =
     {};
-  orders.forEach((o: any) => {
+  orders.forEach((o) => {
     const method = o.payment_method || "unknown";
     if (!paymentMethodsMap[method])
       paymentMethodsMap[method] = { count: 0, revenue: 0 };
@@ -138,7 +123,7 @@ export function useTransformAnalytics(raw: any): AnalyticsData {
     string,
     { name: string; phone: string; orders: number; revenue: number }
   > = {};
-  orders.forEach((o: any) => {
+  orders.forEach((o) => {
     const key = o.phone || o.user_id;
     if (!customersMap[key])
       customersMap[key] = {
@@ -176,7 +161,7 @@ export function useTransformAnalytics(raw: any): AnalyticsData {
       trends: {
         revenueByDay,
         hourlyOrders,
-        pickupTimes: [], // optional if you later add this logic
+        pickupTimes: [],
       },
       items: {
         popularItems,

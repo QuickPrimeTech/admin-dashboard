@@ -44,3 +44,41 @@ export type AnalyticsData = {
     };
   };
 };
+
+export type Payment = {
+  id: string;
+  amount: number;
+  status: "success" | "failed" | "pending";
+  created_at: string;
+  phone: string;
+  user_id: string;
+  order_id: string;
+};
+
+export type OrderItem = {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  quantity: number;
+  description: string;
+  image?: string;
+};
+
+export type Order = {
+  id: string;
+  items: OrderItem[];
+  total: number;
+  status: "success" | "pending" | "failed" | "completed" | "cancelled";
+  payment_method?: string;
+  pickup_time?: string;
+  created_at: string;
+  user_id: string;
+  name: string;
+  phone: string;
+};
+
+export type RawAnalyticsResponse = {
+  payments?: Payment[];
+  orders?: Order[];
+};

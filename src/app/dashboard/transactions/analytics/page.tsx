@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ArrowLeft, ChevronDown } from "lucide-react";
-import { useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,10 +12,10 @@ import { CustomersSection } from "@/sections/transactions/analytics/customers-se
 import { TimePatterns } from "@/sections/transactions/analytics/time-patterns";
 import { PopularItems } from "@/sections/transactions/analytics/popular-items";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { AnalyticsData } from "@/types/transactions/analytics";
 import { useTransformAnalytics } from "@/hooks/transactions/analytics/use-analytics";
 
 export default function AnalyticsPage() {
+  // 1️⃣ Fetch raw data
   const { data: rawData, isLoading } = useQuery({
     queryKey: ["analytics-raw"],
     queryFn: async () => {
@@ -26,16 +25,14 @@ export default function AnalyticsPage() {
     },
   });
 
-  // Transform raw payments + orders into full analytics structure
-  const analyticsData: AnalyticsData | null = useMemo(() => {
-    if (!rawData?.data) return null;
-    return useTransformAnalytics(rawData.data);
-  }, [rawData]);
+  // 2️⃣ Call the transform hook at the top level (React is happy now)
+  const analyticsData = useTransformAnalytics(rawData?.data ?? null);
 
+  // 3️⃣ Render UI
   return (
     <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-2 md:justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Restaurant Analytics
