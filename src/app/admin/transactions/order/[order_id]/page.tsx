@@ -139,7 +139,7 @@ export default function Page(props: Props) {
           <XCircle className="size-16 text-destructive mx-auto mb-6" />
           <h1 className="text-3xl font-bold mb-3">Order Not Found</h1>
           <p className="text-muted-foreground leading-relaxed">
-            We couldn't locate order{" "}
+            We couldn&apos;t locate order{" "}
             <span className="font-semibold text-foreground">#{order_id}</span>.
             Please verify the order ID or contact our support team.
           </p>
@@ -171,7 +171,7 @@ export default function Page(props: Props) {
                   <p className="text-muted-foreground text-lg">
                     Order ID:{" "}
                     <span className="font-semibold text-foreground">
-                      #{order?.id}
+                      {order?.id}
                     </span>
                   </p>
                 </>
@@ -290,7 +290,7 @@ export default function Page(props: Props) {
                         Special Instructions
                       </p>
                       <p className="text-muted-foreground italic leading-relaxed">
-                        "{order.special_instructions}"
+                        &quot;{order.special_instructions}&quot;
                       </p>
                     </div>
                   </>

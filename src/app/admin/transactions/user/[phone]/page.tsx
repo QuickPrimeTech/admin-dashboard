@@ -1,7 +1,7 @@
 import { TransactionsTable } from "@/sections/transactions/transactions-table";
 
 type Props = {
-  params: { phone: string };
+  params: Promise<{ phone: string }>;
 };
 
 export default async function UserTransactionsPage({ params }: Props) {

@@ -11,7 +11,6 @@ import {
   Utensils,
   QrCode,
   ShoppingBag,
-  DollarSign,
   CreditCard,
 } from "lucide-react";
 import Link from "next/link";

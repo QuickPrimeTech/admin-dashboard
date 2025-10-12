@@ -43,6 +43,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { formatDate, formatTime12Hour } from "@/utils/date-formatters";
 
 export type Payment = {
   id: string;
@@ -94,24 +100,79 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
       accessorKey: "order_id",
       header: "Order ID",
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("order_id")}</div>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <Link
+              href={`/admin/transactions/order/${row.original.order_id}`}
+              className="font-medium hover:underline"
+            >
+              {row.getValue("order_id")}
+            </Link>
+          </HoverCardTrigger>
+          <HoverCardContent>
+            <div className="flex justify-between gap-4">
+              <span className="p-2 bg-accent rounded-full h-fit">
+                <ShoppingBag className="size-6" />
+              </span>
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold">Order</h4>
+                <p className="text-sm">See the order for this payment</p>
+                <div className="text-muted-foreground text-xs">
+                  Order made on {formatDate(row.original.created_at)} at{" "}
+                  {formatTime12Hour(row.original.created_at)}
+                </div>
+              </div>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
       ),
     },
-
     {
       accessorKey: "order.name",
       header: "Customer",
-      cell: ({ row }) => (
-        <div className="font-medium">{row.original.order?.name || "—"}</div>
-      ),
+      cell: ({ row }) => {
+        const name = row.original.order?.name;
+        return !phone ? (
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <Link
+                href={`/admin/transactions/user/${row.original.phone}`}
+                className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {name}
+              </Link>
+            </HoverCardTrigger>
+            <HoverCardContent>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="p-2 bg-accent rounded-full h-fit">
+                    <User className="size-4" />
+                  </span>
+                  <h4 className="text-sm font-semibold">Customer</h4>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm">See the payments made by {name}</p>
+                  <div className="text-muted-foreground text-xs">
+                    Payment made on {formatDate(row.original.created_at)} at{" "}
+                    {formatTime12Hour(row.original.created_at)}
+                  </div>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        ) : (
+          <div className="font-mono text-sm">{name}</div>
+        );
+      },
     },
     {
       accessorKey: "phone",
       header: "Phone",
       cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("phone")}</div>
+        <div className="font-mono text-sm">{row.getValue("phone")}</div>
       ),
     },
+
     {
       accessorKey: "amount",
       header: ({ column }) => (
@@ -162,23 +223,16 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
       accessorKey: "created_at",
       header: "Date",
       cell: ({ row }) => {
-        const date = new Date(row.getValue("created_at"));
-        return <div className="text-sm">{date.toLocaleDateString()}</div>;
+        const formattedDate = formatDate(row.getValue("created_at"));
+        return <div className="text-sm">{formattedDate}</div>;
       },
     },
     {
       id: "time",
       header: "Time",
       cell: ({ row }) => {
-        const date = new Date(row.getValue("created_at"));
-        return (
-          <div className="text-sm">
-            {date.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
-        );
+        const time = formatTime12Hour(row.getValue("created_at"));
+        return <div className="text-sm">{time}</div>;
       },
     },
     {
@@ -213,12 +267,14 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
                   View Order
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/admin/transactions/user/${row.original.phone}`}>
-                  <User />
-                  View customer
-                </Link>
-              </DropdownMenuItem>
+              {!phone && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/admin/transactions/user/${row.original.phone}`}>
+                    <User />
+                    View customer
+                  </Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         ),
@@ -252,9 +308,13 @@ export function TransactionsTable({ phone }: TransactionsTableProps) {
           }
           className="max-w-sm"
         />
-        <div className="ml-auto text-sm text-muted-foreground">
-          {payments.length} transaction(s) total
-        </div>
+        {isLoading ? (
+          <Skeleton className="ml-auto w-20 h-6" />
+        ) : (
+          <div className="ml-auto text-sm text-muted-foreground">
+            {payments.length} transaction(s) total
+          </div>
+        )}
       </div>
 
       {/* Table */}
