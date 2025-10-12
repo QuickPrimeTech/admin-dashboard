@@ -1,62 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MenuIcon, Calendar, Camera, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function StatsOverview() {
-  const [loading, setLoading] = useState(true);
-  const [statsData, setStatsData] = useState({
-    menu: 0,
-    reservations: 0,
-    events: 0,
-    gallery: 0,
+  const fetchStats = async () => {
+    const res = await fetch("/api/dashboard");
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || "Failed to fetch stats");
+    }
+
+    return json.data;
+  };
+
+  const { data: statsData, isLoading } = useQuery<
+    {
+      menu: number;
+      gallery: number;
+      reservations: number;
+      events: number;
+    },
+    Error
+  >({
+    queryKey: ["overview-stats"],
+    queryFn: fetchStats,
+    // onError: () => toast.error("Something went wrong while getting the stats")
   });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/dashboard");
-        const json = await res.json();
-        if (!res.ok || !json.success) {
-          throw new Error(json.message || "Failed to fetch stats");
-        }
-        setStatsData(json.data);
-      } catch (err) {
-        toast.error("Failed to load stats");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
 
   const stats = [
     {
       title: "Menu Items",
-      value: statsData.menu,
+      value: statsData?.menu ?? 0,
       description: "Active menu items",
       icon: MenuIcon,
     },
     {
       title: "Reservations",
-      value: statsData.reservations,
+      value: statsData?.reservations ?? 0,
       description: "Pending reservations",
       icon: Calendar,
     },
     {
       title: "Private Events",
-      value: statsData.events,
+      value: statsData?.events ?? 0,
       description: "Requests for private events",
       icon: Users,
     },
     {
       title: "Gallery Photos",
-      value: statsData.gallery,
+      value: statsData?.gallery ?? 0,
       description: "Total uploaded photos",
       icon: Camera,
     },
@@ -72,7 +69,7 @@ export function StatsOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? (
+              {isLoading ? (
                 <Skeleton className="h-8 w-20 rounded-md" />
               ) : (
                 stat.value
