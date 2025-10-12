@@ -1,16 +1,34 @@
-import { AnalyticsData } from "@/types/transactions/analytics";
-import { RawAnalyticsResponse } from "@/types/transactions/analytics";
+// utils/transactions/analytics/use-analytics.ts
+import {
+  AnalyticsData,
+  RawAnalyticsResponse,
+} from "@/types/transactions/analytics";
 
-export function useTransformAnalytics(
-  raw: RawAnalyticsResponse
+export function transformAnalytics(
+  raw: RawAnalyticsResponse,
+  days: number
 ): AnalyticsData {
   const { payments = [], orders = [] } = raw;
+  const now = new Date();
 
-  const totalPayments = payments.length;
+  // Filter data within the given day range
+  const isWithinDays = (dateStr: string) => {
+    const diff = now.getTime() - new Date(dateStr).getTime();
+    return diff <= days * 24 * 60 * 60 * 1000;
+  };
 
-  const successPayments = payments.filter((p) => p.status === "success");
-  const failedPayments = payments.filter((p) => p.status === "failed");
-  const pendingPayments = payments.filter((p) => p.status === "pending");
+  const filteredPayments = payments.filter((p) => isWithinDays(p.created_at));
+  const filteredOrders = orders.filter((o) => isWithinDays(o.created_at));
+
+  const totalPayments = filteredPayments.length;
+
+  const successPayments = filteredPayments.filter(
+    (p) => p.status === "success"
+  );
+  const failedPayments = filteredPayments.filter((p) => p.status === "failed");
+  const pendingPayments = filteredPayments.filter(
+    (p) => p.status === "pending"
+  );
 
   const successRate = totalPayments
     ? (successPayments.length / totalPayments) * 100
@@ -24,20 +42,26 @@ export function useTransformAnalytics(
 
   const totalRevenue = successPayments.reduce((sum, p) => sum + p.amount, 0);
 
-  const totalOrders = orders.length;
-  const successfulOrders = orders.filter((o) => o.status === "success").length;
-  const pendingOrders = orders.filter((o) => o.status === "pending").length;
-  const failedOrders = orders.filter((o) => o.status === "failed").length;
+  const totalOrders = filteredOrders.length;
+  const successfulOrders = filteredOrders.filter(
+    (o) => o.status === "success"
+  ).length;
+  const pendingOrders = filteredOrders.filter(
+    (o) => o.status === "pending"
+  ).length;
+  const failedOrders = filteredOrders.filter(
+    (o) => o.status === "failed"
+  ).length;
 
   const avgOrderValue = successfulOrders ? totalRevenue / successfulOrders : 0;
 
-  const now = new Date();
-  const getRevenueWithin = (days: number) =>
+  // Revenue breakdowns
+  const getRevenueWithin = (d: number) =>
     successPayments
       .filter(
         (p) =>
           now.getTime() - new Date(p.created_at).getTime() <=
-          days * 24 * 60 * 60 * 1000
+          d * 24 * 60 * 60 * 1000
       )
       .reduce((sum, p) => sum + p.amount, 0);
 
@@ -45,11 +69,8 @@ export function useTransformAnalytics(
   const revenue7d = getRevenueWithin(7);
   const revenue30d = getRevenueWithin(30);
 
-  // Trends
-  const revenueByDay: Array<{ date: string; revenue: number; orders: number }> =
-    [];
+  // Revenue trends by day
   const groupedByDate: Record<string, { revenue: number; orders: number }> = {};
-
   successPayments.forEach((p) => {
     const date = new Date(p.created_at).toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -60,26 +81,26 @@ export function useTransformAnalytics(
     groupedByDate[date].orders += 1;
   });
 
-  for (const [date, stats] of Object.entries(groupedByDate)) {
-    revenueByDay.push({ date, ...stats });
-  }
+  const revenueByDay = Object.entries(groupedByDate).map(([date, stats]) => ({
+    date,
+    ...stats,
+  }));
 
-  // Hourly orders
-  const hourlyOrders: Array<{ hour: string; orders: number }> = [];
+  // Hourly order stats
   const hourlyStats: Record<string, number> = {};
-
-  orders.forEach((o) => {
+  filteredOrders.forEach((o) => {
     const hour = new Date(o.created_at).getHours();
     hourlyStats[hour] = (hourlyStats[hour] || 0) + 1;
   });
 
-  for (const [hour, count] of Object.entries(hourlyStats)) {
-    hourlyOrders.push({ hour: `${hour}:00`, orders: count });
-  }
+  const hourlyOrders = Object.entries(hourlyStats).map(([hour, count]) => ({
+    hour: `${hour}:00`,
+    orders: count,
+  }));
 
   // Popular items
   const itemStats: Record<string, { quantity: number; revenue: number }> = {};
-  orders.forEach((o) => {
+  filteredOrders.forEach((o) => {
     o.items.forEach((item) => {
       if (!itemStats[item.name])
         itemStats[item.name] = { quantity: 0, revenue: 0 };
@@ -95,7 +116,7 @@ export function useTransformAnalytics(
 
   // Orders by status
   const ordersByStatus = ["pending", "completed", "cancelled"].map((status) => {
-    const count = orders.filter((o) => o.status === status).length;
+    const count = filteredOrders.filter((o) => o.status === status).length;
     const percentage = totalOrders ? (count / totalOrders) * 100 : 0;
     return { status, count, percentage };
   });
@@ -103,7 +124,7 @@ export function useTransformAnalytics(
   // Payment methods
   const paymentMethodsMap: Record<string, { count: number; revenue: number }> =
     {};
-  orders.forEach((o) => {
+  filteredOrders.forEach((o) => {
     const method = o.payment_method || "unknown";
     if (!paymentMethodsMap[method])
       paymentMethodsMap[method] = { count: 0, revenue: 0 };
@@ -123,7 +144,7 @@ export function useTransformAnalytics(
     string,
     { name: string; phone: string; orders: number; revenue: number }
   > = {};
-  orders.forEach((o) => {
+  filteredOrders.forEach((o) => {
     const key = o.phone || o.user_id;
     if (!customersMap[key])
       customersMap[key] = {
@@ -158,23 +179,11 @@ export function useTransformAnalytics(
         pendingOrders,
         failedOrders,
       },
-      trends: {
-        revenueByDay,
-        hourlyOrders,
-        pickupTimes: [],
-      },
-      items: {
-        popularItems,
-      },
-      orders: {
-        ordersByStatus,
-      },
-      payments: {
-        paymentMethods,
-      },
-      customers: {
-        topCustomers,
-      },
+      trends: { revenueByDay, hourlyOrders, pickupTimes: [] },
+      items: { popularItems },
+      orders: { ordersByStatus },
+      payments: { paymentMethods },
+      customers: { topCustomers },
     },
   };
 }

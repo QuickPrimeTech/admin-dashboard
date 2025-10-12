@@ -3,19 +3,27 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ArrowLeft, ChevronDown } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RevenueSection } from "@/sections/transactions/analytics/revenue-section";
-import { OrdersSection } from "@/sections/transactions/analytics/orders-section";
 import { CustomersSection } from "@/sections/transactions/analytics/customers-section";
 import { TimePatterns } from "@/sections/transactions/analytics/time-patterns";
 import { PopularItems } from "@/sections/transactions/analytics/popular-items";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { useTransformAnalytics } from "@/hooks/transactions/analytics/use-analytics";
+import { AnalyticsData } from "@/types/transactions/analytics";
+import { transformAnalytics } from "@/utils/transactions/analytics/use-analytics";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function AnalyticsPage() {
-  // 1️⃣ Fetch raw data
+  const [days, setDays] = useState(3); // default: 3 days
+
   const { data: rawData, isLoading } = useQuery({
     queryKey: ["analytics-raw"],
     queryFn: async () => {
@@ -23,12 +31,14 @@ export default function AnalyticsPage() {
       if (!res.ok) throw new Error("Failed to fetch analytics");
       return res.json();
     },
+    refetchOnWindowFocus: false,
   });
 
-  // 2️⃣ Call the transform hook at the top level (React is happy now)
-  const analyticsData = useTransformAnalytics(rawData?.data ?? null);
+  const analyticsData: AnalyticsData | null = useMemo(() => {
+    if (!rawData?.data) return null;
+    return transformAnalytics(rawData.data, days);
+  }, [rawData, days]);
 
-  // 3️⃣ Render UI
   return (
     <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
@@ -38,9 +48,10 @@ export default function AnalyticsPage() {
             Restaurant Analytics
           </h1>
           <p className="text-muted-foreground mt-1">
-            Actionable insights to help you improve performance and revenue
+            Insights filtered by the last {days} day{days > 1 && "s"}.
           </p>
         </div>
+
         <ButtonGroup aria-label="back to transaction and timeline button">
           <Button variant="secondary" asChild>
             <Link href="/dashboard/transactions">
@@ -48,10 +59,22 @@ export default function AnalyticsPage() {
               Back to Transactions
             </Link>
           </Button>
-          <Button variant="outline">
-            Timeline
-            <ChevronDown />
-          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Last ({days}days)
+                <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {[3, 7, 14, 30].map((d) => (
+                <DropdownMenuItem key={d} onClick={() => setDays(d)}>
+                  Last {d} days
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </ButtonGroup>
       </div>
 
@@ -59,17 +82,12 @@ export default function AnalyticsPage() {
       <RevenueSection data={analyticsData?.data} isLoading={isLoading} />
 
       {/* Tabs */}
-      <Tabs defaultValue="orders" className="space-y-6">
+      <Tabs defaultValue="items" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="items">Popular Items</TabsTrigger>
           <TabsTrigger value="time">Time Patterns</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="orders">
-          <OrdersSection data={analyticsData?.data} isLoading={isLoading} />
-        </TabsContent>
 
         <TabsContent value="items">
           <PopularItems data={analyticsData?.data} isLoading={isLoading} />
