@@ -1,97 +1,74 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus, QrCode } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
+
 import { MenuItemDialog } from "@/sections/menu/menu-item-dialog";
 import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
-import { toast } from "sonner";
 import { MenuItem } from "@/types/menu";
-import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
-import Link from "next/link";
 import { MenuFiltersSkeleton } from "@/components/skeletons/menu-filter-skeleton";
+import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
+
+async function fetchMenuItems() {
+  const res = await fetch("/api/menu-items", { method: "GET" });
+  if (!res.ok) throw new Error("Failed to fetch menu items");
+  const result = await res.json();
+
+  if (!result.success) throw new Error(result.message || "Server error");
+  return result.data as MenuItem[];
+}
 
 export default function MenuManagement() {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<string[]>(["all"]);
 
-  const filterItems = useCallback(() => {
-    let filtered = menuItems;
+  // 🚀 useQuery handles loading + error + caching
+  const {
+    data: menuItems = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["menu-items"],
+    queryFn: fetchMenuItems,
+    staleTime: 1000 * 60, // 1 minute caching
+  });
 
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  // Extract categories dynamically
+  const categories = useMemo(() => {
+    const unique = Array.from(new Set(menuItems.map((i) => i.category)));
+    return ["all", ...unique];
+  }, [menuItems]);
 
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.category === selectedCategory);
-    }
+  // Filter logic
+  const filteredItems = useMemo(() => {
+    return menuItems.filter((item) => {
+      const matchesSearch =
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    setFilteredItems(filtered);
+      const matchesCategory =
+        selectedCategory === "all" || item.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
   }, [menuItems, searchTerm, selectedCategory]);
 
-  useEffect(() => {
-    fetchMenuItems();
-  }, []);
-
-  useEffect(() => {
-    filterItems();
-  }, [filterItems]);
-
-  const fetchMenuItems = async () => {
-    try {
-      const res = await fetch("/api/menu-items", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        const items = result.data as MenuItem[];
-        setMenuItems(items);
-
-        // Extract unique categories
-        const uniqueCategories = Array.from(
-          new Set(items.map((item) => item.category))
-        );
-        setCategories(["all", ...uniqueCategories]);
-      } else {
-        toast.error("Server error: " + result.message);
-      }
-    } catch {
-      toast.error("Failed to fetch menu items");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // CRUD Handlers
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`/api/menu-items?id=${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/menu-items?id=${id}`, { method: "DELETE" });
+      const result = await res.json();
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Unknown error");
-      }
-
-      setMenuItems((prev) => prev.filter((item) => item.id !== id));
+      if (!res.ok) throw new Error(result.message || "Failed to delete");
       toast.success("Menu item deleted successfully");
+      refetch(); // ✅ Re-fetch updated data
     } catch {
       toast.error("Failed to delete menu item");
     }
@@ -112,12 +89,13 @@ export default function MenuManagement() {
   };
 
   const handleItemSaved = () => {
-    fetchMenuItems();
+    refetch(); // ✅ Refresh data on save
     handleDialogClose();
   };
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col gap-4 items-start lg:flex-row justify-between lg:items-center">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Menu Management</h1>
@@ -130,8 +108,8 @@ export default function MenuManagement() {
             <Plus className="size-4" />
             Add Menu Item
           </Button>
-          <Button variant={"secondary"} asChild>
-            <Link href="/admin/qrcode-generator">
+          <Button variant="secondary" asChild>
+            <Link href="/dashboard/qrcode-generator">
               <QrCode className="size-4" />
               Get QR Code
             </Link>
@@ -139,7 +117,8 @@ export default function MenuManagement() {
         </div>
       </div>
 
-      {loading ? (
+      {/* Filters */}
+      {isLoading ? (
         <MenuFiltersSkeleton />
       ) : (
         <MenuFilters
@@ -151,7 +130,8 @@ export default function MenuManagement() {
         />
       )}
 
-      {loading ? (
+      {/* Menu Grid */}
+      {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <MenuItemSkeleton key={i} />
@@ -166,12 +146,13 @@ export default function MenuManagement() {
         />
       )}
 
+      {/* Dialog */}
       <MenuItemDialog
         open={isDialogOpen}
         onOpenChange={handleDialogClose}
         item={editingItem}
         onSaved={handleItemSaved}
-        categories={categories} // 👈 pass categories here
+        categories={categories}
       />
     </div>
   );

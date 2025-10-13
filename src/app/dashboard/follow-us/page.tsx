@@ -20,7 +20,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { SocialMediaDialog } from "@/components/admin/social-media-dialog";
+import { SocialMediaDialog } from "@/components/dashboard/social-media-dialog";
 import { toast } from "sonner";
 import { mockAPI } from "@/lib/mock-api";
 import Image from "next/image";

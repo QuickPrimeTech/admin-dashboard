@@ -25,7 +25,7 @@ export default async function ConfirmSignupPage() {
               dashboard to continue managing your restaurant.
             </p>
             <Link
-              href="/admin"
+              href="/dashboard"
               className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition"
             >
               Go to Dashboard

@@ -3,9 +3,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -13,9 +10,10 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MenuIcon, LogOut } from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import { Suspense } from "react";
-import { SidebarItems } from "./sidebar-menu-items";
+import { SidebarMenuGroups } from "./sidebar-menu-items"; // ✅ single import
+import { SidebarLogout } from "./sidebar-logout";
 
 export function AppSidebar() {
   return (
@@ -43,26 +41,20 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarItems />
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* ✅ All menu groups rendered from client component */}
+        <SidebarMenuGroups />
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Sign Out">
-              <LogOut />
-              <span>Sign Out</span>
+            <SidebarMenuButton tooltip="Sign Out" asChild>
+              <SidebarLogout />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );

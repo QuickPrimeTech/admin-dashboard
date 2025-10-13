@@ -18,31 +18,31 @@ import { cn } from "@/lib/utils"; // Optional helper for className composition
 const actions = [
   {
     name: "View today's reservations",
-    link: "/admin/reservations",
+    link: "/dashboard/reservations",
     icon: Calendar,
     color: "text-blue-500",
   },
   {
     name: "View private events inquiry",
-    link: "/admin/events",
+    link: "/dashboard/events",
     icon: UsersRound,
     color: "text-yellow-500",
   },
   {
     name: "Add new menu item",
-    link: "/admin/menu",
+    link: "/dashboard/menu",
     icon: Utensils,
     color: "text-red-500",
   },
   {
     name: "Upload gallery photos",
-    link: "/admin/gallery",
+    link: "/dashboard/gallery",
     icon: ImagePlus,
     color: "text-purple-500",
   },
   {
     name: "Update FAQ section",
-    link: "/admin/faqs",
+    link: "/dashboard/faqs",
     icon: HelpCircle,
     color: "text-emerald-500",
   },

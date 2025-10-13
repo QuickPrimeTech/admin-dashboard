@@ -23,7 +23,7 @@ export async function login(formData: FormData) {
     };
   }
 
-  redirect("/admin");
+  redirect("/dashboard");
 }
 
 export async function signup({
