@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronLeft, CircleX } from "lucide-react";
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -12,10 +12,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import Link from "next/link";
 
 export default function NotFound() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isOldAdminPath = pathname === "/admin";
 
   return (
     <div className="h-[100vh] flex justify-center items-center px-4">
@@ -24,22 +26,32 @@ export default function NotFound() {
           <EmptyMedia variant="icon">
             <CircleX className="text-destructive h-10 w-10" />
           </EmptyMedia>
-          <EmptyTitle>This page doesn&apos;t exist</EmptyTitle>
+          <EmptyTitle>Page not found</EmptyTitle>
           <EmptyDescription>
-            You haven&apos;t created any projects yet. Get started by creating
-            your first project.
+            {isOldAdminPath ? (
+              <>
+                We recently moved the admin dashboard from <code>/admin</code>{" "}
+                to <code>/dashboard</code>. You can access all your tools and
+                data there.
+              </>
+            ) : (
+              <>
+                The page you&apos;re looking for might have been moved, renamed,
+                or never existed. Try going back or head to your dashboard.
+              </>
+            )}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
             <Button asChild>
               <Link href="/dashboard">
-                <ChevronLeft className="mr-1 h-4 w-4" />
-                Dashboard
+                <ChevronLeft />
+                Go to Dashboard
               </Link>
             </Button>
             <Button variant="outline" onClick={() => router.back()}>
-              Back
+              Go Back
             </Button>
           </div>
         </EmptyContent>
