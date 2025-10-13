@@ -69,7 +69,7 @@ export default function OrdersPage() {
   const filteredToday = sorted(filterOrders(todayOrders));
 
   // Pagination setup
-  const itemsPerPage = 10;
+  const itemsPerPage = 25;
 
   const getPaginatedData = (list: Order[]) => {
     const start = (currentPage - 1) * itemsPerPage;
