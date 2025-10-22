@@ -37,7 +37,7 @@ export default function MenuManagement() {
   } = useQuery({
     queryKey: ["menu-items"],
     queryFn: fetchMenuItems,
-    staleTime: 1000 * 60, // 1 minute caching
+    staleTime: 1000 * 60 * 5, // 1 minute caching
   });
 
   // Extract categories dynamically
