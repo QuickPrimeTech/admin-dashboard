@@ -16,7 +16,7 @@ interface ChoicesListProps {
   onRemoveChoice: (id: string) => void;
 }
 
-export default function ChoicesList({
+export function ChoicesList({
   choices,
   onUpdateChoice,
   onRemoveChoice,

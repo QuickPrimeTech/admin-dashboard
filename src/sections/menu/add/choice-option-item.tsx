@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@ui/button";
+import { Button } from "@/components/ui/button";
 import { Edit2, Trash2, X, Check } from "lucide-react";
-import { Input } from "@ui/input";
+import { Input } from "@/components/ui/input";
 import type { ChoiceOptionFormData } from "@/schemas/menu";
 
 interface OptionItemProps {
@@ -43,7 +43,7 @@ export default function OptionItem({
 
   if (isEditMode) {
     return (
-      <div className="flex gap-2 items-end bg-card p-3 rounded-lg border border-border">
+      <div className="flex gap-2 items-end bg-card p-3 rounded-lg border border-secondary">
         <div className="flex-1">
           <label className="block text-xs font-medium mb-1">Option Name</label>
           <Input
@@ -54,9 +54,7 @@ export default function OptionItem({
           />
         </div>
         <div className="w-24">
-          <label className="block text-xs font-medium text-muted-foreground mb-1">
-            Price
-          </label>
+          <label className="block text-xs font-medium mb-1">Price</label>
           <Input
             type="number"
             step="0.01"
@@ -90,9 +88,9 @@ export default function OptionItem({
   }
 
   return (
-    <div className="flex items-center justify-between bg-card p-3 rounded-lg border border-border">
+    <div className="flex items-center justify-between bg-card p-3 rounded-lg border border-secondary">
       <div className="flex-1">
-        <p className="font-medium ">{option.label}</p>
+        <p className="font-medium">{option.label}</p>
         {option.price && option.price > 0 && (
           <p className="text-sm text-muted-foreground">
             +${option.price.toFixed(2)}
