@@ -1,15 +1,38 @@
-export type MenuItem = {
+// export type MenuItem = {
+//   id: string;
+//   name: string;
+//   description: string;
+//   price: number;
+//   category: string;
+//   dietary_preference: string[];
+//   image_url?: string;
+//   is_available: boolean;
+//   user_id: string;
+//   public_id?: string; // Add this line
+// };
+
+export interface ChoiceOption {
+  label: string;
+  price?: number;
+}
+
+export interface Choice {
+  id?: string;
+  title: string;
+  required?: boolean;
+  maxSelectable?: number;
+  options: ChoiceOption[];
+}
+
+export interface MenuItem {
   id: string;
   name: string;
-  description: string;
   price: number;
+  description: string;
   category: string;
-  dietary_preference: string[];
-  image_url?: string;
-  is_available: boolean;
-  user_id: string;
-  public_id?: string; // Add this line
-};
+  image?: string;
+  choices: Choice[];
+}
 
 export interface MenuItemForm {
   item?: MenuItem | null;
