@@ -6,6 +6,32 @@ export const choiceOptionSchema = z.object({
   price: z.number().optional(),
 });
 
+export const imageSchema = z
+  .object({
+    image: z
+      .instanceof(File)
+      .refine((file) => file.type.startsWith("image/"), {
+        message: "File must be an image",
+      })
+      .optional()
+      .or(z.literal(null)),
+  })
+  .optional();
+
+// ✅ Define schema only for availability
+export const availabilitySchema = z.object({
+  is_available: z.boolean().default(true),
+  start_time: z
+    .string()
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format")
+    .default("08:00"),
+  end_time: z
+    .string()
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format")
+    .default("22:00"),
+});
+
+export type AvailabilityFormData = z.infer<typeof availabilitySchema>;
 // Choice schema
 export const choiceSchema = z.object({
   id: z.string().optional(),
@@ -33,8 +59,20 @@ export const menuItemSchema = z.object({
     .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
   choices: z.array(choiceSchema).optional(),
 });
+// ✅ Validation schema only for this section
+export const basicInfoSchema = z.object({
+  name: z.string().min(1, "Item name is required"),
+  price: z
+    .number({ invalid_type_error: "Price must be a number" })
+    .positive("Price must be greater than 0"),
+  category: z.string().min(1, "Category is required"),
+  description: z.string().min(1, "Description is required"),
+});
+
+export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
 
 // Type exports
 export type ChoiceOptionFormData = z.infer<typeof choiceOptionSchema>;
 export type ChoiceFormData = z.infer<typeof choiceSchema>;
 export type MenuItemFormData = z.infer<typeof menuItemSchema>;
+export type ImageFormData = z.infer<typeof imageSchema>;

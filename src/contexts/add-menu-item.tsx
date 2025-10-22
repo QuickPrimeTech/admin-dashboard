@@ -1,11 +1,12 @@
 // src/context/menu-item-form-context.tsx
 "use client";
 
+import { BasicInfoFormData } from "@/schemas/menu";
 import React, { createContext, useContext, useState } from "react";
-import type { MenuItemFormData } from "@/schemas/menu";
 
 interface MenuItemFormContextType {
-  formData: Partial<MenuItemFormData>;
+  setSelectedImage: (file: File | null) => void;
+  setBasicInfo: (data: BasicInfoFormData) => void;
 }
 
 const MenuItemFormContext = createContext<MenuItemFormContextType | null>(null);
@@ -15,24 +16,12 @@ export function AddMenuItemProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [formData, setFormDataState] = useState<Partial<MenuItemFormData>>({
-    name: "",
-    description: "",
-    price: 0,
-    category: "",
-    image_file: null,
-    is_available: true,
-    start_time: "00:00",
-    end_time: "23:59",
-    choices: [],
-  });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
+  console.log("Selected image:", selectedImage);
 
   return (
-    <MenuItemFormContext.Provider
-      value={{
-        formData,
-      }}
-    >
+    <MenuItemFormContext.Provider value={{ setSelectedImage, setBasicInfo }}>
       {children}
     </MenuItemFormContext.Provider>
   );

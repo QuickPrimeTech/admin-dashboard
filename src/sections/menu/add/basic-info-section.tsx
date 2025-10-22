@@ -1,4 +1,6 @@
-import { UseFormReturn } from "react-hook-form";
+"use client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Card,
   CardContent,
@@ -7,8 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,21 +26,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { MenuItemFormData } from "@/schemas/menu";
 import { toast } from "sonner";
+import { BasicInfoFormData, basicInfoSchema } from "@/schemas/menu";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Save } from "lucide-react";
+import { useMenuItemForm } from "@/contexts/add-menu-item";
 
-interface BasicInfoSectionProps {
-  form: UseFormReturn<MenuItemFormData>;
-}
+export default function BasicInfoSection() {
+  // Use the form context to save basic info
+  const { setBasicInfo } = useMenuItemForm();
 
-export default function BasicInfoSection({ form }: BasicInfoSectionProps) {
-  const handleSave = async () => {
-    const isValid = await form.trigger(["name", "price", "category"]);
-    if (isValid) {
-      toast("Basic Info Saved", {
-        description: "Your basic information has been saved successfully.",
-      });
-    }
+  // Initialize the form with react-hook-form and zod resolver
+  const form = useForm<BasicInfoFormData>({
+    resolver: zodResolver(basicInfoSchema),
+    defaultValues: {
+      name: "",
+      price: 0,
+      category: "",
+      description: "",
+    },
+  });
+
+  const onSubmit = (data: BasicInfoFormData) => {
+    console.log("✅Basic info submitted:", data);
+    toast.success("Basic info saved!");
+    setBasicInfo(data);
   };
 
   return (
@@ -49,111 +65,121 @@ export default function BasicInfoSection({ form }: BasicInfoSectionProps) {
           Enter the essential details about your menu item
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Item Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Buffalo Style Jumbo Chicken Wings"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+            noValidate
+          >
+            {/* Item Name */}
             <FormField
               control={form.control}
-              name="price"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price</FormLabel>
+                  <FormLabel>Item Name</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        $
-                      </span>
-                      <Input
-                        type="number"
-                        placeholder="13.95"
-                        step="0.01"
-                        min="0"
-                        className="pl-7"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? parseFloat(e.target.value) : 0
-                          )
-                        }
-                        value={field.value || ""}
-                      />
-                    </div>
+                    <Input
+                      placeholder="e.g., Buffalo Style Jumbo Chicken Wings"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Price + Category */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                      <InputGroup>
+                        <InputGroupAddon>Ksh</InputGroupAddon>
+                        <InputGroupInput
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="pl-7"
+                          placeholder="13.95"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value ? parseFloat(e.target.value) : 0
+                            )
+                          }
+                          value={field.value || ""}
+                        />
+                      </InputGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="appetizers">Appetizers</SelectItem>
+                        <SelectItem value="mains">Main Courses</SelectItem>
+                        <SelectItem value="sides">Sides</SelectItem>
+                        <SelectItem value="desserts">Desserts</SelectItem>
+                        <SelectItem value="beverages">Beverages</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Description */}
             <FormField
               control={form.control}
-              name="category"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="appetizers">Appetizers</SelectItem>
-                      <SelectItem value="mains">Main Courses</SelectItem>
-                      <SelectItem value="sides">Sides</SelectItem>
-                      <SelectItem value="desserts">Desserts</SelectItem>
-                      <SelectItem value="beverages">Beverages</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe your dish ingredients"
+                      rows={4}
+                      {...field}
+                    />
+                  </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Describe your dish, ingredients, and preparation..."
-                    rows={4}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Optional but recommended for better customer engagement
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex justify-end pt-4 border-t border-border">
-            <Button onClick={handleSave} type="button">
-              Save Basic Info
-            </Button>
-          </div>
-        </div>
+            {/* Save button */}
+            <div className="flex justify-end pt-4 border-t border-border">
+              <Button type="submit">
+                <Save /> Save Basic Info
+              </Button>
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
