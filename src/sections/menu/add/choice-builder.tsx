@@ -15,11 +15,7 @@ import {
   type ChoiceOptionFormData,
 } from "@/schemas/menu";
 
-interface ChoiceBuilderProps {
-  onAddChoice: (choice: ChoiceFormData) => void;
-}
-
-export function ChoiceBuilder({ onAddChoice }: ChoiceBuilderProps) {
+export function ChoiceBuilder() {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<ChoiceOptionFormData[]>([]);
   const [optionLabel, setOptionLabel] = useState("");
@@ -70,7 +66,6 @@ export function ChoiceBuilder({ onAddChoice }: ChoiceBuilderProps) {
   const onSubmit = (data: ChoiceFormData) => {
     const finalData = { ...data, options };
     console.log("✅ Submitted:", finalData);
-    onAddChoice(finalData);
     reset();
     setOptions([]);
     setIsOpen(false);
@@ -149,7 +144,7 @@ export function ChoiceBuilder({ onAddChoice }: ChoiceBuilderProps) {
             className="w-24"
           />
           <Button type="button" variant="secondary" onClick={handleAddOption}>
-            <Plus className="w-4 h-4" />
+            <Plus />
           </Button>
         </div>
       </div>
@@ -194,6 +189,7 @@ export function ChoiceBuilder({ onAddChoice }: ChoiceBuilderProps) {
           disabled={options.length === 0}
           onClick={submitManually}
         >
+          <Plus />
           Add Choice
         </Button>
       </div>

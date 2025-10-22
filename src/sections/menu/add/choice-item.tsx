@@ -38,7 +38,7 @@ export default function ChoiceItem({ choice, onRemove }: ChoiceItemProps) {
                   <span>{option.label}</span>
                   {option.price && (
                     <span className="text-foreground font-medium">
-                      +${option.price.toFixed(2)}
+                      +Ksh{option.price.toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -47,12 +47,11 @@ export default function ChoiceItem({ choice, onRemove }: ChoiceItemProps) {
           </div>
           <Button
             type="button"
-            variant="ghost"
-            size="sm"
+            variant="destructive"
+            size="icon"
             onClick={onRemove}
-            className="text-destructive hover:text-destructive"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 />
           </Button>
         </div>
       </CardContent>

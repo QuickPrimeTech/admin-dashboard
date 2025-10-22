@@ -1,5 +1,6 @@
 import AvailabilitySection from "./availability-section";
 import BasicInfoSection from "./basic-info-section";
+import { ChoiceBuilder } from "./choice-builder";
 import { ImageSection } from "./image-section";
 
 export function FormContent() {
@@ -13,7 +14,7 @@ export function FormContent() {
         <div className="lg:col-span-2 space-y-6">
           <BasicInfoSection />
           <AvailabilitySection />
-          {/* <ChoiceBuilder onAddChoice={handleAddChoice} /> */}
+          <ChoiceBuilder />
         </div>
       </div>
     </>

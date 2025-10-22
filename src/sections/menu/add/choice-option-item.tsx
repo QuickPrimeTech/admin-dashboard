@@ -67,20 +67,20 @@ export default function OptionItem({
         <div className="flex gap-1">
           <Button
             type="button"
-            variant="ghost"
-            size="sm"
+            variant="secondary"
+            size="icon"
             onClick={handleCancel}
-            className="h-8 w-8 p-0"
+            aria-label="cancel edit choice"
           >
-            <X className="w-4 h-4" />
+            <X />
           </Button>
           <Button
             type="button"
-            size="sm"
+            size="icon"
             onClick={handleSave}
             disabled={!editedLabel.trim()}
           >
-            <Check className="w-4 h-4" />
+            <Check />
           </Button>
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function OptionItem({
         <p className="font-medium">{option.label}</p>
         {option.price && option.price > 0 && (
           <p className="text-sm text-muted-foreground">
-            +${option.price.toFixed(2)}
+            +Ksh{option.price.toFixed(2)}
           </p>
         )}
       </div>
@@ -101,19 +101,21 @@ export default function OptionItem({
         <div className="flex gap-1 ml-4">
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             size="icon"
             onClick={() => setIsEditMode(true)}
+            aria-label="edit choice"
           >
-            <Edit2 className="w-4 h-4" />
+            <Edit2 />
           </Button>
           <Button
             type="button"
             variant="destructive"
             size="icon"
             onClick={onRemove}
+            aria-label="delete choice"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 />
           </Button>
         </div>
       )}
