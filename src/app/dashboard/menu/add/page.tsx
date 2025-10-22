@@ -23,10 +23,13 @@ export default function AddMenuItemPage() {
     resolver: zodResolver(menuItemSchema),
     defaultValues: {
       name: "",
-      price: 0,
       description: "",
+      price: 0,
       category: "",
-      image: undefined,
+      image_url: undefined,
+      is_available: true,
+      start_time: "00:00",
+      end_time: "23:59",
       choices: [],
     },
   });

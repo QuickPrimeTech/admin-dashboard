@@ -24,15 +24,15 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
 import { MenuItem } from "@/types/menu";
+import Link from "next/link";
 
 interface MenuGridProps {
   items: MenuItem[];
   onEdit: (item: MenuItem) => void;
   onDelete: (id: string) => void;
-  onAdd: () => void;
 }
 
-export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
+export function MenuGrid({ items, onEdit, onDelete }: MenuGridProps) {
   if (items.length === 0) {
     return (
       <Card>
@@ -42,9 +42,11 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
             <p className="text-muted-foreground mb-4">
               Get started by adding your first menu item
             </p>
-            <Button onClick={onAdd}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Menu Item
+            <Button asChild>
+              <Link href={"/dashboard/menu/add"}>
+                <Plus />
+                Add Menu Item
+              </Link>
             </Button>
           </div>
         </CardContent>

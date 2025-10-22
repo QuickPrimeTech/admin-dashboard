@@ -79,10 +79,6 @@ export default function MenuManagement() {
     setIsDialogOpen(true);
   };
 
-  const handleAdd = () => {
-    setIsDialogOpen(true);
-  };
-
   const handleDialogClose = () => {
     setIsDialogOpen(false);
     setEditingItem(null);
@@ -104,9 +100,11 @@ export default function MenuManagement() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleAdd}>
-            <Plus className="size-4" />
-            Add Menu Item
+          <Button asChild>
+            <Link href={"/dashboard/menu/add"}>
+              <Plus className="size-4" />
+              Add Menu Item
+            </Link>
           </Button>
           <Button variant="secondary" asChild>
             <Link href="/dashboard/qrcode-generator">
@@ -142,7 +140,6 @@ export default function MenuManagement() {
           items={filteredItems}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onAdd={handleAdd}
         />
       )}
 

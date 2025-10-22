@@ -23,8 +23,21 @@ export const menuItemSchema = z.object({
   price: z.coerce.number().min(0, "Price must be positive"),
   description: z.string().optional(),
   category: z.string().min(1, "Category is required"),
-  image: z.string().optional(),
-  choices: z.array(choiceSchema).default([]),
+  image_url: z.string().optional(),
+
+  /** ✅ new field: availability toggle */
+  is_available: z.boolean().default(true),
+
+  /** ✅ new fields: time range when dish is offered */
+  start_time: z
+    .string()
+    .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, "Invalid start time (HH:MM)"),
+  end_time: z
+    .string()
+    .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, "Invalid end time (HH:MM)"),
+
+  /** optional customization options */
+  choices: z.array(choiceSchema).optional().default([]),
 });
 
 export type MenuItemFormData = z.infer<typeof menuItemSchema>;
