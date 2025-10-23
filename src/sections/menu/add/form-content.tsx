@@ -1,6 +1,7 @@
 import AvailabilitySection from "./availability-section";
 import BasicInfoSection from "./basic-info-section";
 import { ChoiceBuilder } from "./choice-builder";
+import { ChoicesList } from "./choice-list";
 import { ImageSection } from "./image-section";
 
 export function FormContent() {
@@ -14,6 +15,7 @@ export function FormContent() {
         <div className="lg:col-span-2 space-y-6">
           <BasicInfoSection />
           <AvailabilitySection />
+          <ChoicesList />
           <ChoiceBuilder />
         </div>
       </div>

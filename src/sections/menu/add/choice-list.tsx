@@ -1,29 +1,21 @@
+// src/components/menu/ChoicesList.tsx
 "use client";
 
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import ChoiceItem from "./choice-item";
-import type { ChoiceFormData } from "@/schemas/menu";
+import { useMenuItemForm } from "@/contexts/add-menu-item";
 
-interface ChoicesListProps {
-  choices: ChoiceFormData[];
-  onUpdateChoice: (id: string, choice: ChoiceFormData) => void;
-  onRemoveChoice: (id: string) => void;
-}
+export function ChoicesList() {
+  const { choices, updateChoice, removeChoice, setEditingChoice } =
+    useMenuItemForm();
 
-export function ChoicesList({
-  choices,
-  onUpdateChoice,
-  onRemoveChoice,
-}: ChoicesListProps) {
-  if (choices.length === 0) {
-    return null;
-  }
+  if (choices.length === 0) return null;
 
   return (
     <Card className="border-0 shadow-sm">
@@ -36,10 +28,8 @@ export function ChoicesList({
           <ChoiceItem
             key={choice.id}
             choice={choice}
-            onUpdate={(updatedChoice) =>
-              onUpdateChoice(choice.id!, updatedChoice)
-            }
-            onRemove={() => onRemoveChoice(choice.id!)}
+            onEdit={() => setEditingChoice(choice)}
+            onRemove={() => removeChoice(choice.id!)}
           />
         ))}
       </CardContent>

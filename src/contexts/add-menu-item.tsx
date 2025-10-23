@@ -1,12 +1,23 @@
 // src/context/menu-item-form-context.tsx
 "use client";
 
-import { BasicInfoFormData } from "@/schemas/menu";
 import React, { createContext, useContext, useState } from "react";
+import type { BasicInfoFormData, ChoiceFormData } from "@/schemas/menu";
 
 interface MenuItemFormContextType {
+  selectedImage: File | null;
   setSelectedImage: (file: File | null) => void;
+
+  basicInfo: BasicInfoFormData | null;
   setBasicInfo: (data: BasicInfoFormData) => void;
+
+  choices: ChoiceFormData[];
+  addChoice: (choice: ChoiceFormData) => void;
+  updateChoice: (id: string, updated: ChoiceFormData) => void;
+  removeChoice: (id: string) => void;
+
+  editingChoice: ChoiceFormData | null;
+  setEditingChoice: (choice: ChoiceFormData | null) => void;
 }
 
 const MenuItemFormContext = createContext<MenuItemFormContextType | null>(null);
@@ -18,10 +29,40 @@ export function AddMenuItemProvider({
 }) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
-  console.log("Selected image:", selectedImage);
+  const [choices, setChoices] = useState<ChoiceFormData[]>([]);
+  const [editingChoice, setEditingChoice] = useState<ChoiceFormData | null>(
+    null
+  );
+
+  const addChoice = (choice: ChoiceFormData) => {
+    setChoices((prev) => [...prev, { ...choice, id: crypto.randomUUID() }]);
+  };
+
+  const updateChoice = (id: string, updated: ChoiceFormData) => {
+    setChoices((prev) =>
+      prev.map((choice) => (choice.id === id ? { ...updated, id } : choice))
+    );
+  };
+
+  const removeChoice = (id: string) => {
+    setChoices((prev) => prev.filter((choice) => choice.id !== id));
+  };
 
   return (
-    <MenuItemFormContext.Provider value={{ setSelectedImage, setBasicInfo }}>
+    <MenuItemFormContext.Provider
+      value={{
+        selectedImage,
+        setSelectedImage,
+        basicInfo,
+        setBasicInfo,
+        choices,
+        addChoice,
+        updateChoice,
+        removeChoice,
+        editingChoice,
+        setEditingChoice,
+      }}
+    >
       {children}
     </MenuItemFormContext.Provider>
   );
