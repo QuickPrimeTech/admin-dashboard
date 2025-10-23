@@ -1,16 +1,17 @@
 // src/context/menu-item-form-context.tsx
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import type {
   AvailabilityFormData,
   BasicInfoFormData,
   ChoiceFormData,
 } from "@/schemas/menu";
+import { base64ToFile, fileToBase64 } from "@/helpers/file-helpers";
 
-interface MenuItemFormContextType {
-  selectedImage: File | null;
-  setSelectedImage: (file: File | null) => void;
+type MenuItemFormContextType = {
+  imageInfo: ImageInfo | null;
+  setImageInfo: React.Dispatch<React.SetStateAction<ImageInfo | null>>;
 
   basicInfo: BasicInfoFormData | null;
   setBasicInfo: (data: BasicInfoFormData) => void;
@@ -26,7 +27,15 @@ interface MenuItemFormContextType {
 
   editingChoice: ChoiceFormData | null;
   setEditingChoice: (choice: ChoiceFormData | null) => void;
-}
+
+  submitForm: () => void;
+};
+
+type ImageInfo = {
+  preview_url: string;
+  image: File;
+  base64: string;
+};
 
 const MenuItemFormContext = createContext<MenuItemFormContextType | null>(null);
 
@@ -35,7 +44,7 @@ export function AddMenuItemProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imageInfo, setImageInfo] = useState<ImageInfo | null>(null);
   const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
   const [availabilityInfo, setAvailabilityInfo] =
     useState<AvailabilityFormData | null>(null);
@@ -44,6 +53,66 @@ export function AddMenuItemProvider({
     null
   );
 
+  // ✅ Load persisted data on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("menu-item-form");
+    if (!stored) return;
+
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.imageInfo?.base64) {
+        parsed.imageInfo.image = base64ToFile(
+          parsed.imageInfo.base64,
+          "restored-image.png"
+        );
+      }
+      setImageInfo(parsed.imageInfo || null);
+      setBasicInfo(parsed.basicInfo || null);
+      setAvailabilityInfo(parsed.availabilityInfo || null);
+      setChoices(parsed.choices || []);
+    } catch (err) {
+      console.error("Failed to load persisted form data", err);
+    }
+  }, []);
+
+  // ✅ Persist data but skip if nothing important changed
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    const persist = async () => {
+      // debounce writes to localStorage to avoid spam
+      clearTimeout(timeout);
+      timeout = setTimeout(async () => {
+        const data = {
+          imageInfo: imageInfo
+            ? {
+                ...imageInfo,
+                base64:
+                  imageInfo.base64 ||
+                  (imageInfo.image ? await fileToBase64(imageInfo.image) : ""),
+              }
+            : null,
+          basicInfo,
+          availabilityInfo,
+          choices,
+        };
+        localStorage.setItem("menu-item-form", JSON.stringify(data));
+      }, 500); // only persist after 0.5s of no change
+    };
+
+    persist();
+    return () => clearTimeout(timeout);
+  }, [imageInfo?.base64, basicInfo, availabilityInfo, choices]);
+
+  const submitForm = () => {
+    // Implement form submission logic here
+    console.log("Submitting form with data:", {
+      imageInfo,
+      basicInfo,
+      availabilityInfo,
+      choices,
+    });
+  };
   const removeChoice = (id: string) => {
     setChoices((prev) => prev.filter((choice) => choice.id !== id));
   };
@@ -64,9 +133,9 @@ export function AddMenuItemProvider({
       value={{
         availabilityInfo,
         setAvailabilityInfo,
-        selectedImage,
         onEditChoice,
-        setSelectedImage,
+        imageInfo,
+        setImageInfo,
         basicInfo,
         setBasicInfo,
         choices,
@@ -74,6 +143,7 @@ export function AddMenuItemProvider({
         removeChoice,
         editingChoice,
         setEditingChoice,
+        submitForm,
       }}
     >
       {children}
@@ -81,7 +151,7 @@ export function AddMenuItemProvider({
   );
 }
 
-export const useMenuItemForm = () => {
+export function useMenuItemForm(): MenuItemFormContextType {
   const context = useContext(MenuItemFormContext);
   if (!context) {
     throw new Error(
@@ -89,4 +159,4 @@ export const useMenuItemForm = () => {
     );
   }
   return context;
-};
+}

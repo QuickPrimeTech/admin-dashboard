@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@ui/button";
 import AvailabilitySection from "./availability-section";
 import BasicInfoSection from "./basic-info-section";
@@ -5,8 +7,10 @@ import { ChoiceBuilder } from "./choice-builder";
 import { ChoicesList } from "./choice-list";
 import { ImageSection } from "./image-section";
 import { Save } from "lucide-react";
+import { useMenuItemForm } from "@/contexts/add-menu-item";
 
 export function FormContent() {
+  const { submitForm } = useMenuItemForm();
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -20,7 +24,7 @@ export function FormContent() {
           <ChoicesList />
           <ChoiceBuilder />
           <div className="flex justify-end">
-            <Button type="submit">
+            <Button type="submit" onClick={submitForm}>
               <Save /> Save Menu Item
             </Button>
           </div>
