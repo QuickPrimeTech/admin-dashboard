@@ -50,52 +50,30 @@ export function ImageSection() {
     [trigger, setImageInfo, previewUrl]
   );
 
+  // Detect global reset from context and clear form + preview
   useEffect(() => {
-    // Restore persisted image
-    if (!imageFile && imageInfo?.base64) {
-      if (!previewUrl) {
-        setPreviewUrl(imageInfo.base64); // ✅ base64 works as preview source
-      }
-
-      if (!imageFile) {
-        const restoredFile = base64ToFile(
-          imageInfo.base64,
-          "restored-image.png"
-        );
-        setValue("image", restoredFile);
-      }
-      console.log("Preview URL from context:", previewUrl);
-      return;
+    if (imageInfo === null) {
+      form.reset({ image: undefined }); // clears all react-hook-form state
+      setPreviewUrl(undefined); // removes preview visually
     }
+  }, [imageInfo, form]);
 
-    // Remove preview if image cleared
-    if (!imageFile) {
+  // Detect when global form is reset
+  useEffect(() => {
+    if (!imageInfo) {
       setPreviewUrl(undefined);
-      return;
+      setValue("image", undefined);
     }
+  }, [imageInfo, setValue]);
 
-    // Handle new upload
-    if (imageFile instanceof File) {
-      const url = URL.createObjectURL(imageFile);
-      setPreviewUrl(url);
-
-      // Upload only if new file
-      if (!imageInfo?.base64) {
-        handleImageUpload(imageFile);
-      }
-      // ✅ Clean up URL only once
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [imageFile, imageInfo]);
-
-  // ✅ File selection logic
+  //  File selection logic
   function handleFileSelect(file: File) {
     if (file?.type.startsWith("image/")) {
       setValue("image", file, { shouldValidate: true });
     }
   }
 
-  // ✅ Remove selected image
+  //  Remove selected image
   function handleRemove() {
     setValue("image", undefined);
     setImageInfo(null);
