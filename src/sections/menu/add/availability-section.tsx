@@ -22,8 +22,10 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { z } from "zod";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
+import { useMenuItemForm } from "@/contexts/add-menu-item";
 
 export default function AvailabilitySection() {
+  const { setAvailabilityInfo } = useMenuItemForm();
   const form = useForm<AvailabilityFormData>({
     resolver: zodResolver(availabilitySchema) as Resolver<
       AvailabilityFormData,
@@ -37,7 +39,7 @@ export default function AvailabilitySection() {
   });
 
   const onSubmit = (data: AvailabilityFormData) => {
-    console.log("✅ Availability submitted:", data);
+    setAvailabilityInfo(data);
     toast.success("Availability settings saved successfully!");
   };
 

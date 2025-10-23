@@ -2,7 +2,11 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
-import type { BasicInfoFormData, ChoiceFormData } from "@/schemas/menu";
+import type {
+  AvailabilityFormData,
+  BasicInfoFormData,
+  ChoiceFormData,
+} from "@/schemas/menu";
 
 interface MenuItemFormContextType {
   selectedImage: File | null;
@@ -16,6 +20,7 @@ interface MenuItemFormContextType {
 
   onEditChoice: (choice: ChoiceFormData) => void;
 
+  setAvailabilityInfo: (data: AvailabilityFormData) => void;
   editingChoice: ChoiceFormData | null;
   setEditingChoice: (choice: ChoiceFormData | null) => void;
 }
@@ -29,6 +34,8 @@ export function AddMenuItemProvider({
 }) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
+  const [availabilityInfo, setAvailabilityInfo] =
+    useState<AvailabilityFormData | null>(null);
   const [choices, setChoices] = useState<ChoiceFormData[]>([]);
   const [editingChoice, setEditingChoice] = useState<ChoiceFormData | null>(
     null
@@ -52,6 +59,7 @@ export function AddMenuItemProvider({
   return (
     <MenuItemFormContext.Provider
       value={{
+        setAvailabilityInfo,
         selectedImage,
         onEditChoice,
         setSelectedImage,

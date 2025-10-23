@@ -52,7 +52,6 @@ export default function BasicInfoSection() {
   });
 
   const onSubmit = (data: BasicInfoFormData) => {
-    console.log("✅Basic info submitted:", data);
     toast.success("Basic info saved!");
     setBasicInfo(data);
   };

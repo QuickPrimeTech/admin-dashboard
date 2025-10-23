@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import AvailabilitySection from "./availability-section";
 import BasicInfoSection from "./basic-info-section";
 import { ChoiceBuilder } from "./choice-builder";
