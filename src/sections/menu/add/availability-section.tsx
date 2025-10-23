@@ -20,12 +20,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { z } from "zod";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/add-menu-item";
+import { useEffect } from "react";
 
 export default function AvailabilitySection() {
-  const { setAvailabilityInfo } = useMenuItemForm();
+  const { availabilityInfo, setAvailabilityInfo } = useMenuItemForm();
   const form = useForm<AvailabilityFormData>({
     resolver: zodResolver(availabilitySchema) as Resolver<
       AvailabilityFormData,
@@ -37,6 +37,12 @@ export default function AvailabilitySection() {
       end_time: "22:00",
     },
   });
+
+  useEffect(() => {
+    if (availabilityInfo) {
+      form.reset(availabilityInfo);
+    }
+  }, [availabilityInfo, form]);
 
   const onSubmit = (data: AvailabilityFormData) => {
     setAvailabilityInfo(data);

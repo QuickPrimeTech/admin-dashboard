@@ -12,6 +12,7 @@ interface MenuItemFormContextType {
   selectedImage: File | null;
   setSelectedImage: (file: File | null) => void;
 
+  basicInfo: BasicInfoFormData | null;
   setBasicInfo: (data: BasicInfoFormData) => void;
 
   choices: ChoiceFormData[];
@@ -20,7 +21,9 @@ interface MenuItemFormContextType {
 
   onEditChoice: (choice: ChoiceFormData) => void;
 
+  availabilityInfo: AvailabilityFormData | null;
   setAvailabilityInfo: (data: AvailabilityFormData) => void;
+
   editingChoice: ChoiceFormData | null;
   setEditingChoice: (choice: ChoiceFormData | null) => void;
 }
@@ -59,10 +62,12 @@ export function AddMenuItemProvider({
   return (
     <MenuItemFormContext.Provider
       value={{
+        availabilityInfo,
         setAvailabilityInfo,
         selectedImage,
         onEditChoice,
         setSelectedImage,
+        basicInfo,
         setBasicInfo,
         choices,
         addChoice,

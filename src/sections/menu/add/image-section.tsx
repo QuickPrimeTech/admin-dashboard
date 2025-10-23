@@ -24,20 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useMenuItemForm } from "@/contexts/add-menu-item";
-
-// ✅ Validation schema (optional image but must be valid type)
-const imageSchema = z.object({
-  image: z
-    .any()
-    .refine(
-      (file) =>
-        !file || (file instanceof File && file.type.startsWith("image/")),
-      "Only image files are allowed"
-    )
-    .optional(),
-});
-
-type ImageFormValues = z.infer<typeof imageSchema>;
+import { ImageFormValues, imageSchema } from "@/schemas/menu";
 
 export function ImageSection() {
   // ✅ Context to store selected image file

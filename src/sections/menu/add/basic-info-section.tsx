@@ -35,10 +35,11 @@ import {
 } from "@/components/ui/input-group";
 import { Save } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/add-menu-item";
+import { useEffect } from "react";
 
 export default function BasicInfoSection() {
   // Use the form context to save basic info
-  const { setBasicInfo } = useMenuItemForm();
+  const { setBasicInfo, basicInfo } = useMenuItemForm();
 
   // Initialize the form with react-hook-form and zod resolver
   const form = useForm<BasicInfoFormData>({
@@ -50,6 +51,12 @@ export default function BasicInfoSection() {
       description: "",
     },
   });
+  useEffect(() => {
+    // If there's existing basic info, set it as the form values
+    if (basicInfo) {
+      form.reset(basicInfo);
+    }
+  }, [basicInfo, form]);
 
   const onSubmit = (data: BasicInfoFormData) => {
     toast.success("Basic info saved!");

@@ -6,17 +6,17 @@ export const choiceOptionSchema = z.object({
   price: z.number().optional(),
 });
 
-export const imageSchema = z
-  .object({
-    image: z
-      .instanceof(File)
-      .refine((file) => file.type.startsWith("image/"), {
-        message: "File must be an image",
-      })
-      .optional()
-      .or(z.literal(null)),
-  })
-  .optional();
+// ✅ Validation schema (optional image but must be valid type)e
+export const imageSchema = z.object({
+  image: z
+    .any()
+    .refine(
+      (file) =>
+        !file || (file instanceof File && file.type.startsWith("image/")),
+      "Only image files are allowed"
+    )
+    .optional(),
+});
 
 // ✅ Define schema only for availability
 export const availabilitySchema = z.object({
@@ -70,7 +70,7 @@ export const basicInfoSchema = z.object({
 });
 
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
-
+export type ImageFormValues = z.infer<typeof imageSchema>;
 // Type exports
 export type ChoiceOptionFormData = z.infer<typeof choiceOptionSchema>;
 export type ChoiceFormData = z.infer<typeof choiceSchema>;
