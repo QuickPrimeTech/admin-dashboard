@@ -102,7 +102,7 @@ export function AddMenuItemProvider({
 
     persist();
     return () => clearTimeout(timeout);
-  }, [imageInfo?.base64, basicInfo, availabilityInfo, choices]);
+  }, [imageInfo?.base64, basicInfo, availabilityInfo, choices, imageInfo]);
 
   const submitForm = () => {
     // Implement form submission logic here

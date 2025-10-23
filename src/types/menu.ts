@@ -1,15 +1,9 @@
-// export type MenuItem = {
-//   id: string;
-//   name: string;
-//   description: string;
-//   price: number;
-//   category: string;
-//   dietary_preference: string[];
-//   image_url?: string;
-//   is_available: boolean;
-//   user_id: string;
-//   public_id?: string; // Add this line
-// };
+import {
+  AvailabilityFormData,
+  BasicInfoFormData,
+  ChoiceFormData,
+  MenuItemFormData,
+} from "@/schemas/menu";
 
 export interface ChoiceOption {
   label: string;
@@ -24,21 +18,12 @@ export interface Choice {
   options: ChoiceOption[];
 }
 
-export interface MenuItem {
+export interface MenuItem
+  extends ChoiceFormData,
+    AvailabilityFormData,
+    BasicInfoFormData {
+  image_url: string;
   id: string;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  image?: string;
-  choices: Choice[];
-}
-
-export interface MenuItemForm {
-  item?: MenuItem | null;
-  onSaved: () => void;
-  onOpenChange: (open: boolean) => void;
-  categories: string[]; // 👈 add this
 }
 
 export type FormDataFields = {

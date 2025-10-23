@@ -72,7 +72,7 @@ export function ImageSection() {
       // ✅ Clean up URL only once
       return () => URL.revokeObjectURL(url);
     }
-  }, [imageFile, imageInfo]);
+  }, [imageFile, imageInfo, handleImageUpload, previewUrl, setValue]);
 
   async function handleImageUpload(file: File) {
     await trigger("image");

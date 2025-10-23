@@ -7,7 +7,6 @@ import { Plus, QrCode } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-import { MenuItemDialog } from "@/sections/menu/menu-item-dialog";
 import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
 import { MenuItem } from "@/types/menu";
@@ -26,8 +25,6 @@ async function fetchMenuItems() {
 export default function MenuManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
   // 🚀 useQuery handles loading + error + caching
   const {
@@ -72,21 +69,6 @@ export default function MenuManagement() {
     } catch {
       toast.error("Failed to delete menu item");
     }
-  };
-
-  const handleEdit = (item: MenuItem) => {
-    setEditingItem(item);
-    setIsDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-    setEditingItem(null);
-  };
-
-  const handleItemSaved = () => {
-    refetch(); // ✅ Refresh data on save
-    handleDialogClose();
   };
 
   return (
@@ -136,21 +118,8 @@ export default function MenuManagement() {
           ))}
         </div>
       ) : (
-        <MenuGrid
-          items={filteredItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <MenuGrid items={filteredItems} onDelete={handleDelete} />
       )}
-
-      {/* Dialog */}
-      <MenuItemDialog
-        open={isDialogOpen}
-        onOpenChange={handleDialogClose}
-        item={editingItem}
-        onSaved={handleItemSaved}
-        categories={categories}
-      />
     </div>
   );
 }

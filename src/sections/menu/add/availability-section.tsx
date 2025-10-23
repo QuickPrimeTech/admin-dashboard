@@ -27,10 +27,7 @@ import { useEffect } from "react";
 export default function AvailabilitySection() {
   const { availabilityInfo, setAvailabilityInfo } = useMenuItemForm();
   const form = useForm<AvailabilityFormData>({
-    resolver: zodResolver(availabilitySchema) as Resolver<
-      AvailabilityFormData,
-      any
-    >,
+    resolver: zodResolver(availabilitySchema) as Resolver<AvailabilityFormData>,
     defaultValues: {
       is_available: true,
       start_time: "08:00",

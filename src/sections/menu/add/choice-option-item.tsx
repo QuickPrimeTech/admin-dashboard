@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Edit2, Trash2, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { ChoiceOptionFormData } from "@/schemas/menu";
-import { Badge } from "@/components/ui/badge";
 
 interface OptionItemProps {
   option: ChoiceOptionFormData;

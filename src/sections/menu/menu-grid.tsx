@@ -28,11 +28,10 @@ import Link from "next/link";
 
 interface MenuGridProps {
   items: MenuItem[];
-  onEdit: (item: MenuItem) => void;
   onDelete: (id: string) => void;
 }
 
-export function MenuGrid({ items, onEdit, onDelete }: MenuGridProps) {
+export function MenuGrid({ items, onDelete }: MenuGridProps) {
   if (items.length === 0) {
     return (
       <Card>
@@ -56,8 +55,8 @@ export function MenuGrid({ items, onEdit, onDelete }: MenuGridProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((item) => (
-        <Card key={item.id} className="py-0 pb-5 overflow-hidden">
+      {items.map((item, index) => (
+        <Card key={index} className="py-0 pb-5 overflow-hidden">
           <div className="relative h-48">
             <Image
               src={item.image_url || "/placeholder.jpg"}
@@ -87,28 +86,12 @@ export function MenuGrid({ items, onEdit, onDelete }: MenuGridProps) {
                 {item.category}
               </Badge>
             </div>
-            {item.dietary_preference && item.dietary_preference.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-3">
-                {item.dietary_preference.map((dietary_preference) => (
-                  <Badge
-                    key={dietary_preference}
-                    variant="secondary"
-                    className="text-xs"
-                  >
-                    {dietary_preference}
-                  </Badge>
-                ))}
-              </div>
-            )}
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(item)}
-                className="flex-1"
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
+              <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Link href={`/dashboard/menu/edit/${item.id}`}>
+                  <Edit />
+                  Edit
+                </Link>
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -117,7 +100,7 @@ export function MenuGrid({ items, onEdit, onDelete }: MenuGridProps) {
                     size="sm"
                     className="text-destructive hover:text-destructive"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>

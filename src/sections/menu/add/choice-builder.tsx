@@ -234,7 +234,9 @@ export function ChoiceBuilder() {
               variant="outline"
               onClick={() => {
                 resetForm();
-                editingChoice ? addChoice(editingChoice) : null;
+                if (editingChoice) {
+                  addChoice(editingChoice);
+                }
                 // Reset to editing choice or empty
                 setEditingChoice(null);
                 setIsOpen(false);
