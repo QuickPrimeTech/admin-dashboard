@@ -136,6 +136,7 @@ export default function BasicInfoSection() {
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <Select
+                      key={field.value}
                       onValueChange={field.onChange}
                       value={field.value || ""}
                     >
