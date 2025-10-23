@@ -2,7 +2,6 @@ import {
   AvailabilityFormData,
   BasicInfoFormData,
   ChoiceFormData,
-  MenuItemFormData,
 } from "@/schemas/menu";
 
 export interface ChoiceOption {

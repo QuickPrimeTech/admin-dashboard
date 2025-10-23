@@ -74,7 +74,8 @@ export default function ChoiceItem({
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This action cannot be undone. This will permanently delete
-                    the choice option from the menu item.
+                    the <strong>{choice.title}</strong> choice option from the
+                    menu item.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

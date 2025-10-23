@@ -15,6 +15,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,8 +31,8 @@ export default function AvailabilitySection() {
     resolver: zodResolver(availabilitySchema) as Resolver<AvailabilityFormData>,
     defaultValues: {
       is_available: true,
-      start_time: "08:00",
-      end_time: "22:00",
+      start_time: "",
+      end_time: "",
     },
   });
 
@@ -94,6 +95,7 @@ export default function AvailabilitySection() {
                     <FormControl>
                       <Input type="time" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -107,6 +109,7 @@ export default function AvailabilitySection() {
                     <FormControl>
                       <Input type="time" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

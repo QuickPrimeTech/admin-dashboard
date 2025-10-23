@@ -112,8 +112,7 @@ export default function BasicInfoSection() {
                           type="number"
                           step="0.01"
                           min="0"
-                          className="pl-7"
-                          placeholder="13.95"
+                          placeholder="Enter amount here"
                           {...field}
                           onChange={(e) =>
                             field.onChange(

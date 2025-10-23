@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, DragEvent } from "react";
+import { useState, useEffect, DragEvent, useCallback } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -35,6 +35,20 @@ export function ImageSection() {
 
   const [previewUrl, setPreviewUrl] = useState<string>();
   const [isDragActive, setIsDragActive] = useState(false);
+  // ✅ Memoize handleImageUpload to avoid dependency warnings
+  const handleImageUpload = useCallback(
+    async (file: File) => {
+      await trigger("image");
+      const base64 = await fileToBase64(file);
+
+      setImageInfo((prev) => ({
+        preview_url: prev?.preview_url || previewUrl || "",
+        image: file,
+        base64,
+      }));
+    },
+    [trigger, setImageInfo, previewUrl]
+  );
 
   useEffect(() => {
     // Restore persisted image
@@ -72,19 +86,7 @@ export function ImageSection() {
       // ✅ Clean up URL only once
       return () => URL.revokeObjectURL(url);
     }
-  }, [imageFile, imageInfo, handleImageUpload, previewUrl, setValue]);
-
-  async function handleImageUpload(file: File) {
-    await trigger("image");
-    const base64 = await fileToBase64(file);
-
-    // ✅ Only store base64 (no blob URLs)
-    setImageInfo((prev) => ({
-      preview_url: prev?.preview_url || previewUrl || "", // or keep existing if already set
-      image: file,
-      base64,
-    }));
-  }
+  }, [imageFile, imageInfo]);
 
   // ✅ File selection logic
   function handleFileSelect(file: File) {
