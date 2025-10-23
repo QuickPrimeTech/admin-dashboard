@@ -53,7 +53,7 @@ export const menuItemSchema = z.object({
   image: z.instanceof(File).optional().or(z.null()), // allows clearing
   is_available: z.boolean(),
   is_popular: z.boolean(),
-  lqip: z.string().optional(),
+  lqip: z.string().optional().or(z.null()),
   start_time: z
     .string()
     .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "The start time is required"),

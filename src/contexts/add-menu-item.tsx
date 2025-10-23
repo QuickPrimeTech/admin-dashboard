@@ -90,6 +90,15 @@ export function AddMenuItemProvider({
     }
   }, []);
 
+  const resetFormState = () => {
+    setImageInfo(null);
+    setBasicInfo(null);
+    setAvailabilityInfo(null);
+    setChoices([]);
+    setEditingChoice(null);
+    localStorage.removeItem(localStorageKey);
+  };
+
   // ✅ Persist data but skip if nothing important changed
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -129,7 +138,7 @@ export function AddMenuItemProvider({
       // Combine all form sections into one object
       const data: MenuItemFormData = {
         ...basicInfo,
-        image: imageInfo?.image || null,
+        image: imageInfo?.image || undefined,
         lqip: imageInfo
           ? await generateBlurDataURL(imageInfo.image)
           : undefined,
@@ -158,15 +167,12 @@ export function AddMenuItemProvider({
       });
 
       // ✅ Send to your backend
-      const response = await axios.post("/api/menu-items", formData, {
+      await axios.post("/api/menu-items", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      toast.success("✅ Menu item created successfully!");
-      console.log("Response:", response.data);
-
-      // Optionally clear the localStorage
-      localStorage.removeItem("add-menu-item-form-data");
+      // Optionally clear the data
+      resetFormState();
     } catch (err: any) {
       if (err instanceof ZodError) {
         err.errors.forEach((issue) => {

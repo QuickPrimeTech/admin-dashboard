@@ -55,7 +55,7 @@ export default function BasicInfoSection() {
     // If there's existing basic info, set it as the form values
     if (basicInfo) {
       form.reset(basicInfo);
-    }
+    } else form.reset({ name: "", price: 0, category: "", description: "" });
   }, [basicInfo, form]);
 
   const onSubmit = (data: BasicInfoFormData) => {

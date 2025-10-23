@@ -65,7 +65,7 @@ export default function MenuManagement() {
 
       if (!res.ok) throw new Error(result.message || "Failed to delete");
       toast.success("Menu item deleted successfully");
-      refetch(); // ✅ Re-fetch updated data
+      refetch(); //  Re-fetch updated data
     } catch {
       toast.error("Failed to delete menu item");
     }

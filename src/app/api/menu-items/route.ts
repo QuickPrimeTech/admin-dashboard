@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     choices,
   };
 
-  console.log("Received Choices:", data.choices);
+  console.log("Received Choices:", data);
   //Validating the form data using the MenuItemFormData schema
   const parsedData = menuItemSchema.safeParse(data);
   if (!parsedData.success) {
