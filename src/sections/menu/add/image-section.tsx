@@ -120,7 +120,9 @@ export function ImageSection() {
     <Form {...form}>
       <Card className="sticky top-16 h-fit">
         <CardHeader>
-          <CardTitle className="text-lg">Item Image</CardTitle>
+          <CardTitle className="text-lg">
+            Item Image (Highly Recommended)
+          </CardTitle>
           <CardDescription>
             Upload a beautiful photo of your dish (optional)
           </CardDescription>
