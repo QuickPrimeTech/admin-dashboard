@@ -29,7 +29,7 @@ export default function ChoiceItem({
   return (
     <Card className="bg-accent/10 border-accent/20 py-3">
       <CardContent>
-        <div className="flex justify-between gap-4">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <h4 className="font-semibold text-foreground">{choice.title}</h4>
