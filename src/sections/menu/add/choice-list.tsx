@@ -12,8 +12,7 @@ import ChoiceItem from "./choice-item";
 import { useMenuItemForm } from "@/contexts/add-menu-item";
 
 export function ChoicesList() {
-  const { choices, updateChoice, removeChoice, setEditingChoice } =
-    useMenuItemForm();
+  const { choices, removeChoice, onEditChoice } = useMenuItemForm();
 
   if (choices.length === 0) return null;
 
@@ -28,7 +27,7 @@ export function ChoicesList() {
           <ChoiceItem
             key={choice.id}
             choice={choice}
-            onEdit={() => setEditingChoice(choice)}
+            onEdit={() => onEditChoice(choice)}
             onRemove={() => removeChoice(choice.id!)}
           />
         ))}

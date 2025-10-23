@@ -1,8 +1,10 @@
+import { Button } from "@/components/ui/button";
 import AvailabilitySection from "./availability-section";
 import BasicInfoSection from "./basic-info-section";
 import { ChoiceBuilder } from "./choice-builder";
 import { ChoicesList } from "./choice-list";
 import { ImageSection } from "./image-section";
+import { Save } from "lucide-react";
 
 export function FormContent() {
   return (
@@ -17,6 +19,11 @@ export function FormContent() {
           <AvailabilitySection />
           <ChoicesList />
           <ChoiceBuilder />
+          <div className="flex justify-end">
+            <Button type="submit">
+              <Save /> Save Menu Item
+            </Button>
+          </div>
         </div>
       </div>
     </>
