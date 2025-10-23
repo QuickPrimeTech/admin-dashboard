@@ -1,5 +1,5 @@
 // app/api/menu-items/route.ts
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { cleanFormData } from "@/lib/clean-form-data";
 import { cloudinary } from "@/lib/server/cloudinary";
@@ -14,61 +14,49 @@ import {
 } from "@/helpers/common";
 import { FormDataFields } from "@/types/menu";
 import { revalidatePage } from "@/helpers/revalidator";
+import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
+import { json } from "stream/consumers";
 
 export async function POST(request: NextRequest) {
   // checking if the client is authenticated to add a menu item
-  const { user, supabase, response } = await getAuthenticatedUser();
+  const { response } = await getAuthenticatedUser();
   if (response) return response;
+  const formData = await request.formData();
 
-  try {
-    const formData = await request.formData();
-    //making the form data match the shape of the table that is being inserted to
-    const data = cleanFormData(formData) as unknown as FormDataFields;
-
-    // declaring intial values in order to determine later if the image was sent to cloudinary
-    let uploadedImageUrl = null;
-    let publicId = null;
-
-    //Getting the image file sent by the user
-    const imageFile = formData.get("image") as File | null;
-
-    // since the user exist we can fetch the restaurant name from supabase through the user.id
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
-
-    if (imageFile) {
-      // preparing the image to upload to cloudinary
-      const uploadResult = await uploadImageToCloudinary(
-        imageFile,
-        `${sanitizedRestaurantName}/menu-items`
-      );
-
-      uploadedImageUrl = uploadResult.secure_url;
-      publicId = uploadResult.public_id;
+  const choicesEntry = formData.get("choices");
+  let choices: unknown[] = [];
+  if (typeof choicesEntry === "string") {
+    try {
+      choices = JSON.parse(choicesEntry);
+    } catch {
+      choices = [];
     }
-
-    const newMenuItem = {
-      name: data.name,
-      description: data.description,
-      price: parseFloat(data.price),
-      category: data.category,
-      is_available: data.is_available === "true" || data.is_available === true,
-      dietary_preference: data.dietary_preference || [],
-      image_url: uploadedImageUrl,
-      public_id: publicId,
-      user_id: user.id,
-    };
-    const { error } = await supabase.from("menu_items").insert([newMenuItem]);
-    if (error) {
-      return errorResponse("Failed to save item", 500, error.message);
-    }
-    //revalidating the page in the frontend for the menu items to be rendered
-    await revalidatePage("/menu");
-    // returning a response to the frontend
-    return successResponse("Menu item created successfully");
-  } catch (err) {
-    const error = err as Error;
-    return errorResponse("Server error", 500, error.message);
   }
+
+  // Safely extract values from FormData rather than asserting the entire FormData shape
+  const data = {
+    name: formData.get("name"),
+    description: formData.get("description"),
+    price: Number(formData.get("price")),
+    category: formData.get("category"),
+    image: formData.get("image"),
+    is_available: formData.get("is_available") === "true",
+    is_popular: formData.get("is_popular") === "true",
+    lqip: formData.get("lqip"),
+    start_time: formData.get("start_time"),
+    end_time: formData.get("end_time"),
+    choices,
+  };
+
+  console.log("Received Choices:", data.choices);
+  //Validating the form data using the MenuItemFormData schema
+  const parsedData = menuItemSchema.safeParse(data);
+  if (!parsedData.success) {
+    const errors = parsedData.error.flatten().fieldErrors;
+    console.log("Validation errors:", errors);
+    return errorResponse("Invalid form data", 400, JSON.stringify(errors));
+  }
+  return NextResponse.json({ message: "Form data received" });
 }
 
 export async function GET() {

@@ -21,6 +21,7 @@ export const imageSchema = z.object({
 // ✅ Define schema only for availability
 export const availabilitySchema = z.object({
   is_available: z.boolean().default(true),
+  is_popular: z.boolean().default(false),
   start_time: z
     .string()
     .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format")
@@ -49,14 +50,16 @@ export const menuItemSchema = z.object({
   description: z.string().optional(),
   price: z.number().positive("Price must be greater than 0"),
   category: z.string().min(1, "Category is required"),
-  image_file: z.instanceof(File).optional().or(z.null()), // allows clearing
+  image: z.instanceof(File).optional().or(z.null()), // allows clearing
   is_available: z.boolean(),
+  is_popular: z.boolean(),
+  lqip: z.string().optional(),
   start_time: z
     .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "The start time is required"),
   end_time: z
     .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "The end time is required"),
   choices: z.array(choiceSchema).optional(),
 });
 // ✅ Validation schema only for this section

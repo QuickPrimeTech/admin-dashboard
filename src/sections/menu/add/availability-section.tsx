@@ -31,8 +31,9 @@ export default function AvailabilitySection() {
     resolver: zodResolver(availabilitySchema) as Resolver<AvailabilityFormData>,
     defaultValues: {
       is_available: true,
-      start_time: "",
-      end_time: "",
+      is_popular: false,
+      start_time: "00:00",
+      end_time: "23:59",
     },
   });
 
@@ -72,6 +73,27 @@ export default function AvailabilitySection() {
                     <FormLabel className="text-base">Item Available</FormLabel>
                     <p className="text-sm text-muted-foreground">
                       Toggle to control if this item is available for ordering
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="is_popular"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border border-border p-4 bg-card">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Is popular</FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      Toggle to control if this item appears in the popular
+                      section
                     </p>
                   </div>
                   <FormControl>
