@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       return errorResponse("Failed to save item", 500, error.message);
     }
-    return NextResponse.json({ message: "Form data received" });
+    return NextResponse.json({ message: "Menu item was created successfully" });
   } catch (err) {
     const error = err as Error;
     return NextResponse.json(

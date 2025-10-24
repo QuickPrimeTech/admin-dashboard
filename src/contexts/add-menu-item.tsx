@@ -35,6 +35,7 @@ type MenuItemFormContextType = {
   setAvailabilityInfo: React.Dispatch<
     React.SetStateAction<AvailabilityFormData | null>
   >;
+  isSubmitting: boolean;
 
   editingChoice: ChoiceFormData | null;
   setEditingChoice: (choice: ChoiceFormData | null) => void;
@@ -58,6 +59,8 @@ export function AddMenuItemProvider({
   const localStorageKey = "add-menu-item-form-data";
 
   const [suspendPersist, setSuspendPersist] = useState(false);
+  //This is the state to show if the form is being submitted or not
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [imageInfo, setImageInfo] = useState<ImageInfo | null>(null);
   const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
   const [availabilityInfo, setAvailabilityInfo] =
@@ -177,12 +180,14 @@ export function AddMenuItemProvider({
           formData.append(key, String(value));
         }
       });
-
+      setIsSubmitting(true);
       // ✅ Send to your backend
-      await axios.post("/api/menu-items", formData, {
+      const res = await axios.post("/api/menu-items", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      console.log(res);
+      toast.success(res.data.message);
       // Optionally clear the data
       resetFormState();
     } catch (err: unknown) {
@@ -198,6 +203,7 @@ export function AddMenuItemProvider({
         console.error("Unexpected Error:", err);
       }
     }
+    setIsSubmitting(false);
     setSuspendPersist(false);
   };
 
@@ -226,6 +232,7 @@ export function AddMenuItemProvider({
         setImageInfo,
         basicInfo,
         setBasicInfo,
+        isSubmitting,
         choices,
         addChoice,
         setChoices,

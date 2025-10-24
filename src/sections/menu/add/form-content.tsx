@@ -6,11 +6,11 @@ import BasicInfoSection from "./basic-info-section";
 import { ChoiceBuilder } from "./choice-builder";
 import { ChoicesList } from "./choice-list";
 import { ImageSection } from "./image-section";
-import { Save } from "lucide-react";
+import { Loader, Save } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/add-menu-item";
 
 export function FormContent() {
-  const { submitForm } = useMenuItemForm();
+  const { submitForm, isSubmitting } = useMenuItemForm();
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -25,7 +25,16 @@ export function FormContent() {
           <ChoiceBuilder />
           <div className="flex justify-end">
             <Button type="submit" onClick={submitForm}>
-              <Save /> Save Menu Item
+              {isSubmitting ? (
+                <>
+                  <Loader className="animate-spin" />
+                  Saving Menu Item
+                </>
+              ) : (
+                <>
+                  <Save /> Save Menu Item
+                </>
+              )}
             </Button>
           </div>
         </div>
