@@ -92,7 +92,13 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
               </Badge>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                aria-label={`edit ${item.name}`}
+                asChild
+              >
                 <Link href={`/dashboard/menu/edit/${item.id}`}>
                   <Edit />
                   Edit

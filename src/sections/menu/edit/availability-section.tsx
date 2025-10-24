@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { useEffect } from "react";
+import { Edit } from "lucide-react";
 
 export default function AvailabilitySection() {
   const { availabilityInfo, setAvailabilityInfo } = useMenuItemForm();
@@ -144,7 +145,10 @@ export default function AvailabilitySection() {
 
             {/* Save Button */}
             <div className="flex justify-end pt-4 border-t border-border">
-              <Button type="submit">Save Availability</Button>
+              <Button type="submit">
+                <Edit />
+                Update Availability
+              </Button>
             </div>
           </form>
         </Form>

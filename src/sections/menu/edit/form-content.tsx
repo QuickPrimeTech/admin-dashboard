@@ -6,7 +6,7 @@ import BasicInfoSection from "./basic-info-section";
 import { ChoiceBuilder } from "./choice-builder";
 import { ChoicesList } from "./choice-list";
 import { ImageSection } from "./image-section";
-import { Loader, Save } from "lucide-react";
+import { Edit, Loader } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 
 export function FormContent() {
@@ -28,11 +28,11 @@ export function FormContent() {
               {isSubmitting ? (
                 <>
                   <Loader className="animate-spin" />
-                  Saving Menu Item
+                  Update Menu Item
                 </>
               ) : (
                 <>
-                  <Save /> Save Menu Item
+                  <Edit /> Update Menu Item
                 </>
               )}
             </Button>
