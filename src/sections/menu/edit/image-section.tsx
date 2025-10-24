@@ -15,21 +15,38 @@ import {
 import { Button } from "@ui/button";
 import { Input } from "@ui/input";
 import { cn } from "@/lib/utils";
-
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@ui/form";
 import { ImageFormValues, imageSchema } from "@/schemas/menu";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 
 export function ImageSection() {
+  const { status, data } = useMenuItemForm();
+
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
     defaultValues: { image: undefined },
   });
 
-  const { control, setValue, watch, trigger } = form;
+  const { control, setValue, watch } = form;
   const imageFile = watch("image");
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [isDragActive, setIsDragActive] = useState(false);
+
+  // ✅ Skeleton while loading
+  if (status === "pending") {
+    return (
+      <Card className="sticky top-16 h-fit animate-pulse">
+        <CardHeader>
+          <div className="h-5 w-1/2 bg-muted rounded-md mb-2" />
+          <div className="h-4 w-2/3 bg-muted rounded-md" />
+        </CardHeader>
+        <CardContent>
+          <div className="relative aspect-square rounded-xl bg-muted" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   // ✅ File selection logic
   function handleFileSelect(file: File) {
@@ -37,18 +54,15 @@ export function ImageSection() {
       setValue("image", file, { shouldValidate: true });
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      // ✅ Clean up URL only once
       return () => URL.revokeObjectURL(url);
     }
   }
 
-  // ✅ Remove selected image
   function handleRemove() {
     setValue("image", undefined);
     setPreviewUrl(undefined);
   }
 
-  // ✅ Drag events
   function handleDrag(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -63,6 +77,8 @@ export function ImageSection() {
     const file = e.dataTransfer.files?.[0];
     if (file) handleFileSelect(file);
   }
+
+  const hasExistingImage = !!data?.image_url;
 
   return (
     <Form {...form}>
@@ -83,12 +99,25 @@ export function ImageSection() {
             render={() => (
               <FormItem>
                 <div className="relative aspect-square">
-                  {previewUrl ? (
+                  {/* ✅ Existing image from server */}
+                  {hasExistingImage && !previewUrl && (
+                    <ServerImagePreview
+                      imageUrl={data.image_url}
+                      lqip={data.lqip}
+                      onRemove={handleRemove}
+                    />
+                  )}
+
+                  {/* ✅ New uploaded image */}
+                  {previewUrl && (
                     <ImagePreview
                       previewUrl={previewUrl}
                       onRemove={handleRemove}
                     />
-                  ) : (
+                  )}
+
+                  {/* ✅ Dropzone when no image */}
+                  {!previewUrl && !hasExistingImage && (
                     <ImageDropzone
                       isDragActive={isDragActive}
                       onDrag={handleDrag}
@@ -108,9 +137,10 @@ export function ImageSection() {
 }
 
 /* -------------------------------------------- */
-/* Subcomponents for clarity                    */
+/* Subcomponents                                */
 /* -------------------------------------------- */
 
+// ✅ Show uploaded image preview
 function ImagePreview({
   previewUrl,
   onRemove,
@@ -124,7 +154,7 @@ function ImagePreview({
         src={previewUrl}
         alt="Preview"
         fill
-        className="w-full h-full object-cover rounded-lg"
+        className="object-cover rounded-lg"
       />
       <Button
         type="button"
@@ -140,6 +170,41 @@ function ImagePreview({
   );
 }
 
+// ✅ Show existing image from database with LQIP
+function ServerImagePreview({
+  imageUrl,
+  lqip,
+  onRemove,
+}: {
+  imageUrl: string;
+  lqip?: string;
+  onRemove: () => void;
+}) {
+  return (
+    <>
+      <Image
+        src={imageUrl}
+        alt="Item Image"
+        fill
+        className="object-cover rounded-lg"
+        placeholder={lqip ? "blur" : "empty"}
+        blurDataURL={lqip || undefined}
+      />
+      <Button
+        type="button"
+        variant="destructive"
+        size="sm"
+        className="absolute top-2 right-2"
+        onClick={onRemove}
+      >
+        <Trash2 className="w-4 h-4 mr-1" />
+        Remove
+      </Button>
+    </>
+  );
+}
+
+// ✅ Dropzone
 function ImageDropzone({
   isDragActive,
   onDrag,

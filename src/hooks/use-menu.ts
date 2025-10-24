@@ -74,15 +74,30 @@ export function useDeleteMenuMutation() {
 
 //Query to get a certain menu item
 export function useMenuItemQuery(id?: number) {
+  const queryClient = useQueryClient();
+
   return useQuery<MenuItem>({
     queryKey: ["menu-item", id],
     queryFn: async () => {
       if (!id) throw new Error("Menu item ID is required");
 
-      const res = await axios.get(`/api/menu-items`, {
-        params: { id },
-      });
+      // Step 1: Check if menu-items list is already cached
+      const cachedMenuItems =
+        queryClient.getQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY);
 
+      // Step 2: If cache exists, find the specific item
+      if (cachedMenuItems && cachedMenuItems.length > 0) {
+        const cachedItem = cachedMenuItems.find(
+          (item) => Number(item.id) === Number(id)
+        );
+        if (cachedItem) {
+          // ✅ Return cached version immediately (no network call)
+          return cachedItem;
+        }
+      }
+
+      // Step 3: Otherwise, fetch from API
+      const res = await axios.get(`/api/menu-items`, { params: { id } });
       const result = res.data;
 
       if (!result.success) throw new Error(result.message || "Server error");
