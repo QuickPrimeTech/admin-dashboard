@@ -9,7 +9,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import ChoiceItem from "./choice-item";
-import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 
 export function ChoicesList() {
   const { choices, removeChoice, onEditChoice } = useMenuItemForm();

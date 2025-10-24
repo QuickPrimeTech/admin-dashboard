@@ -1,5 +1,12 @@
-import { AddMenuItemProvider } from "@/contexts/add-menu-item";
+import { AddMenuItemProvider } from "@/contexts/menu/add-menu-item";
 import { FormContent } from "@/sections/menu/add/form-content";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Add Menu Item",
+  description:
+    "Add a new menu item with images, choices, and availability. Customize your restaurant’s offerings easily from your dashboard.",
+};
 
 export default function AddMenuItemPage() {
   return (

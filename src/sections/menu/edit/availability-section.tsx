@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
-import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { useEffect } from "react";
 
 export default function AvailabilitySection() {

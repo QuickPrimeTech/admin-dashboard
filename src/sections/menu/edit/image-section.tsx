@@ -18,7 +18,7 @@ import { Input } from "@ui/input";
 import { cn } from "@/lib/utils";
 
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@ui/form";
-import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageFormValues, imageSchema } from "@/schemas/menu";
 import { base64ToFile, fileToBase64 } from "@/helpers/file-helpers";
 

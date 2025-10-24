@@ -34,7 +34,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Save } from "lucide-react";
-import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { useEffect } from "react";
 
 export default function BasicInfoSection() {

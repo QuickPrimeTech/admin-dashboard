@@ -19,7 +19,6 @@ export function useMenuQuery() {
   return useQuery({
     queryKey: MENU_ITEMS_QUERY_KEY,
     queryFn: fetchMenuItems,
-    staleTime: 1000 * 60 * 5, // 1 minute caching
   });
 }
 

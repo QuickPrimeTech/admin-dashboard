@@ -15,7 +15,7 @@ export default function MenuManagement() {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   // 🚀 useQuery handles loading + error + caching
-  const { data: menuItems = [], isLoading, refetch } = useMenuQuery();
+  const { data: menuItems = [], isLoading } = useMenuQuery();
 
   // CRUD Handlers
   const handleDelete = useDeleteMenuMutation();

@@ -7,7 +7,7 @@ import { ChoiceBuilder } from "./choice-builder";
 import { ChoicesList } from "./choice-list";
 import { ImageSection } from "./image-section";
 import { Loader, Save } from "lucide-react";
-import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 
 export function FormContent() {
   const { submitForm, isSubmitting } = useMenuItemForm();

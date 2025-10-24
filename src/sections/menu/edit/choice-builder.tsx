@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@ui/form";
 import { choiceSchema, type ChoiceFormData } from "@/schemas/menu";
-import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import OptionItem from "./choice-option-item";
 
 export function ChoiceBuilder() {
