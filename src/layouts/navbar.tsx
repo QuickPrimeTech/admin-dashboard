@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -18,22 +18,33 @@ import {
 import { ModeToggle } from "@/components/mode-toggle";
 import { logout } from "@/app/auth/actions/actions";
 import { LogOutDialog } from "@/components/logout-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function AppNavbar() {
-  const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { state } = useSidebar();
 
   async function handleLogout() {
-    setOpen(true); // show the dialog
+    setDialogOpen(true); // show the dialog
     // Wait a short moment to show the spinner, then log out
-    setTimeout(async () => {
-      await logout();
-    }, 2000);
+    await logout();
   }
 
   return (
     <>
       <header className="flex h-16 sticky top-0 z-50 shrink-0 items-center gap-2 border-b bg-background px-4">
-        <SidebarTrigger className="-ml-1" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarTrigger className="-ml-1" />
+          </TooltipTrigger>
+          <TooltipContent className="bg-secondary text-secondary-foreground">
+            {state === "collapsed" ? "Open Sidebar" : "Close Sidebar"}
+          </TooltipContent>
+        </Tooltip>
         <Separator orientation="vertical" className="mr-2 h-4" />
         <div className="flex-1" />
 
@@ -73,7 +84,7 @@ export function AppNavbar() {
       </header>
 
       {/* Log out Dialog */}
-      <LogOutDialog open={open} />
+      <LogOutDialog open={dialogOpen} />
     </>
   );
 }
