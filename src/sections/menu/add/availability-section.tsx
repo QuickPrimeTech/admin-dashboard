@@ -27,19 +27,24 @@ import { useEffect } from "react";
 
 export default function AvailabilitySection() {
   const { availabilityInfo, setAvailabilityInfo } = useMenuItemForm();
+  const defaultData: AvailabilityFormData = {
+    is_available: true,
+    is_popular: false,
+    start_time: "00:00",
+    end_time: "23:59",
+  };
   const form = useForm<AvailabilityFormData>({
     resolver: zodResolver(availabilitySchema) as Resolver<AvailabilityFormData>,
-    defaultValues: {
-      is_available: true,
-      is_popular: false,
-      start_time: "00:00",
-      end_time: "23:59",
-    },
+    defaultValues: defaultData,
   });
 
   useEffect(() => {
     if (availabilityInfo) {
+      // Prefill from context when editing or restoring from localStorage
       form.reset(availabilityInfo);
+    } else {
+      // Reset to default values when context is cleared (after submit)
+      form.reset(defaultData);
     }
   }, [availabilityInfo, form]);
 

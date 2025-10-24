@@ -33,7 +33,7 @@ export function ImageSection() {
   const { control, setValue, watch, trigger } = form;
   const imageFile = watch("image");
 
-  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [isDragActive, setIsDragActive] = useState(false);
   // ✅ Memoize handleImageUpload to avoid dependency warnings
   const handleImageUpload = useCallback(
@@ -41,8 +41,7 @@ export function ImageSection() {
       await trigger("image");
       const base64 = await fileToBase64(file);
 
-      setImageInfo((prev) => ({
-        preview_url: prev?.preview_url || previewUrl || "",
+      setImageInfo(() => ({
         image: file,
         base64,
       }));
@@ -50,30 +49,45 @@ export function ImageSection() {
     [trigger, setImageInfo, previewUrl]
   );
 
-  // Detect global reset from context and clear form + preview
   useEffect(() => {
-    if (imageInfo === null) {
-      form.reset({ image: undefined }); // clears all react-hook-form state
-      setPreviewUrl(undefined); // removes preview visually
-    }
-  }, [imageInfo, form]);
+    // Restore persisted image
+    if (!imageFile && imageInfo?.base64) {
+      if (!previewUrl) {
+        setPreviewUrl(imageInfo.base64); // base64 works as preview source
+        console.log("Checked no previewUrl", previewUrl);
+      }
 
-  // Detect when global form is reset
-  useEffect(() => {
+      if (!imageFile) {
+        const restoredFile = base64ToFile(
+          imageInfo.base64,
+          "restored-image.png"
+        );
+        setValue("image", restoredFile);
+      }
+      return;
+    }
+
+    // Remove preview if form is submitted
     if (!imageInfo) {
       setPreviewUrl(undefined);
       setValue("image", undefined);
+      return;
     }
-  }, [imageInfo, setValue]);
+  }, [imageInfo]);
 
-  //  File selection logic
+  // ✅ File selection logic
   function handleFileSelect(file: File) {
     if (file?.type.startsWith("image/")) {
       setValue("image", file, { shouldValidate: true });
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      handleImageUpload(file);
+      // ✅ Clean up URL only once
+      return () => URL.revokeObjectURL(url);
     }
   }
 
-  //  Remove selected image
+  // ✅ Remove selected image
   function handleRemove() {
     setValue("image", undefined);
     setImageInfo(null);

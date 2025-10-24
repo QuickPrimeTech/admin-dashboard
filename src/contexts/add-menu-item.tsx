@@ -44,7 +44,6 @@ type MenuItemFormContextType = {
 };
 
 type ImageInfo = {
-  preview_url: string;
   image: File;
   base64: string;
 };
@@ -59,6 +58,7 @@ export function AddMenuItemProvider({
   //  Key for localStorage for persisting form data
   const localStorageKey = "add-menu-item-form-data";
 
+  const [suspendPersist, setSuspendPersist] = useState(false);
   const [imageInfo, setImageInfo] = useState<ImageInfo | null>(null);
   const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
   const [availabilityInfo, setAvailabilityInfo] =
@@ -101,6 +101,7 @@ export function AddMenuItemProvider({
 
   // ✅ Persist data but skip if nothing important changed
   useEffect(() => {
+    if (suspendPersist) return;
     let timeout: NodeJS.Timeout;
 
     const persist = async () => {
@@ -126,10 +127,18 @@ export function AddMenuItemProvider({
 
     persist();
     return () => clearTimeout(timeout);
-  }, [imageInfo?.base64, basicInfo, availabilityInfo, choices, imageInfo]);
+  }, [
+    suspendPersist,
+    imageInfo?.base64,
+    basicInfo,
+    availabilityInfo,
+    choices,
+    imageInfo,
+  ]);
 
   const submitForm = async () => {
     try {
+      setSuspendPersist(true);
       if (!basicInfo) {
         toast.error("Please fill in the basic info first.");
         return;
@@ -186,6 +195,7 @@ export function AddMenuItemProvider({
         console.error("Unexpected Error:", err);
       }
     }
+    setSuspendPersist(false);
   };
 
   const removeChoice = (id: string) => {
