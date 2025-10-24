@@ -108,11 +108,30 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   // Checking if the user is authenticated
   const { supabase, response } = await getAuthenticatedUser();
   if (response) return response;
 
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  if (id) {
+    // Fetch a single item by ID
+    const { data, error } = await supabase
+      .from("menu_items")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      return errorResponse("Failed to fetch menu item", 500, error.message);
+    }
+
+    return successResponse("Menu item fetched successfully", data);
+  }
+
+  //Otherwise fetch all menu items is not provided and id
   const { data, error } = await supabase
     .from("menu_items")
     .select("*")
