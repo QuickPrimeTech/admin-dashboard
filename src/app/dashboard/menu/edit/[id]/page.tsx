@@ -18,11 +18,22 @@ export default async function EditMenuPage({
   const { id } = await params;
 
   return (
-    <div>
-      Welcome to the update page. You are about to edit and the string form {id}
-      <EditMenuItemProvider>
-        <FormContent />
-      </EditMenuItemProvider>
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between mb-8 space-y-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 text-foreground">
+              Edit Menu Item
+            </h1>
+            <p className="text-muted-foreground">
+              Edit this menu dish with customizable options for your restaurant
+            </p>
+          </div>
+        </div>
+        <EditMenuItemProvider>
+          <FormContent />
+        </EditMenuItemProvider>
+      </div>
     </div>
   );
 }

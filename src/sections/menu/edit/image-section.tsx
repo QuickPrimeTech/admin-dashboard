@@ -1,6 +1,5 @@
 "use client";
-
-import { useState, useEffect, DragEvent } from "react";
+import { useState, DragEvent } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -18,13 +17,9 @@ import { Input } from "@ui/input";
 import { cn } from "@/lib/utils";
 
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@ui/form";
-import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageFormValues, imageSchema } from "@/schemas/menu";
-import { base64ToFile, fileToBase64 } from "@/helpers/file-helpers";
 
 export function ImageSection() {
-  const { imageInfo, setImageInfo } = useMenuItemForm();
-
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
     defaultValues: { image: undefined },
@@ -36,49 +31,12 @@ export function ImageSection() {
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [isDragActive, setIsDragActive] = useState(false);
 
-  const handleImageUpload = async (file: File) => {
-    await trigger("image");
-    const base64 = await fileToBase64(file);
-
-    setImageInfo(() => ({
-      image: file,
-      base64,
-    }));
-  };
-
-  useEffect(() => {
-    // Restore persisted image
-    if (!imageFile && imageInfo?.base64) {
-      if (!previewUrl) {
-        setPreviewUrl(imageInfo.base64); // base64 works as preview source
-        console.log("Checked no previewUrl", previewUrl);
-      }
-
-      if (!imageFile) {
-        const restoredFile = base64ToFile(
-          imageInfo.base64,
-          "restored-image.png"
-        );
-        setValue("image", restoredFile);
-      }
-      return;
-    }
-
-    // Remove preview if form is submitted
-    if (!imageInfo) {
-      setPreviewUrl(undefined);
-      setValue("image", undefined);
-      return;
-    }
-  }, [imageInfo]);
-
   // ✅ File selection logic
   function handleFileSelect(file: File) {
     if (file?.type.startsWith("image/")) {
       setValue("image", file, { shouldValidate: true });
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      handleImageUpload(file);
       // ✅ Clean up URL only once
       return () => URL.revokeObjectURL(url);
     }
@@ -87,7 +45,6 @@ export function ImageSection() {
   // ✅ Remove selected image
   function handleRemove() {
     setValue("image", undefined);
-    setImageInfo(null);
     setPreviewUrl(undefined);
   }
 
