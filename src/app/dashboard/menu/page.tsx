@@ -12,30 +12,18 @@ import { MenuGrid } from "@/sections/menu/menu-grid";
 import { MenuItem } from "@/types/menu";
 import { MenuFiltersSkeleton } from "@/components/skeletons/menu-filter-skeleton";
 import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
-
-async function fetchMenuItems() {
-  const res = await fetch("/api/menu-items", { method: "GET" });
-  if (!res.ok) throw new Error("Failed to fetch menu items");
-  const result = await res.json();
-
-  if (!result.success) throw new Error(result.message || "Server error");
-  return result.data as MenuItem[];
-}
+import axios from "axios";
+import { useDeleteMenuMutation, useMenuQuery } from "@/hooks/use-menu";
 
 export default function MenuManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   // 🚀 useQuery handles loading + error + caching
-  const {
-    data: menuItems = [],
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["menu-items"],
-    queryFn: fetchMenuItems,
-    staleTime: 1000 * 60 * 5, // 1 minute caching
-  });
+  const { data: menuItems = [], isLoading, refetch } = useMenuQuery();
+
+  // CRUD Handlers
+  const handleDelete = useDeleteMenuMutation();
 
   // Extract categories dynamically
   const categories = useMemo(() => {
@@ -56,20 +44,6 @@ export default function MenuManagement() {
       return matchesSearch && matchesCategory;
     });
   }, [menuItems, searchTerm, selectedCategory]);
-
-  // CRUD Handlers
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await fetch(`/api/menu-items?id=${id}`, { method: "DELETE" });
-      const result = await res.json();
-
-      if (!res.ok) throw new Error(result.message || "Failed to delete");
-      toast.success("Menu item deleted successfully");
-      refetch(); //  Re-fetch updated data
-    } catch {
-      toast.error("Failed to delete menu item");
-    }
-  };
 
   return (
     <div className="space-y-6">
