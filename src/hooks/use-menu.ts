@@ -71,3 +71,24 @@ export function useDeleteMenuMutation() {
     },
   });
 }
+
+//Query to get a certain menu item
+export function useMenuItemQuery(id?: number) {
+  return useQuery<MenuItem>({
+    queryKey: ["menu-item", id],
+    queryFn: async () => {
+      if (!id) throw new Error("Menu item ID is required");
+
+      const res = await axios.get(`/api/menu-items`, {
+        params: { id },
+      });
+
+      const result = res.data;
+
+      if (!result.success) throw new Error(result.message || "Server error");
+
+      return result.data as MenuItem;
+    },
+    enabled: !!id, // only run when id exists
+  });
+}

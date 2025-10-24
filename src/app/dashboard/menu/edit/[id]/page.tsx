@@ -30,7 +30,7 @@ export default async function EditMenuPage({
             </p>
           </div>
         </div>
-        <EditMenuItemProvider>
+        <EditMenuItemProvider id={Number(id)}>
           <FormContent />
         </EditMenuItemProvider>
       </div>
