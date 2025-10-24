@@ -27,8 +27,7 @@ export function ImageSection() {
     defaultValues: { image: undefined },
   });
 
-  const { control, setValue, watch } = form;
-  const imageFile = watch("image");
+  const { control, setValue } = form;
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [isDragActive, setIsDragActive] = useState(false);

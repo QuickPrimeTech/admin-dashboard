@@ -29,7 +29,7 @@ import { UseMutationResult } from "@tanstack/react-query";
 
 interface MenuGridProps {
   items: MenuItem[];
-  onDelete: UseMutationResult<any, Error, number, unknown>;
+  onDelete: UseMutationResult<{ id: number }, Error, number, unknown>;
 }
 
 export function MenuGrid({ items, onDelete }: MenuGridProps) {

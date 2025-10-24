@@ -7,8 +7,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { MenuItem } from "@/types/menu";
-import { QueryObserverResult } from "@tanstack/react-query";
 import { AlertCircleIcon, RefreshCw } from "lucide-react";
 
 type EditErrorStateProps = {
