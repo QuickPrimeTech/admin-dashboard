@@ -12,10 +12,8 @@ import {
   errorResponse,
   successResponse,
 } from "@/helpers/common";
-import { FormDataFields } from "@/types/menu";
 import { revalidatePage } from "@/helpers/revalidator";
 import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
-import { json } from "stream/consumers";
 
 export async function POST(request: NextRequest) {
   // checking if the client is authenticated to add a menu item

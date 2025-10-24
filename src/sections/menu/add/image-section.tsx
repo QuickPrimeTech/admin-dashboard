@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, DragEvent, useCallback } from "react";
+import { useState, useEffect, DragEvent } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -35,19 +35,16 @@ export function ImageSection() {
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [isDragActive, setIsDragActive] = useState(false);
-  // ✅ Memoize handleImageUpload to avoid dependency warnings
-  const handleImageUpload = useCallback(
-    async (file: File) => {
-      await trigger("image");
-      const base64 = await fileToBase64(file);
 
-      setImageInfo(() => ({
-        image: file,
-        base64,
-      }));
-    },
-    [trigger, setImageInfo, previewUrl]
-  );
+  const handleImageUpload = async (file: File) => {
+    await trigger("image");
+    const base64 = await fileToBase64(file);
+
+    setImageInfo(() => ({
+      image: file,
+      base64,
+    }));
+  };
 
   useEffect(() => {
     // Restore persisted image

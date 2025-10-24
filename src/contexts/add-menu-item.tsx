@@ -7,7 +7,6 @@ import {
   type AvailabilityFormData,
   type BasicInfoFormData,
   type ChoiceFormData,
-  type MenuItemFormData,
 } from "@/schemas/menu";
 import {
   base64ToFile,
@@ -143,18 +142,22 @@ export function AddMenuItemProvider({
         toast.error("Please fill in the basic info first.");
         return;
       }
+      if (!availabilityInfo) {
+        toast.error("Please fill in the availability info first.");
+        return;
+      }
 
       // Combine all form sections into one object
-      const data: MenuItemFormData = {
+      const data = {
         ...basicInfo,
         image: imageInfo?.image || undefined,
         lqip: imageInfo
           ? await generateBlurDataURL(imageInfo.image)
           : undefined,
         is_available: availabilityInfo?.is_available ?? false,
-        start_time: availabilityInfo?.start_time ?? "00:00",
-        end_time: availabilityInfo?.end_time ?? "23:59",
-        is_popular: availabilityInfo?.is_popular ?? false,
+        start_time: availabilityInfo?.start_time,
+        end_time: availabilityInfo?.end_time,
+        is_popular: availabilityInfo?.is_popular,
         description: basicInfo?.description || undefined,
         choices,
       };
@@ -182,7 +185,7 @@ export function AddMenuItemProvider({
 
       // Optionally clear the data
       resetFormState();
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ZodError) {
         err.errors.forEach((issue) => {
           toast.error(`${issue.path.join(".")}: ${issue.message}`);
