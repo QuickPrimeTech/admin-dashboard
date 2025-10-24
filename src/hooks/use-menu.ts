@@ -1,3 +1,4 @@
+import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
 import { MenuItem } from "@/types/menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -10,7 +11,6 @@ async function fetchMenuItems() {
   const res = await fetch("/api/menu-items", { method: "GET" });
   if (!res.ok) throw new Error("Failed to fetch menu items");
   const result = await res.json();
-
   if (!result.success) throw new Error(result.message || "Server error");
   return result.data as MenuItem[];
 }
@@ -43,7 +43,11 @@ export function useDeleteMenuMutation() {
       queryClient.setQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY, (old) => {
         return old?.filter((menuItem) => Number(menuItem.id) !== id);
       });
-
+      //Updating the overview stats from the homepage to have the reduced value
+      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+        if (!old) return;
+        return { ...old, menu: old.menu - 1 };
+      });
       //Returning the previous items for rollback on error
       return { previousMenuItems };
     },
@@ -55,6 +59,11 @@ export function useDeleteMenuMutation() {
           onMutateResult.previousMenuItems
         );
       }
+      //Rolling back the overview stats menu count
+      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+        if (!old) return;
+        return { ...old, menu: old.menu + 1 };
+      });
       //Giving the user feedback that the request didn't go through
       toast.error("There was an error deleting your menu item");
     },
