@@ -110,13 +110,12 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   // Checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
+  const { supabase, response } = await getAuthenticatedUser();
   if (response) return response;
 
   const { data, error } = await supabase
     .from("menu_items")
     .select("*")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
