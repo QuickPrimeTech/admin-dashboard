@@ -1,7 +1,11 @@
 import { MenuItem } from "@/types/menu";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { toast } from "sonner";
+//This is the name of the key to reuse
+const MENU_ITEMS_QUERY_KEY = ["menu-items"];
 
+//This is the fetch function to get all the menu items needed
 async function fetchMenuItems() {
   const res = await fetch("/api/menu-items", { method: "GET" });
   if (!res.ok) throw new Error("Failed to fetch menu items");
@@ -13,22 +17,49 @@ async function fetchMenuItems() {
 
 export function useMenuQuery() {
   return useQuery({
-    queryKey: ["menu-items"],
+    queryKey: MENU_ITEMS_QUERY_KEY,
     queryFn: fetchMenuItems,
     staleTime: 1000 * 60 * 5, // 1 minute caching
   });
 }
 
 export function useDeleteMenuMutation() {
-  return async (id: string) => {
-    try {
-      const res = await fetch(`/api/menu-items?id=${id}`, { method: "DELETE" });
-      const result = await res.json();
+  const queryClient = useQueryClient();
 
-      if (!res.ok) throw new Error(result.message || "Failed to delete");
-      toast.success("Menu item deleted successfully");
-    } catch {
-      toast.error("Failed to delete menu item");
-    }
-  };
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await axios.delete(`/api/menu-items?id=${id}`);
+      return res.data;
+    },
+    onMutate: async (id: number) => {
+      //Canceling all the query request that are taking place to prevent intefering with the optimistic update
+      await queryClient.cancelQueries({ queryKey: MENU_ITEMS_QUERY_KEY });
+      //Taking a snapshot of the previous queries in order to have a smooth rollback
+      const previousMenuItems = queryClient.getQueryData<MenuItem[]>([
+        "menu-items",
+      ]);
+      //Removing the menu item from the cache for the user to get immediate feedback
+
+      queryClient.setQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY, (old) => {
+        return old?.filter((menuItem) => Number(menuItem.id) !== id);
+      });
+
+      //Returning the previous items for rollback on error
+      return { previousMenuItems };
+    },
+    onError: (_err, _id, onMutateResult) => {
+      //Rolling back to the previous menuItems
+      if (onMutateResult?.previousMenuItems) {
+        queryClient.setQueryData(
+          MENU_ITEMS_QUERY_KEY,
+          onMutateResult.previousMenuItems
+        );
+      }
+      //Giving the user feedback that the request didn't go through
+      toast.error("There was an error deleting your menu item");
+    },
+    onSuccess: () => {
+      toast.success("Menu Item was deleted successfully");
+    },
+  });
 }

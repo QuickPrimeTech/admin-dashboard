@@ -1,18 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus, QrCode } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
-
 import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
-import { MenuItem } from "@/types/menu";
 import { MenuFiltersSkeleton } from "@/components/skeletons/menu-filter-skeleton";
 import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
-import axios from "axios";
 import { useDeleteMenuMutation, useMenuQuery } from "@/hooks/use-menu";
 
 export default function MenuManagement() {

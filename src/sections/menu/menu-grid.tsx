@@ -25,10 +25,11 @@ import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
 import { MenuItem } from "@/types/menu";
 import Link from "next/link";
+import { UseMutationResult } from "@tanstack/react-query";
 
 interface MenuGridProps {
   items: MenuItem[];
-  onDelete: (id: string) => void;
+  onDelete: UseMutationResult<any, Error, number, unknown>;
 }
 
 export function MenuGrid({ items, onDelete }: MenuGridProps) {
@@ -122,7 +123,7 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive hover:bg-destructive/90 text-white"
-                      onClick={() => onDelete(item.id)}
+                      onClick={() => onDelete.mutate(Number(item.id))}
                     >
                       Yes, delete
                     </AlertDialogAction>
