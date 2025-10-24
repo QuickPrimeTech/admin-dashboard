@@ -6,7 +6,6 @@ import {
   Users,
   Camera,
   HelpCircle,
-  Video,
   Settings,
   Utensils,
   QrCode,
