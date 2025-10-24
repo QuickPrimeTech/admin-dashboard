@@ -63,6 +63,10 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
               alt={item.name}
               fill
               className="object-cover"
+              {...(item.lqip && {
+                placeholder: "blur",
+                blurDataURL: item.lqip,
+              })}
             />
           </div>
           <CardHeader>

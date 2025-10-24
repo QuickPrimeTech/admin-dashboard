@@ -22,6 +22,7 @@ export interface MenuItem
     AvailabilityFormData,
     BasicInfoFormData {
   image_url: string;
+  lqip: string;
   id: string;
 }
 
