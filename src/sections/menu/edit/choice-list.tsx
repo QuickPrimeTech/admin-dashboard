@@ -1,0 +1,48 @@
+// src/sections/menu/edit/choices-list.tsx
+"use client";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import ChoiceItem from "./choice-item";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
+import { ChoicesListSkeleton } from "../skeletons/choice-list-skeleton";
+
+export function ChoicesList() {
+  const { data, status } = useMenuItemForm();
+
+  const editChoice = (id: string) => {
+    console.log("About to edit", id);
+  };
+  const removeChoice = (id: string) => {
+    console.log("About to remove", id);
+  };
+
+  //Handling the Loading state
+  if (!data || status === "pending") {
+    return <ChoicesListSkeleton />;
+  }
+
+  return (
+    <Card className="border-0 shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-lg">Customization Options</CardTitle>
+        <CardDescription>Your added choices and options</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {data.choices.map((choice) => (
+          <ChoiceItem
+            key={choice.id}
+            choice={choice}
+            onEdit={() => editChoice(choice.id!)}
+            onRemove={() => removeChoice(choice.id!)}
+          />
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
