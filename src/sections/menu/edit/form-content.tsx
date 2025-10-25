@@ -19,7 +19,7 @@ export function FormContent() {
         <ChoiceBuilder />
         <div className="flex justify-end">
           <Button type="submit">
-            <Edit /> Update Menu Item
+            <Edit /> Update Changes
           </Button>
         </div>
       </div>

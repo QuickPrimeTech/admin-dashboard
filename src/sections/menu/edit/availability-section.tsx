@@ -156,7 +156,7 @@ export default function AvailabilitySection() {
 
             {/* Save Button */}
             <div className="flex justify-end pt-4 border-t border-border">
-              <Button type="submit">
+              <Button type="submit" disabled={!form.formState.isDirty}>
                 <Edit />
                 Update Availability
               </Button>

@@ -191,7 +191,7 @@ export default function BasicInfoSection() {
 
             {/* Save button */}
             <div className="flex justify-end pt-4 border-t border-border">
-              <Button type="submit">
+              <Button type="submit" disabled={!form.formState.isDirty}>
                 <Edit /> Update Basic Info
               </Button>
             </div>
