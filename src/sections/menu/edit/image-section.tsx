@@ -21,7 +21,7 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 
 export function ImageSection() {
-  const { status, data, unsavedChanges, setUnsavedChanges } = useMenuItemForm();
+  const { status, data, setUnsavedChanges } = useMenuItemForm();
 
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
@@ -48,7 +48,7 @@ export function ImageSection() {
       ...prev,
       image: hasChanged,
     }));
-  }, [previewUrl, isServerImageRemoved, setUnsavedChanges]);
+  }, [previewUrl, isServerImageRemoved, setUnsavedChanges, data?.image_url]);
 
   // Skeleton while loading
   if (status === "pending") {

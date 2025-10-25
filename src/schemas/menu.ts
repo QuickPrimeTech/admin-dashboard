@@ -72,6 +72,7 @@ export const basicInfoSchema = z.object({
   description: z.string().min(1, "Description is required"),
 });
 
+export type MenuItemFormData = z.infer<typeof menuItemSchema>;
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
 export type ImageFormValues = z.infer<typeof imageSchema>;
 // Type exports

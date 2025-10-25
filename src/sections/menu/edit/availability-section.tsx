@@ -26,7 +26,7 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { AvailabilitySkeleton } from "@/sections/menu/skeletons/availability-skeleton";
 
 export default function AvailabilitySection() {
-  const { data, status, unsavedChanges, setUnsavedChanges } = useMenuItemForm();
+  const { data, status, setUnsavedChanges } = useMenuItemForm();
 
   const defaultData: AvailabilityFormData = {
     is_available: true,
@@ -54,12 +54,12 @@ export default function AvailabilitySection() {
 
   useEffect(() => {
     if (form.formState.isDirty) {
-      setUnsavedChanges({ ...unsavedChanges, avaiabilityInfo: true });
+      setUnsavedChanges((prev) => ({ ...prev, avaiabilityInfo: true }));
       return;
     }
 
-    setUnsavedChanges({ ...unsavedChanges, avaiabilityInfo: false });
-  }, [form.formState.isDirty]);
+    setUnsavedChanges((prev) => ({ ...prev, avaiabilityInfo: false }));
+  }, [form.formState.isDirty, setUnsavedChanges]);
 
   // ✅ Show skeletons while loading
   if (status === "pending") {

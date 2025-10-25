@@ -1,18 +1,24 @@
 // src/context/menu-item-form-context.tsx
 "use client";
 import { useMenuItemQuery } from "@/hooks/use-menu";
+import { MenuItemFormData } from "@/schemas/menu";
 import { EditErrorState } from "@/sections/menu/edit/error-state";
 import { MenuItem } from "@/types/menu";
 import React, { createContext, useContext, useState } from "react";
+
+type Sections = "basicInfo" | "image" | "availabilityInfo" | "choices";
 
 type MenuItemFormContext = {
   data: MenuItem | null;
   status: "error" | "success" | "pending";
   //To save the form data that has changed and cosolidated
-  formData: Record<string, any>;
-  setFormData: (values: Record<string, any>) => void;
+  formData: Record<string, Partial<MenuItemFormData>>;
+  setFormData: (values: Record<string, Partial<MenuItemFormData>>) => void;
   //To save the form data taht has changed
-  updateFormData: (section: string, values: any) => void;
+  updateFormData: (
+    section: Sections,
+    values: Partial<MenuItemFormData>
+  ) => void;
   unsavedChanges: Record<string, boolean>;
   setUnsavedChanges: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
@@ -28,13 +34,18 @@ export function EditMenuItemProvider({
   id: number;
 }) {
   const { data, status, refetch, isError } = useMenuItemQuery(id);
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<
+    Record<string, Partial<MenuItemFormData>>
+  >({});
   const [unsavedChanges, setUnsavedChanges] = useState<Record<string, boolean>>(
     {}
   );
 
   // function to update the specific data in the form data
-  function updateFormData(section: string, values: any) {
+  function updateFormData(
+    section: Sections,
+    values: Partial<MenuItemFormData>
+  ) {
     setFormData((prev) => ({
       ...prev,
       [section]: { ...prev[section], ...values },

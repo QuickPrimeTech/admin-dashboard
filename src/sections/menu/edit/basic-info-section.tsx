@@ -37,7 +37,7 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
 
 export default function BasicInfoSection() {
-  const { data, status, unsavedChanges, setUnsavedChanges } = useMenuItemForm();
+  const { data, status, setUnsavedChanges } = useMenuItemForm();
 
   const form = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
@@ -66,12 +66,12 @@ export default function BasicInfoSection() {
   };
   useEffect(() => {
     if (form.formState.isDirty) {
-      setUnsavedChanges({ ...unsavedChanges, basicInfo: true });
+      setUnsavedChanges((prev) => ({ ...prev, basicInfo: true }));
       return;
     }
 
-    setUnsavedChanges({ ...unsavedChanges, basicInfo: false });
-  }, [form.formState.isDirty]);
+    setUnsavedChanges((prev) => ({ ...prev, basicInfo: false }));
+  }, [form.formState.isDirty, setUnsavedChanges]);
 
   // Show skeletons when loading
   if (status === "pending") {
