@@ -19,16 +19,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { AvailabilitySkeleton } from "@/sections/menu/skeletons/availability-skeleton";
-import { Edit } from "lucide-react";
 
 export default function AvailabilitySection() {
-  const { data, status } = useMenuItemForm();
+  const { data, status, unsavedChanges, setUnsavedChanges } = useMenuItemForm();
 
   const defaultData: AvailabilityFormData = {
     is_available: true,
@@ -53,6 +51,15 @@ export default function AvailabilitySection() {
       });
     }
   }, [data, form]);
+
+  useEffect(() => {
+    if (form.formState.isDirty) {
+      setUnsavedChanges({ ...unsavedChanges, avaiabilityInfo: true });
+      return;
+    }
+
+    setUnsavedChanges({ ...unsavedChanges, avaiabilityInfo: false });
+  }, [form.formState.isDirty]);
 
   // ✅ Show skeletons while loading
   if (status === "pending") {
@@ -152,14 +159,6 @@ export default function AvailabilitySection() {
                   </FormItem>
                 )}
               />
-            </div>
-
-            {/* Save Button */}
-            <div className="flex justify-end pt-4 border-t border-border">
-              <Button type="submit" disabled={!form.formState.isDirty}>
-                <Edit />
-                Update Availability
-              </Button>
             </div>
           </form>
         </Form>

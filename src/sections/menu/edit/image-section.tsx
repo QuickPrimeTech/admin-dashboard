@@ -1,5 +1,5 @@
 "use client";
-import { useState, DragEvent } from "react";
+import { useState, DragEvent, useEffect } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -21,7 +21,7 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 
 export function ImageSection() {
-  const { status, data } = useMenuItemForm();
+  const { status, data, unsavedChanges, setUnsavedChanges } = useMenuItemForm();
 
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
@@ -34,12 +34,28 @@ export function ImageSection() {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isServerImageRemoved, setIsServerImageRemoved] = useState(false); // ✅ new state
 
-  // ✅ Skeleton while loading
+  //  Detect unsaved changes for image
+  useEffect(() => {
+    const hadServerImage = data?.image_url;
+
+    // Case 1: Had server image → removing it counts as change
+    // Case 2: No server image → adding & then removing returns to initial state (not a change)
+    const hasChanged = hadServerImage
+      ? isServerImageRemoved || !!previewUrl
+      : !!previewUrl;
+    //Syncing with the context to update the save changes button
+    setUnsavedChanges((prev) => ({
+      ...prev,
+      image: hasChanged,
+    }));
+  }, [previewUrl, isServerImageRemoved, setUnsavedChanges]);
+
+  // Skeleton while loading
   if (status === "pending") {
     return <ImageSectionSkeleton />;
   }
 
-  // ✅ File selection logic
+  // File selection logic
   function handleFileSelect(file: File) {
     if (file?.type.startsWith("image/")) {
       setValue("image", file, { shouldValidate: true });
@@ -111,12 +127,32 @@ export function ImageSection() {
 
                   {/* ✅ Dropzone when no image or removed */}
                   {!previewUrl && !hasExistingImage && (
-                    <ImageDropzone
-                      isDragActive={isDragActive}
-                      onDrag={handleDrag}
-                      onDrop={handleDrop}
-                      onFileSelect={handleFileSelect}
-                    />
+                    <div className="relative">
+                      <ImageDropzone
+                        isDragActive={isDragActive}
+                        onDrag={handleDrag}
+                        onDrop={handleDrop}
+                        onFileSelect={handleFileSelect}
+                      />
+
+                      {/* ✅ Restore button if image was removed but existed on server */}
+                      {isServerImageRemoved && data?.image_url && (
+                        <div className="absolute inset-x-0 -bottom-1/2 flex justify-center">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setIsServerImageRemoved(false);
+                              setValue("image", undefined); // clear uploaded file value
+                              setPreviewUrl(undefined); // reset preview
+                            }}
+                          >
+                            Restore Image
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
                 <FormMessage />

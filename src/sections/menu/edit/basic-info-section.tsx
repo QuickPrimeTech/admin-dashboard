@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BasicInfoFormData, basicInfoSchema } from "@/schemas/menu";
 import {
@@ -34,12 +33,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Edit } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
 
 export default function BasicInfoSection() {
-  const { data, status } = useMenuItemForm();
+  const { data, status, unsavedChanges, setUnsavedChanges } = useMenuItemForm();
 
   const form = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
@@ -66,8 +64,14 @@ export default function BasicInfoSection() {
   const onSubmit = () => {
     toast.success("Basic info saved!");
   };
+  useEffect(() => {
+    if (form.formState.isDirty) {
+      setUnsavedChanges({ ...unsavedChanges, basicInfo: true });
+      return;
+    }
 
-  // Helper skeleton field
+    setUnsavedChanges({ ...unsavedChanges, basicInfo: false });
+  }, [form.formState.isDirty]);
 
   // Show skeletons when loading
   if (status === "pending") {
@@ -188,13 +192,6 @@ export default function BasicInfoSection() {
                 </FormItem>
               )}
             />
-
-            {/* Save button */}
-            <div className="flex justify-end pt-4 border-t border-border">
-              <Button type="submit" disabled={!form.formState.isDirty}>
-                <Edit /> Update Basic Info
-              </Button>
-            </div>
           </form>
         </Form>
       </CardContent>
