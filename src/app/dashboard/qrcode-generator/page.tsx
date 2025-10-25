@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon, Upload } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import Link from "next/link";
 
 export default function ClientQR() {
   const [options, setOptions] = useState<Options>({
@@ -204,7 +205,9 @@ export default function ClientQR() {
       <CardHeader>
         <CardTitle className="flex flex-col md:flex-row items-center w-full gap-2 justify-between">
           <span className="text-lg">Custom QR Code Generator</span>
-          <Button variant={"secondary"}>Go Back to Menu</Button>
+          <Button variant={"secondary"} asChild>
+            <Link href={"/menu"}>Go Back to Menu</Link>
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
