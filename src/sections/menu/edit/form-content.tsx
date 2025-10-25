@@ -1,3 +1,4 @@
+import AvailabilitySection from "./availability-section";
 import BasicInfoSection from "./basic-info-section";
 import { ImageSection } from "./image-section";
 
@@ -9,6 +10,7 @@ export function FormContent() {
       </div>
       <div className="lg:col-span-2 space-y-6">
         <BasicInfoSection />
+        <AvailabilitySection />
       </div>
     </div>
   );
