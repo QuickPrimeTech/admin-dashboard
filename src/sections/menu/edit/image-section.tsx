@@ -32,6 +32,7 @@ export function ImageSection() {
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isServerImageRemoved, setIsServerImageRemoved] = useState(false); // ✅ new state
 
   // ✅ Skeleton while loading
   if (status === "pending") {
@@ -44,6 +45,7 @@ export function ImageSection() {
       setValue("image", file, { shouldValidate: true });
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      setIsServerImageRemoved(false); // if uploading a new one after removing
       return () => URL.revokeObjectURL(url);
     }
   }
@@ -51,6 +53,7 @@ export function ImageSection() {
   function handleRemove() {
     setValue("image", undefined);
     setPreviewUrl(undefined);
+    setIsServerImageRemoved(true); // ✅ mark server image as removed
   }
 
   function handleDrag(e: DragEvent) {
@@ -68,7 +71,7 @@ export function ImageSection() {
     if (file) handleFileSelect(file);
   }
 
-  const hasExistingImage = !!data?.image_url;
+  const hasExistingImage = !!data?.image_url && !isServerImageRemoved; // ✅ account for removal
 
   return (
     <Form {...form}>
@@ -106,7 +109,7 @@ export function ImageSection() {
                     />
                   )}
 
-                  {/* ✅ Dropzone when no image */}
+                  {/* ✅ Dropzone when no image or removed */}
                   {!previewUrl && !hasExistingImage && (
                     <ImageDropzone
                       isDragActive={isDragActive}
@@ -125,7 +128,6 @@ export function ImageSection() {
     </Form>
   );
 }
-
 /* -------------------------------------------- */
 /* Subcomponents                                */
 /* -------------------------------------------- */
@@ -153,7 +155,7 @@ function ImagePreview({
         className="absolute top-2 right-2"
         onClick={onRemove}
       >
-        <Trash2 className="w-4 h-4 mr-1" />
+        <Trash2 />
         Remove
       </Button>
     </>
@@ -187,7 +189,7 @@ function ServerImagePreview({
         className="absolute top-2 right-2"
         onClick={onRemove}
       >
-        <Trash2 className="w-4 h-4 mr-1" />
+        <Trash2 />
         Remove
       </Button>
     </>
