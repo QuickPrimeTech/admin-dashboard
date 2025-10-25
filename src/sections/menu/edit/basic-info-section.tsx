@@ -63,7 +63,7 @@ export default function BasicInfoSection() {
     }
   }, [data, form]);
 
-  const onSubmit = (data: BasicInfoFormData) => {
+  const onSubmit = () => {
     toast.success("Basic info saved!");
   };
 

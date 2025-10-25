@@ -59,7 +59,7 @@ export default function AvailabilitySection() {
     return <AvailabilitySkeleton />;
   }
 
-  const onSubmit = (data: AvailabilityFormData) => {
+  const onSubmit = () => {
     toast.success("Availability settings saved successfully!");
   };
 

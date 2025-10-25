@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +16,6 @@ import {
   FormMessage,
 } from "@ui/form";
 import { choiceSchema, type ChoiceFormData } from "@/schemas/menu";
-import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ChoiceOptionItem } from "./choice-option-item";
 
 export function ChoiceBuilder() {
@@ -26,7 +24,7 @@ export function ChoiceBuilder() {
   const [optionPrice, setOptionPrice] = useState("");
   const [optionError, setOptionError] = useState("");
 
-  const { data, status } = useMenuItemForm(); // ✅ from context
+  // const { data, status } = useMenuItemForm(); // ✅ from context
 
   const form = useForm<ChoiceFormData>({
     resolver: zodResolver(choiceSchema),
