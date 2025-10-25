@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@ui/form";
 import { ImageFormValues, imageSchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
+import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 
 export function ImageSection() {
   const { status, data } = useMenuItemForm();
@@ -34,17 +35,7 @@ export function ImageSection() {
 
   // ✅ Skeleton while loading
   if (status === "pending") {
-    return (
-      <Card className="sticky top-16 h-fit animate-pulse">
-        <CardHeader>
-          <div className="h-5 w-1/2 bg-muted rounded-md mb-2" />
-          <div className="h-4 w-2/3 bg-muted rounded-md" />
-        </CardHeader>
-        <CardContent>
-          <div className="relative aspect-square rounded-xl bg-muted" />
-        </CardContent>
-      </Card>
-    );
+    return <ImageSectionSkeleton />;
   }
 
   // ✅ File selection logic

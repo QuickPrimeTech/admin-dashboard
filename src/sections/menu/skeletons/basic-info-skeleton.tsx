@@ -1,5 +1,4 @@
-//@/sections/menu/skeletons/basic-info-skeleton.tsx
-
+// @/sections/menu/skeletons/basic-info-skeleton.tsx
 import { Skeleton } from "@ui/skeleton";
 import {
   Card,
@@ -8,10 +7,19 @@ import {
   CardContent,
   CardDescription,
 } from "@ui/card";
-import { FormLabel } from "@ui/form";
 
-const SkeletonField = ({ height = 40 }: { height?: number }) => (
-  <Skeleton className="rounded-md" style={{ height }} />
+const SkeletonField = ({
+  label,
+  height = 40,
+}: {
+  label?: string;
+  height?: number;
+}) => (
+  <div className="space-y-2">
+    {label && <div className="h-4 w-24 bg-muted rounded" />}{" "}
+    {/* label placeholder */}
+    <Skeleton className="rounded-md w-full" style={{ height }} />
+  </div>
 );
 
 export function BasicInfoSkeleton() {
@@ -23,33 +31,23 @@ export function BasicInfoSkeleton() {
           Enter the essential details about your menu item
         </CardDescription>
       </CardHeader>
+
       <CardContent className="space-y-4">
         {/* Item Name */}
-        <div>
-          <FormLabel>Item Name</FormLabel>
-          <SkeletonField />
-        </div>
+        <SkeletonField label="Item Name" />
 
         {/* Price + Category */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <FormLabel>Price</FormLabel>
-            <SkeletonField />
-          </div>
-          <div>
-            <FormLabel>Category</FormLabel>
-            <SkeletonField />
-          </div>
+          <SkeletonField label="Price" />
+          <SkeletonField label="Category" />
         </div>
 
         {/* Description */}
-        <div>
-          <FormLabel>Description</FormLabel>
-          <SkeletonField height={100} />
-        </div>
+        <SkeletonField label="Description" height={100} />
 
+        {/* Save button */}
         <div className="flex justify-end pt-4 border-t border-border">
-          <SkeletonField height={36} />
+          <Skeleton className="h-9 w-36 rounded-md" />
         </div>
       </CardContent>
     </Card>
