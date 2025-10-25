@@ -34,7 +34,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Save } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
 
@@ -192,7 +192,7 @@ export default function BasicInfoSection() {
             {/* Save button */}
             <div className="flex justify-end pt-4 border-t border-border">
               <Button type="submit">
-                <Save /> Save Basic Info
+                <Edit /> Update Basic Info
               </Button>
             </div>
           </form>
