@@ -110,6 +110,7 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:text-destructive"
+                    aria-label={`delete ${item.name}`}
                   >
                     <Trash2 />
                   </Button>
