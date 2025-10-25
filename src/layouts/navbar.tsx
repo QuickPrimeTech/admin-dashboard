@@ -49,8 +49,8 @@ export function AppNavbar() {
         <div className="flex-1" />
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
-            <Bell className="size-4" />
+          <Button variant="ghost" size="icon" aria-label="view notifications">
+            <Bell />
           </Button>
           <ModeToggle />
           <DropdownMenu>
