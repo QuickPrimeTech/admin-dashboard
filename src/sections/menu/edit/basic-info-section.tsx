@@ -35,10 +35,11 @@ import {
 } from "@/components/ui/input-group";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
+import { removeKeys } from "@/helpers/object-helpers";
 
 export default function BasicInfoSection() {
-  const { data, status, setUnsavedChanges } = useMenuItemForm();
-
+  const { data, status, setUnsavedChanges, updateFormData, setFormData } =
+    useMenuItemForm();
   const form = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
     defaultValues: {
@@ -50,6 +51,8 @@ export default function BasicInfoSection() {
   });
 
   // Prefill form when data is loaded
+  const { isDirty, dirtyFields } = form.formState;
+
   useEffect(() => {
     if (data) {
       form.reset({
@@ -61,17 +64,22 @@ export default function BasicInfoSection() {
     }
   }, [data, form]);
 
-  const onSubmit = () => {
-    toast.success("Basic info saved!");
-  };
   useEffect(() => {
-    if (form.formState.isDirty) {
+    if (isDirty) {
       setUnsavedChanges((prev) => ({ ...prev, basicInfo: true }));
       return;
     }
-
+    setFormData((prev) =>
+      removeKeys(prev, ["name", "price", "category", "description"])
+    );
     setUnsavedChanges((prev) => ({ ...prev, basicInfo: false }));
-  }, [form.formState.isDirty, setUnsavedChanges]);
+  }, [isDirty]);
+
+  useEffect(() => {
+    console.log(dirtyFields);
+    // setFormData({name: "Derick Kibiwott"})
+    // updateFormData({ name: "This is a sample name" });
+  }, [dirtyFields]);
 
   // Show skeletons when loading
   if (status === "pending") {
@@ -90,11 +98,7 @@ export default function BasicInfoSection() {
 
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-            noValidate
-          >
+          <form className="space-y-4" noValidate>
             {/* Item Name */}
             <FormField
               control={form.control}

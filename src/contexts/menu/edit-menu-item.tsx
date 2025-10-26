@@ -4,7 +4,7 @@ import { useMenuItemQuery } from "@/hooks/use-menu";
 import { MenuItemFormData } from "@/schemas/menu";
 import { EditErrorState } from "@/sections/menu/edit/error-state";
 import { MenuItem } from "@/types/menu";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 type formSections = "image" | "basicInfo" | "availability" | "choices";
 
@@ -42,15 +42,19 @@ export function EditMenuItemProvider({
   });
 
   // function to update the specific data in the form data
-  function updateFormData(values: Partial<MenuItemFormData>) {
-    setFormData((prev) => ({
-      ...prev,
-      ...values,
-    }));
-  }
+  const updateFormData = React.useCallback(
+    (values: Partial<MenuItemFormData>) => {
+      setFormData((prev) => ({
+        ...prev,
+        ...values,
+      }));
+    },
+    []
+  );
 
-  //Detecting if the data was fetched unsuccessfully
-  console.log(formData);
+  // useEffect(() => {
+  //   console.log(formData);
+  // }, [formData]);
 
   if (isError) {
     return <EditErrorState refetch={() => refetch()} />;
