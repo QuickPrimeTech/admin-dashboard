@@ -6,22 +6,19 @@ import { EditErrorState } from "@/sections/menu/edit/error-state";
 import { MenuItem } from "@/types/menu";
 import React, { createContext, useContext, useState } from "react";
 
-type Sections = "basicInfo" | "image" | "availabilityInfo" | "choices";
+type formSections = "image" | "basicInfo" | "availability" | "choices";
 
 type MenuItemFormContext = {
   data: MenuItem | null;
   status: "error" | "success" | "pending";
   //To save the form data that has changed and cosolidated
-  formData: Record<string, Partial<MenuItemFormData>>;
-  setFormData: (values: Record<string, Partial<MenuItemFormData>>) => void;
+  formData: Partial<MenuItemFormData>;
+  setFormData: React.Dispatch<React.SetStateAction<Partial<MenuItemFormData>>>;
   //To save the form data taht has changed
-  updateFormData: (
-    section: Sections,
-    values: Partial<MenuItemFormData>
-  ) => void;
-  unsavedChanges: Record<string, boolean>;
+  updateFormData: (values: Partial<MenuItemFormData>) => void;
+  unsavedChanges: Record<formSections, boolean>;
   setUnsavedChanges: React.Dispatch<
-    React.SetStateAction<Record<string, boolean>>
+    React.SetStateAction<Record<formSections, boolean>>
   >;
 };
 const MenuItemFormContext = createContext<MenuItemFormContext | null>(null);
@@ -34,26 +31,27 @@ export function EditMenuItemProvider({
   id: number;
 }) {
   const { data, status, refetch, isError } = useMenuItemQuery(id);
-  const [formData, setFormData] = useState<
-    Record<string, Partial<MenuItemFormData>>
-  >({});
-  const [unsavedChanges, setUnsavedChanges] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [formData, setFormData] = useState<Partial<MenuItemFormData>>({});
+  const [unsavedChanges, setUnsavedChanges] = useState<
+    Record<formSections, boolean>
+  >({
+    image: false,
+    basicInfo: false,
+    availability: false,
+    choices: false,
+  });
 
   // function to update the specific data in the form data
-  function updateFormData(
-    section: Sections,
-    values: Partial<MenuItemFormData>
-  ) {
+  function updateFormData(values: Partial<MenuItemFormData>) {
     setFormData((prev) => ({
       ...prev,
-      [section]: { ...prev[section], ...values },
+      ...values,
     }));
   }
 
   //Detecting if the data was fetched unsuccessfully
-  console.log(isError);
+  console.log(formData);
+
   if (isError) {
     return <EditErrorState refetch={() => refetch()} />;
   }

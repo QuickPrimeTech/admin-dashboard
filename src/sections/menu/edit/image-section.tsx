@@ -19,9 +19,12 @@ import { Form, FormField, FormItem, FormControl, FormMessage } from "@ui/form";
 import { ImageFormValues, imageSchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
+import { generateBlurDataURL } from "@/helpers/file-helpers";
+import { removeKeys } from "@/helpers/object-helpers";
 
 export function ImageSection() {
-  const { status, data, setUnsavedChanges } = useMenuItemForm();
+  const { status, data, setUnsavedChanges, setFormData, updateFormData } =
+    useMenuItemForm();
 
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
@@ -37,7 +40,6 @@ export function ImageSection() {
   //  Detect unsaved changes for image
   useEffect(() => {
     const hadServerImage = data?.image_url;
-
     // Case 1: Had server image → removing it counts as change
     // Case 2: No server image → adding & then removing returns to initial state (not a change)
     const hasChanged = hadServerImage
@@ -56,11 +58,16 @@ export function ImageSection() {
   }
 
   // File selection logic
-  function handleFileSelect(file: File) {
+  async function handleFileSelect(file: File) {
     if (file?.type.startsWith("image/")) {
       setValue("image", file, { shouldValidate: true });
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      //Syncing the info with the context so that the image can be uploaded
+      updateFormData({
+        image: file,
+        lqip: await generateBlurDataURL(file),
+      });
       setIsServerImageRemoved(false); // if uploading a new one after removing
       return () => URL.revokeObjectURL(url);
     }
@@ -70,6 +77,14 @@ export function ImageSection() {
     setValue("image", undefined);
     setPreviewUrl(undefined);
     setIsServerImageRemoved(true); // ✅ mark server image as removed
+    //Checking if there was a server image before that
+    const hadServerImage = data?.image_url;
+    if (hadServerImage) {
+      updateFormData({ image: null, lqip: null });
+      return;
+    }
+    //If it didn't have a server image, I'll just remove the image info from the context
+    setFormData((prev) => removeKeys(prev, ["image", "lqip"]));
   }
 
   function handleDrag(e: DragEvent) {
@@ -87,7 +102,16 @@ export function ImageSection() {
     if (file) handleFileSelect(file);
   }
 
-  const hasExistingImage = !!data?.image_url && !isServerImageRemoved; // ✅ account for removal
+  //This is the function that runs when the user decides to restore the server image
+  function restoreServerImage() {
+    setIsServerImageRemoved(false);
+    setValue("image", undefined); // clear uploaded file value
+    setPreviewUrl(undefined); // reset preview
+    //Removing the image data from the context if the user has restored the serve image
+    setFormData((prev) => removeKeys(prev, ["image", "lqip"]));
+  }
+
+  const hasExistingImage = !!data?.image_url && !isServerImageRemoved; // account for removal
 
   return (
     <Form {...form}>
@@ -142,11 +166,7 @@ export function ImageSection() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              setIsServerImageRemoved(false);
-                              setValue("image", undefined); // clear uploaded file value
-                              setPreviewUrl(undefined); // reset preview
-                            }}
+                            onClick={restoreServerImage}
                           >
                             Restore Image
                           </Button>
