@@ -3,7 +3,7 @@ import { useState, DragEvent, useEffect } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Upload, ImageIcon, Trash2 } from "lucide-react";
+import { Upload, ImageIcon, Trash2, Save } from "lucide-react";
 
 import {
   Card,
@@ -22,9 +22,12 @@ import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
 import { removeKeys } from "@/helpers/object-helpers";
 
+type ImageData = {
+  image: File | null;
+  lqip: string | null;
+};
 export function ImageSection() {
-  const { status, data, setUnsavedChanges, setFormData, updateFormData } =
-    useMenuItemForm();
+  const { status, data } = useMenuItemForm();
 
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
@@ -34,23 +37,9 @@ export function ImageSection() {
   const { control, setValue } = form;
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
+  const [imageData, setImageData] = useState<ImageData | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isServerImageRemoved, setIsServerImageRemoved] = useState(false); // ✅ new state
-
-  //  Detect unsaved changes for image
-  useEffect(() => {
-    const hadServerImage = data?.image_url;
-    // Case 1: Had server image → removing it counts as change
-    // Case 2: No server image → adding & then removing returns to initial state (not a change)
-    const hasChanged = hadServerImage
-      ? isServerImageRemoved || !!previewUrl
-      : !!previewUrl;
-    //Syncing with the context to update the save changes button
-    setUnsavedChanges((prev) => ({
-      ...prev,
-      image: hasChanged,
-    }));
-  }, [previewUrl, isServerImageRemoved, setUnsavedChanges, data?.image_url]);
 
   // Skeleton while loading
   if (status === "pending") {
@@ -64,7 +53,7 @@ export function ImageSection() {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       //Syncing the info with the context so that the image can be uploaded
-      updateFormData({
+      setImageData({
         image: file,
         lqip: await generateBlurDataURL(file),
       });
@@ -80,11 +69,11 @@ export function ImageSection() {
     //Checking if there was a server image before that
     const hadServerImage = data?.image_url;
     if (hadServerImage) {
-      updateFormData({ image: null, lqip: null });
+      setImageData({ image: null, lqip: null });
       return;
     }
     //If it didn't have a server image, I'll just remove the image info from the context
-    setFormData((prev) => removeKeys(prev, ["image", "lqip"]));
+    setImageData(null);
   }
 
   function handleDrag(e: DragEvent) {
@@ -108,7 +97,7 @@ export function ImageSection() {
     setValue("image", undefined); // clear uploaded file value
     setPreviewUrl(undefined); // reset preview
     //Removing the image data from the context if the user has restored the serve image
-    setFormData((prev) => removeKeys(prev, ["image", "lqip"]));
+    setImageData(null);
   }
 
   const hasExistingImage = !!data?.image_url && !isServerImageRemoved; // account for removal
@@ -175,6 +164,11 @@ export function ImageSection() {
                     </div>
                   )}
                 </div>
+                {imageData && (
+                  <Button>
+                    <Save /> Save Change
+                  </Button>
+                )}
                 <FormMessage />
               </FormItem>
             )}

@@ -11,9 +11,9 @@ export function LoadingPageSkeleton() {
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between mb-8 space-y-4">
-          <div>
-            <Skeleton className="h-12 max-w-sm" />
-            <Skeleton className="h-10 max-w-md" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 max-w-sm" />
+            <Skeleton className="h-4 max-w-md" />
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

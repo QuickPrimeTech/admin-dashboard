@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 import { BasicInfoFormData, basicInfoSchema } from "@/schemas/menu";
 import {
   InputGroup,
@@ -35,11 +34,12 @@ import {
 } from "@/components/ui/input-group";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
-import { removeKeys } from "@/helpers/object-helpers";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
+import { toast } from "sonner";
 
 export default function BasicInfoSection() {
-  const { data, status, setUnsavedChanges, updateFormData, setFormData } =
-    useMenuItemForm();
+  const { data, status } = useMenuItemForm();
   const form = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
     defaultValues: {
@@ -49,9 +49,6 @@ export default function BasicInfoSection() {
       description: "",
     },
   });
-
-  // Prefill form when data is loaded
-  const { isDirty, dirtyFields } = form.formState;
 
   useEffect(() => {
     if (data) {
@@ -64,27 +61,15 @@ export default function BasicInfoSection() {
     }
   }, [data, form]);
 
-  useEffect(() => {
-    if (isDirty) {
-      setUnsavedChanges((prev) => ({ ...prev, basicInfo: true }));
-      return;
-    }
-    setFormData((prev) =>
-      removeKeys(prev, ["name", "price", "category", "description"])
-    );
-    setUnsavedChanges((prev) => ({ ...prev, basicInfo: false }));
-  }, [isDirty]);
-
-  useEffect(() => {
-    console.log(dirtyFields);
-    // setFormData({name: "Derick Kibiwott"})
-    // updateFormData({ name: "This is a sample name" });
-  }, [dirtyFields]);
-
   // Show skeletons when loading
   if (status === "pending") {
     return <BasicInfoSkeleton />;
   }
+
+  const onSubmit = (data: BasicInfoFormData) => {
+    console.log("About to update this basic info ---->", data);
+    toast.success("Successfuly updated basic information");
+  };
 
   // Render actual form when loaded
   return (
@@ -98,7 +83,11 @@ export default function BasicInfoSection() {
 
       <CardContent>
         <Form {...form}>
-          <form className="space-y-4" noValidate>
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+            noValidate
+          >
             {/* Item Name */}
             <FormField
               control={form.control}
@@ -196,6 +185,11 @@ export default function BasicInfoSection() {
                 </FormItem>
               )}
             />
+            <div className="flex justify-end pt-4 border-t border-border">
+              <Button type="submit" disabled={!form.formState.isDirty}>
+                <Edit /> Update Basic Info
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>

@@ -24,9 +24,11 @@ import { toast } from "sonner";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { AvailabilitySkeleton } from "@/sections/menu/skeletons/availability-skeleton";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
 
 export default function AvailabilitySection() {
-  const { data, status, setUnsavedChanges } = useMenuItemForm();
+  const { data, status } = useMenuItemForm();
 
   const defaultData: AvailabilityFormData = {
     is_available: true,
@@ -52,21 +54,13 @@ export default function AvailabilitySection() {
     }
   }, [data, form]);
 
-  useEffect(() => {
-    if (form.formState.isDirty) {
-      setUnsavedChanges((prev) => ({ ...prev, avaiabilityInfo: true }));
-      return;
-    }
-
-    setUnsavedChanges((prev) => ({ ...prev, avaiabilityInfo: false }));
-  }, [form.formState.isDirty, setUnsavedChanges]);
-
   // ✅ Show skeletons while loading
   if (status === "pending") {
     return <AvailabilitySkeleton />;
   }
 
-  const onSubmit = () => {
+  const onSubmit = (data: AvailabilityFormData) => {
+    console.log("About to update this availability info ---->", data);
     toast.success("Availability settings saved successfully!");
   };
 
@@ -159,6 +153,11 @@ export default function AvailabilitySection() {
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="flex justify-end pt-4 border-t border-border">
+              <Button type="submit" disabled={!form.formState.isDirty}>
+                <Edit /> Update Availability
+              </Button>
             </div>
           </form>
         </Form>
