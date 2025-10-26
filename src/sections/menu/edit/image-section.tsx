@@ -1,5 +1,5 @@
 "use client";
-import { useState, DragEvent, useEffect } from "react";
+import { useState, DragEvent } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,9 @@ import { ImageFormValues, imageSchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
-import { removeKeys } from "@/helpers/object-helpers";
+import axios from "axios";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 type ImageData = {
   image: File | null;
@@ -35,7 +37,7 @@ export function ImageSection() {
   });
 
   const { control, setValue } = form;
-
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [imageData, setImageData] = useState<ImageData | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -99,7 +101,22 @@ export function ImageSection() {
     //Removing the image data from the context if the user has restored the serve image
     setImageData(null);
   }
-
+  //This function submits the image to the backend
+  async function submitImage() {
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      //appending all the form value
+      if (imageData?.image) formData.append("image", imageData?.image);
+      if (imageData?.lqip) formData.append("lqip", imageData?.lqip);
+      //Sending the data to the backend
+      const res = await axios.patch("/api/menu-items", formData);
+      toast.success(res.data.message);
+    } catch {
+      toast.error("There was an error submitting your image");
+    }
+    setIsSubmitting(false);
+  }
   const hasExistingImage = !!data?.image_url && !isServerImageRemoved; // account for removal
 
   return (
@@ -165,8 +182,17 @@ export function ImageSection() {
                   )}
                 </div>
                 {imageData && (
-                  <Button>
-                    <Save /> Save Change
+                  <Button onClick={submitImage} disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Spinner /> Saving{" "}
+                      </>
+                    ) : (
+                      <>
+                        <Save /> Save{" "}
+                      </>
+                    )}
+                    Change
                   </Button>
                 )}
                 <FormMessage />

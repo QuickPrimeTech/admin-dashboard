@@ -146,65 +146,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (response) return response;
-
   const formData = await req.formData();
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const price = formData.get("price") as string;
-  const category = formData.get("category") as string;
-  const imageFile = formData.get("image") as File | null;
-  const menuId = formData.get("id") as string;
-
-  if (!menuId) {
-    return errorResponse("Missing menu item ID", 400);
-  }
-
-  // 1️⃣ Get current menu item
-  const { data: currentItem, error } = await getMenuItemById(user.id, menuId);
-  if (error || !currentItem) return errorResponse("Item not found", 404);
-
-  let imageUrl = currentItem.image_url;
-  let publicId = currentItem.public_id;
-
-  // 2️⃣ If a new image is uploaded
-  if (imageFile && imageFile.size > 0) {
-    // Only delete existing Cloudinary image if it exists
-    const folderPath = `restaurants/${user.id}/menu-items`;
-
-    const uploadResult = await uploadAndReplaceImage(
-      imageFile,
-      folderPath,
-      publicId || undefined // this line makes it null-safe
-    );
-
-    imageUrl = uploadResult.secure_url;
-    publicId = uploadResult.public_id;
-  }
-
-  // 3️⃣ Update Supabase row
-  const { error: updateError } = await supabase
-    .from("menu_items")
-    .update({
-      name,
-      description,
-      price,
-      category,
-      image_url: imageUrl ?? null, // safe assignment
-      public_id: publicId ?? null, // safe assignment
-    })
-    .eq("id", menuId)
-    .eq("user_id", user.id)
-    .select()
-    .single();
-
-  if (updateError)
-    return errorResponse("Error updating menu item", 500, updateError.message);
-  //revalidating the page in the frontend for the menu items to be rendered
-  await revalidatePage("/menu");
-  //  returning a success message to the frontend
-  return successResponse("Menu item updated successfully");
+  console.log(formData);
+  return NextResponse.json({ message: "The data was successfully received" });
 }
 
 export async function DELETE(request: NextRequest) {
