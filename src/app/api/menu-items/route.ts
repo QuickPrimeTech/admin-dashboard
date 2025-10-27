@@ -13,7 +13,7 @@ import {
   deleteImageFromCloudinary,
 } from "@/helpers/common";
 import { revalidatePage } from "@/helpers/revalidator";
-import { menuItemSchema } from "@/schemas/menu";
+import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
 import { createResponse } from "@/helpers/api-responses";
 
 export async function POST(request: NextRequest) {
@@ -204,7 +204,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Build partial update
-    const data = {
+    const data: Partial<MenuItemFormData> = {
       name: formData.get("name") ?? existingItem.name,
       description: formData.get("description") ?? existingItem.description,
       price: formData.get("price")
@@ -221,8 +221,12 @@ export async function PATCH(request: NextRequest) {
           : existingItem.is_popular,
       lqip: formData.get("lqip") ?? existingItem.lqip,
       start_time:
-        formData.get("start_time") ?? existingItem.start_time.slice(0, 5),
-      end_time: formData.get("end_time") ?? existingItem.end_time.slice(0, 5),
+        formData.get("start_time") ??
+        (existingItem.start_time ? existingItem.start_time.slice(0, 5) : null),
+      end_time:
+        formData.get("end_time") ??
+        (existingItem.end_time ? existingItem.end_time.slice(0, 5) : null),
+
       choices: choices.length ? choices : existingItem.choices,
     };
 
