@@ -1,6 +1,7 @@
 // hooks/use-menu.ts
 
 import { ApiResponse } from "@/helpers/api-responses";
+import { createClient } from "@/utils/supabase/client";
 import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
 import { MenuItem } from "@/types/menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -234,21 +235,52 @@ export function useUpdateMenuItemMutation() {
   });
 }
 
-// Unique key generator for each user's categories
 const CATEGORIES_QUERY_KEY = ["categories"];
 
-export function useCategoriesQuery(userId: string) {
+export function useCategoriesQuery() {
+  const queryClient = useQueryClient();
+
   return useQuery<string[]>({
     queryKey: CATEGORIES_QUERY_KEY,
-    queryFn: async () => {
-      const res = await axios.get("/api/categories", { params: { userId } });
-      const result = res.data;
+    queryFn: async (): Promise<string[]> => {
+      const supabase = createClient();
 
-      if (!result.success)
-        throw new Error(result.message || "Failed to fetch categories");
+      // 1️⃣ Ensure user is authenticated
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-      // Expecting backend to return something like: { success: true, data: ["Appetizers", "Drinks", ...] }
-      return result.data;
+      if (userError) throw userError;
+      if (!user) throw new Error("You must be logged in to view categories.");
+
+      //Try to get cached menu items
+      const cachedMenuItems =
+        queryClient.getQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY);
+
+      if (cachedMenuItems && cachedMenuItems.length > 0) {
+        // Extract categories from cache
+        const uniqueCategories = Array.from(
+          new Set(cachedMenuItems.map((item) => item.category).filter(Boolean))
+        );
+        return uniqueCategories;
+      }
+
+      // Otherwise, fall back to fetching from Supabase
+      const { data, error } = await supabase
+        .from("menu_items")
+        .select("category")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      // 3️⃣ Deduplicate and clean categories
+      const uniqueCategories = Array.from(
+        new Set(data.map((item) => item.category).filter(Boolean))
+      );
+
+      return uniqueCategories;
     },
+    retry: false, // prevent retry spam for auth errors
   });
 }

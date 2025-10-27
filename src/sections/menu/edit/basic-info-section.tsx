@@ -38,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import { Spinner } from "@/components/ui/spinner";
+import { DynamicSelect } from "@/components/dynamic-select";
 
 export default function BasicInfoSection() {
   const { data: serverData, status } = useMenuItemForm();
@@ -158,24 +159,7 @@ export default function BasicInfoSection() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select
-                      key={field.value}
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="appetizers">Appetizers</SelectItem>
-                        <SelectItem value="mains">Main Courses</SelectItem>
-                        <SelectItem value="sides">Sides</SelectItem>
-                        <SelectItem value="desserts">Desserts</SelectItem>
-                        <SelectItem value="beverages">Beverages</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <DynamicSelect field={field} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -207,11 +191,12 @@ export default function BasicInfoSection() {
               >
                 {isPending ? (
                   <>
-                    <Spinner /> Updating Availability...
+                    <Spinner /> Update Basic Info...
                   </>
                 ) : (
                   <>
-                    <Edit /> Update Availability
+                    <Edit />
+                    Update Basic Info
                   </>
                 )}
               </Button>

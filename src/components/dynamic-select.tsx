@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -19,8 +19,8 @@ import {
 } from "@ui/dialog";
 import { Input } from "@ui/input";
 import { Button } from "@ui/button";
-
-const BASE = ["Appetizers", "Main Courses", "Sides", "Desserts", "Beverages"];
+import { useCategoriesQuery } from "@/hooks/use-menu";
+import { Skeleton } from "./ui/skeleton";
 
 type DynamicSelectProps<
   TFieldValues extends FieldValues,
@@ -33,18 +33,25 @@ export function DynamicSelect<
   TFieldValues extends FieldValues,
   TName extends Path<TFieldValues>
 >({ field }: DynamicSelectProps<TFieldValues, TName>) {
-  const [opts, setOpts] = useState<string[]>(BASE);
+  //Getting the categories using the react query
+  const { data: serverCategories, isPending } = useCategoriesQuery();
+
+  const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [custom, setCustom] = useState("");
 
   const add = () => {
     const txt = custom.trim();
     if (!txt) return;
-    if (!opts.includes(txt)) setOpts((o) => [...o, txt]);
+    if (!categories.includes(txt)) setCategories((o) => [...o, txt]);
     field.onChange(txt);
     setCustom("");
     setOpen(false);
   };
+
+  useEffect(() => {
+    if (serverCategories) setCategories(serverCategories);
+  }, [serverCategories]);
 
   return (
     <>
@@ -61,12 +68,23 @@ export function DynamicSelect<
           </SelectTrigger>
         </FormControl>
         <SelectContent>
-          {opts.map((o) => (
-            <SelectItem key={o} value={o}>
-              {o}
-            </SelectItem>
-          ))}
-          <SelectItem value="__ADD__">+ Add custom</SelectItem>
+          {isPending ? (
+            // ✅ Loading skeletons when fetching
+            <div className="p-2 space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-6 w-full" />
+              ))}
+            </div>
+          ) : (
+            <>
+              {categories.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {o}
+                </SelectItem>
+              ))}
+              <SelectItem value="__ADD__">+ Add custom</SelectItem>
+            </>
+          )}
         </SelectContent>
       </Select>
 
