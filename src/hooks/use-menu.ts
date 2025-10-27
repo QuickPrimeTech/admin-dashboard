@@ -162,3 +162,21 @@ export function useCreateMenuItemMutation() {
     },
   });
 }
+
+export function useUpdateMenuItemMutation() {
+  return useMutation<ApiResponse<MenuItem>, Error, { formData: FormData }>({
+    mutationFn: async ({ formData }) => {
+      const { data } = await axios.patch<ApiResponse<MenuItem>>(
+        "/api/menu-items",
+        formData
+      );
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message ?? "Menu item updated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message ?? "There was an error updating the menu item");
+    },
+  });
+}

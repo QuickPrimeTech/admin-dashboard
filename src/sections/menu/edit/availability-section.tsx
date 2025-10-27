@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,16 +19,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { AvailabilitySkeleton } from "@/sections/menu/skeletons/availability-skeleton";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import axios from "axios";
+import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AvailabilitySection() {
   const { data: serverData, status } = useMenuItemForm();
+  //Getting the mutation function that updates the menu item
+  const { mutate, isPending } = useUpdateMenuItemMutation();
 
   const defaultData: AvailabilityFormData = {
     is_available: true,
@@ -62,23 +63,19 @@ export default function AvailabilitySection() {
   }
 
   const onSubmit = (data: AvailabilityFormData) => {
-    const payload = new FormData();
+    const formData = new FormData();
 
     Object.keys(form.formState.dirtyFields).forEach((key) => {
       const value = data[key as keyof AvailabilityFormData];
-      payload.append(
+      formData.append(
         key,
         typeof value === "object" ? JSON.stringify(value) : String(value)
       );
     });
     //Appending the id so that the server can know which image to edit
-    payload.append("id", serverData?.id!);
-    axios
-      .patch("/api/menu-items", payload)
-      .then((res) => toast.success(res.data.message))
-      .catch(() =>
-        toast.error("There was an error updating the availability data")
-      );
+    formData.append("id", serverData?.id!);
+    //Sending data to the backend
+    mutate({ formData });
   };
 
   return (
@@ -172,8 +169,19 @@ export default function AvailabilitySection() {
               />
             </div>
             <div className="flex justify-end pt-4 border-t border-border">
-              <Button type="submit" disabled={!form.formState.isDirty}>
-                <Edit /> Update Availability
+              <Button
+                type="submit"
+                disabled={!form.formState.isDirty || isPending}
+              >
+                {isPending ? (
+                  <>
+                    <Spinner /> Updating Availability...
+                  </>
+                ) : (
+                  <>
+                    <Edit /> Update Availability
+                  </>
+                )}
               </Button>
             </div>
           </form>

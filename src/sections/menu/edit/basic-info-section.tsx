@@ -38,9 +38,13 @@ import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function BasicInfoSection() {
   const { data: serverData, status } = useMenuItemForm();
+  //Getting the mutation function that updates the menu item
+  const { mutate, isPending } = useUpdateMenuItemMutation();
   const form = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
     defaultValues: {
@@ -68,23 +72,20 @@ export default function BasicInfoSection() {
   }
 
   const onSubmit = (data: BasicInfoFormData) => {
-    const payload = new FormData();
+    const formData = new FormData();
 
     Object.keys(form.formState.dirtyFields).forEach((key) => {
       const value = data[key as keyof BasicInfoFormData];
-      payload.append(
+      formData.append(
         key,
         typeof value === "object" ? JSON.stringify(value) : String(value)
       );
     });
 
     //Appending the id so that the server can know which image to edit
-    payload.append("id", serverData?.id!);
+    formData.append("id", serverData?.id!);
 
-    axios
-      .patch("/api/menu-items", payload)
-      .then((res) => toast.success(res.data.message))
-      .catch(() => toast.error("There was an error updating the form"));
+    mutate({ formData });
   };
 
   // Render actual form when loaded
@@ -202,8 +203,19 @@ export default function BasicInfoSection() {
               )}
             />
             <div className="flex justify-end pt-4 border-t border-border">
-              <Button type="submit" disabled={!form.formState.isDirty}>
-                <Edit /> Update Basic Info
+              <Button
+                type="submit"
+                disabled={!form.formState.isDirty || isPending}
+              >
+                {isPending ? (
+                  <>
+                    <Spinner /> Updating Availability...
+                  </>
+                ) : (
+                  <>
+                    <Edit /> Update Availability
+                  </>
+                )}
               </Button>
             </div>
           </form>

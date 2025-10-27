@@ -20,9 +20,9 @@ import { ImageFormValues, imageSchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
-import axios from "axios";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 
 /* -------------------------------------------------
  *  Types
@@ -34,6 +34,8 @@ type ImageData = { image: File | null; lqip: string | null };
  * ------------------------------------------------*/
 export function ImageSection() {
   const { status, data } = useMenuItemForm();
+  //Getting the mutation function that updates the menu item
+  const { mutate, isPending } = useUpdateMenuItemMutation();
 
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
@@ -41,7 +43,6 @@ export function ImageSection() {
   });
 
   const { control, setValue } = form;
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [imageData, setImageData] = useState<ImageData | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -95,18 +96,16 @@ export function ImageSection() {
   async function submitImage() {
     if (!imageData || !Object.keys(imageData).length) return;
 
-    setIsSubmitting(true);
     try {
-      const fd = new FormData();
-      fd.append("image", imageData.image ?? "");
-      fd.append("lqip", imageData.lqip ?? "");
-      fd.append("id", data?.id!);
-      const { data: res } = await axios.patch("/api/menu-items", fd);
-      toast.success(res.message);
+      const formData = new FormData();
+      formData.append("image", imageData.image ?? "");
+      formData.append("lqip", imageData.lqip ?? "");
+      formData.append("id", data?.id!);
+      //Sending the data to the mutation function
+      mutate({ formData });
     } catch {
       toast.error("There was an error submitting your image");
     } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -179,9 +178,9 @@ export function ImageSection() {
                   <Button
                     className="mt-3 w-full"
                     onClick={submitImage}
-                    disabled={isSubmitting}
+                    disabled={isPending}
                   >
-                    {isSubmitting ? (
+                    {isPending ? (
                       <>
                         <Spinner /> Saving
                       </>
