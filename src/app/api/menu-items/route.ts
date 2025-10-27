@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
     const parsedData = menuItemSchema.safeParse(data);
     if (!parsedData.success) {
       const errors = parsedData.error.flatten().fieldErrors;
-      console.log("Validation errors:", errors);
       return createResponse(
         400,
         "Invalid form data",
@@ -229,8 +228,6 @@ export async function PATCH(request: NextRequest) {
 
       choices: choices.length ? choices : existingItem.choices,
     };
-
-    console.log(data);
 
     // Validate
     const parsed = menuItemSchema.partial().safeParse(data);

@@ -125,7 +125,12 @@ export function ImageSection() {
             name="image"
             render={() => (
               <FormItem>
-                <div className="relative aspect-square">
+                <div
+                  className={cn(
+                    "relative aspect-square",
+                    !previewUrl && "aspect-auto h-fit"
+                  )}
+                >
                   {previewUrl ? (
                     <ImagePreview
                       previewUrl={previewUrl}
