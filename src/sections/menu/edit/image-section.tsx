@@ -112,7 +112,6 @@ export function ImageSection() {
 
   /* ------------  render  ------------ */
   const hasExistingImage = !!data?.image_url && !isServerImageRemoved;
-  const showDropzone = !previewUrl && !hasExistingImage;
 
   return (
     <Form {...form}>

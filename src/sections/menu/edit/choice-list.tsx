@@ -1,6 +1,5 @@
 // src/sections/menu/edit/choices-list.tsx
 "use client";
-
 import {
   Card,
   CardContent,
@@ -26,7 +25,9 @@ export function ChoicesList() {
   if (!data || status === "pending") {
     return <ChoicesListSkeleton />;
   }
-
+  if (data.choices.length === 0) {
+    return null;
+  }
   return (
     <Card className="border-0 shadow-sm">
       <CardHeader>
