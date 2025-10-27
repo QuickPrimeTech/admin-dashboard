@@ -14,7 +14,7 @@ import { ChoicesListSkeleton } from "../skeletons/choice-list-skeleton";
 export function ChoicesList() {
   const { data, status } = useMenuItemForm();
 
-  const { choices, removeChoice, onEditChoice } = useMenuItemForm();
+  const { choices, onEditChoice } = useMenuItemForm();
 
   //Handling the Loading state
   if (!data || status === "pending") {
@@ -35,7 +35,6 @@ export function ChoicesList() {
             key={index}
             choice={choice}
             onEdit={() => onEditChoice(choice)}
-            onRemove={() => removeChoice(choice.id!)}
           />
         ))}
       </CardContent>
