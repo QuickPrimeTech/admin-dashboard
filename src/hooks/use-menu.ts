@@ -235,11 +235,11 @@ export function useUpdateMenuItemMutation() {
 }
 
 // Unique key generator for each user's categories
-const CATEGORIES_QUERY_KEY = (userId: string) => ["categories", userId];
+const CATEGORIES_QUERY_KEY = ["categories"];
 
 export function useCategoriesQuery(userId: string) {
   return useQuery<string[]>({
-    queryKey: CATEGORIES_QUERY_KEY(userId),
+    queryKey: CATEGORIES_QUERY_KEY,
     queryFn: async () => {
       const res = await axios.get("/api/categories", { params: { userId } });
       const result = res.data;
@@ -250,6 +250,5 @@ export function useCategoriesQuery(userId: string) {
       // Expecting backend to return something like: { success: true, data: ["Appetizers", "Drinks", ...] }
       return result.data;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
   });
 }

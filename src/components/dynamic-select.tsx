@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,6 +10,17 @@ import {
 } from "@ui/select";
 import { FormControl } from "@ui/form";
 import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@ui/dialog";
+import { Input } from "@ui/input";
+import { Button } from "@ui/button";
+
+const BASE = ["Appetizers", "Main Courses", "Sides", "Desserts", "Beverages"];
 
 type DynamicSelectProps<
   TFieldValues extends FieldValues,
@@ -21,24 +33,62 @@ export function DynamicSelect<
   TFieldValues extends FieldValues,
   TName extends Path<TFieldValues>
 >({ field }: DynamicSelectProps<TFieldValues, TName>) {
+  const [opts, setOpts] = useState<string[]>(BASE);
+  const [open, setOpen] = useState(false);
+  const [custom, setCustom] = useState("");
+
+  const add = () => {
+    const txt = custom.trim();
+    if (!txt) return;
+    if (!opts.includes(txt)) setOpts((o) => [...o, txt]);
+    field.onChange(txt);
+    setCustom("");
+    setOpen(false);
+  };
+
   return (
-    <Select
-      key={field.value}
-      onValueChange={field.onChange}
-      value={field.value || ""}
-    >
-      <FormControl>
-        <SelectTrigger>
-          <SelectValue placeholder="Select a category" />
-        </SelectTrigger>
-      </FormControl>
-      <SelectContent>
-        <SelectItem value="appetizers">Appetizers</SelectItem>
-        <SelectItem value="mains">Main Courses</SelectItem>
-        <SelectItem value="sides">Sides</SelectItem>
-        <SelectItem value="desserts">Desserts</SelectItem>
-        <SelectItem value="beverages">Beverages</SelectItem>
-      </SelectContent>
-    </Select>
+    <>
+      <Select
+        key={field.value}
+        onValueChange={(v) =>
+          v === "__ADD__" ? setOpen(true) : field.onChange(v)
+        }
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {opts.map((o) => (
+            <SelectItem key={o} value={o}>
+              {o}
+            </SelectItem>
+          ))}
+          <SelectItem value="__ADD__">+ Add custom</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add custom category</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="e.g. Brunch"
+            value={custom}
+            onChange={(e) => setCustom(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && add()}
+          />
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={add}>Add</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
