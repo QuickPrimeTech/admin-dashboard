@@ -94,7 +94,10 @@ export function ChoiceBuilder() {
     const combinedChoices = [...choices, data];
 
     const formData = new FormData();
-    formData.append("id", serverData?.id!);
+    //Making sure the id exists
+    if (!serverData?.id) return;
+
+    formData.append("id", serverData.id);
     formData.append("choices", JSON.stringify(combinedChoices));
     await mutateAsync({ formData });
 

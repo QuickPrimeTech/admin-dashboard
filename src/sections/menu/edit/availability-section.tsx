@@ -73,7 +73,8 @@ export default function AvailabilitySection() {
       );
     });
     //Appending the id so that the server can know which image to edit
-    formData.append("id", serverData?.id!);
+    if (!serverData?.id) return;
+    formData.append("id", serverData.id);
     //Sending data to the backend
     mutate({ formData });
   };

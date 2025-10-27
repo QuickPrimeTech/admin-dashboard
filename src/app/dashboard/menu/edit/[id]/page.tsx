@@ -1,4 +1,3 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { EditMenuItemProvider } from "@/contexts/menu/edit-menu-item";
 import { FormContent } from "@/sections/menu/edit/form-content";
 import { Metadata } from "next";
