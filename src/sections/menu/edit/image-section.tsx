@@ -24,10 +24,14 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 
-type ImageData = {
-  image: File | null;
-  lqip: string | null;
-};
+/* -------------------------------------------------
+ *  Types
+ * ------------------------------------------------*/
+type ImageData = { image: File | null; lqip: string | null };
+
+/* -------------------------------------------------
+ *  Main component
+ * ------------------------------------------------*/
 export function ImageSection() {
   const { status, data } = useMenuItemForm();
 
@@ -37,47 +41,34 @@ export function ImageSection() {
   });
 
   const { control, setValue } = form;
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [imageData, setImageData] = useState<ImageData | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
-  const [isServerImageRemoved, setIsServerImageRemoved] = useState(false); // ✅ new state
+  const [isServerImageRemoved, setIsServerImageRemoved] = useState(false);
 
-  // Skeleton while loading
-  if (status === "pending") {
-    return <ImageSectionSkeleton />;
-  }
+  if (status === "pending") return <ImageSectionSkeleton />;
 
-  // File selection logic
+  /* ------------  file handling  ------------ */
   async function handleFileSelect(file: File) {
-    if (file?.type.startsWith("image/")) {
-      setValue("image", file, { shouldValidate: true });
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      //Syncing the info with the context so that the image can be uploaded
-      setImageData({
-        image: file,
-        lqip: await generateBlurDataURL(file),
-      });
-      setIsServerImageRemoved(false); // if uploading a new one after removing
-      return () => URL.revokeObjectURL(url);
-    }
+    if (!file.type.startsWith("image/")) return;
+
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setValue("image", file, { shouldValidate: true });
+    setImageData({ image: file, lqip: await generateBlurDataURL(file) });
+    setIsServerImageRemoved(false);
+    return () => URL.revokeObjectURL(url);
   }
 
   function handleRemove() {
     setValue("image", undefined);
     setPreviewUrl(undefined);
-    setIsServerImageRemoved(true); // ✅ mark server image as removed
-    //Checking if there was a server image before that
-    const hadServerImage = data?.image_url;
-    if (hadServerImage) {
-      setImageData({ image: null, lqip: null });
-      return;
-    }
-    //If it didn't have a server image, I'll just remove the image info from the context
-    setImageData(null);
+    setIsServerImageRemoved(true);
+    setImageData(data?.image_url ? { image: null, lqip: null } : null);
   }
 
+  /* ------------  drag & drop  ------------ */
   function handleDrag(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -88,36 +79,39 @@ export function ImageSection() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-
     const file = e.dataTransfer.files?.[0];
     if (file) handleFileSelect(file);
   }
 
-  //This is the function that runs when the user decides to restore the server image
+  /* ------------  server restore  ------------ */
   function restoreServerImage() {
     setIsServerImageRemoved(false);
-    setValue("image", undefined); // clear uploaded file value
-    setPreviewUrl(undefined); // reset preview
-    //Removing the image data from the context if the user has restored the serve image
+    setValue("image", undefined);
+    setPreviewUrl(undefined);
     setImageData(null);
   }
-  //This function submits the image to the backend
+
+  /* ------------  submit  ------------ */
   async function submitImage() {
+    if (!imageData || !Object.keys(imageData).length) return;
+
     setIsSubmitting(true);
     try {
-      const formData = new FormData();
-      //appending all the form value
-      if (imageData?.image) formData.append("image", imageData?.image);
-      if (imageData?.lqip) formData.append("lqip", imageData?.lqip);
-      //Sending the data to the backend
-      const res = await axios.patch("/api/menu-items", formData);
-      toast.success(res.data.message);
+      const fd = new FormData();
+      fd.append("image", imageData.image ?? "");
+      fd.append("lqip", imageData.lqip ?? "");
+      const { data: res } = await axios.patch("/api/menu-items", fd);
+      toast.success(res.message);
     } catch {
       toast.error("There was an error submitting your image");
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   }
-  const hasExistingImage = !!data?.image_url && !isServerImageRemoved; // account for removal
+
+  /* ------------  render  ------------ */
+  const hasExistingImage = !!data?.image_url && !isServerImageRemoved;
+  const showDropzone = !previewUrl && !hasExistingImage;
 
   return (
     <Form {...form}>
@@ -137,64 +131,68 @@ export function ImageSection() {
             name="image"
             render={() => (
               <FormItem>
-                <div className="relative aspect-square">
-                  {/* ✅ Existing image from server */}
-                  {hasExistingImage && !previewUrl && (
-                    <ServerImagePreview
-                      imageUrl={data.image_url}
-                      lqip={data.lqip}
+                <div
+                  className={cn(
+                    "relative aspect-square",
+                    !hasExistingImage && !previewUrl && "aspect-auto h-fit"
+                  )}
+                >
+                  {hasExistingImage ? (
+                    <ImageDisplay
+                      src={data.image_url!}
+                      placeholder={data.lqip}
+                      alt="Item image"
                       onRemove={handleRemove}
                     />
-                  )}
-
-                  {/* ✅ New uploaded image */}
-                  {previewUrl && (
-                    <ImagePreview
-                      previewUrl={previewUrl}
+                  ) : previewUrl ? (
+                    <ImageDisplay
+                      src={previewUrl}
+                      alt="Preview"
                       onRemove={handleRemove}
                     />
-                  )}
-
-                  {/* ✅ Dropzone when no image or removed */}
-                  {!previewUrl && !hasExistingImage && (
-                    <div className="relative">
-                      <ImageDropzone
-                        isDragActive={isDragActive}
-                        onDrag={handleDrag}
-                        onDrop={handleDrop}
-                        onFileSelect={handleFileSelect}
-                      />
-
-                      {/* ✅ Restore button if image was removed but existed on server */}
-                      {isServerImageRemoved && data?.image_url && (
-                        <div className="absolute inset-x-0 -bottom-1/2 flex justify-center">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={restoreServerImage}
-                          >
-                            Restore Image
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                  ) : (
+                    <ImageDropzone
+                      isDragActive={isDragActive}
+                      onDrag={handleDrag}
+                      onDrop={handleDrop}
+                      onFileSelect={handleFileSelect}
+                    />
                   )}
                 </div>
+
+                {/* restore button – only when server image was removed */}
+                {isServerImageRemoved && data?.image_url && (
+                  <div className="mt-2 flex justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={restoreServerImage}
+                    >
+                      Restore Image
+                    </Button>
+                  </div>
+                )}
+
+                {/* save button – only when new image is staged */}
                 {imageData && (
-                  <Button onClick={submitImage} disabled={isSubmitting}>
+                  <Button
+                    className="mt-3 w-full"
+                    onClick={submitImage}
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? (
                       <>
-                        <Spinner /> Saving{" "}
+                        <Spinner /> Saving
                       </>
                     ) : (
                       <>
-                        <Save /> Save{" "}
+                        <Save /> Save Change
                       </>
                     )}
-                    Change
                   </Button>
                 )}
+
                 <FormMessage />
               </FormItem>
             )}
@@ -204,98 +202,74 @@ export function ImageSection() {
     </Form>
   );
 }
-/* -------------------------------------------- */
-/* Subcomponents                                */
-/* -------------------------------------------- */
 
-// ✅ Show uploaded image preview
-function ImagePreview({
-  previewUrl,
-  onRemove,
-}: {
-  previewUrl: string;
+/* -------------------------------------------------
+ *  Re-usable pieces
+ * ------------------------------------------------*/
+type ImageDisplayProps = {
+  src: string;
+  alt: string;
+  placeholder?: string;
   onRemove: () => void;
-}) {
+};
+
+function ImageDisplay({ src, alt, placeholder, onRemove }: ImageDisplayProps) {
   return (
     <>
       <Image
-        src={previewUrl}
-        alt="Preview"
+        src={src}
+        alt={alt}
         fill
         className="object-cover rounded-lg"
+        placeholder={placeholder ? "blur" : "empty"}
+        blurDataURL={placeholder || undefined}
       />
       <Button
         type="button"
         variant="destructive"
         size="sm"
         className="absolute top-2 right-2"
+        aria-label="delete image"
         onClick={onRemove}
       >
-        <Trash2 />
-        Remove
+        <Trash2 /> Delete
       </Button>
     </>
   );
 }
 
-// ✅ Show existing image from database with LQIP
-function ServerImagePreview({
-  imageUrl,
-  lqip,
-  onRemove,
-}: {
-  imageUrl: string;
-  lqip?: string;
-  onRemove: () => void;
-}) {
-  return (
-    <>
-      <Image
-        src={imageUrl}
-        alt="Item Image"
-        fill
-        className="object-cover rounded-lg"
-        placeholder={lqip ? "blur" : "empty"}
-        blurDataURL={lqip || undefined}
-      />
-      <Button
-        type="button"
-        variant="destructive"
-        size="sm"
-        className="absolute top-2 right-2"
-        onClick={onRemove}
-      >
-        <Trash2 />
-        Remove
-      </Button>
-    </>
-  );
-}
+type DropzoneProps = {
+  isDragActive: boolean;
+  onDrag: (e: DragEvent) => void;
+  onDrop: (e: DragEvent) => void;
+  onFileSelect: (file: File) => void;
+};
 
-// ✅ Dropzone
 function ImageDropzone({
   isDragActive,
   onDrag,
   onDrop,
   onFileSelect,
-}: {
-  isDragActive: boolean;
-  onDrag: (e: DragEvent) => void;
-  onDrop: (e: DragEvent) => void;
-  onFileSelect: (file: File) => void;
-}) {
+}: DropzoneProps) {
+  const dropCn = cn(
+    "relative rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-200",
+    isDragActive
+      ? "border-primary bg-primary/10"
+      : "border-border bg-muted hover:bg-accent/50"
+  );
+
+  const iconCn = cn(
+    "p-3 rounded-full transition-colors",
+    isDragActive ? "bg-primary/20" : "bg-muted-foreground/10"
+  );
+
   return (
     <div
       onDragEnter={onDrag}
       onDragLeave={onDrag}
       onDragOver={onDrag}
       onDrop={onDrop}
-      className={cn(
-        "relative rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-200",
-        isDragActive
-          ? "border-primary bg-primary/10"
-          : "border-border bg-muted hover:bg-accent/50"
-      )}
+      className={dropCn}
     >
       <FormControl>
         <Input
@@ -311,12 +285,7 @@ function ImageDropzone({
       </FormControl>
 
       <div className="flex flex-col items-center justify-center gap-3">
-        <div
-          className={cn(
-            "p-3 rounded-full transition-colors",
-            isDragActive ? "bg-primary/20" : "bg-muted-foreground/10"
-          )}
-        >
+        <div className={iconCn}>
           {isDragActive ? (
             <Upload className="w-6 h-6 text-primary" />
           ) : (
