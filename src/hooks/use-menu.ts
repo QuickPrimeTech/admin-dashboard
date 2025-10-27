@@ -164,7 +164,14 @@ export function useCreateMenuItemMutation() {
 }
 
 export function useUpdateMenuItemMutation() {
-  return useMutation<ApiResponse<MenuItem>, Error, { formData: FormData }>({
+  //Gettin the context
+  const queryClient = useQueryClient();
+  // returning the mutation so that the user can access the methods
+  return useMutation<
+    ApiResponse<MenuItem>,
+    AxiosError<ApiResponse<null>>,
+    { formData: FormData }
+  >({
     mutationFn: async ({ formData }) => {
       const { data } = await axios.patch<ApiResponse<MenuItem>>(
         "/api/menu-items",
@@ -173,10 +180,54 @@ export function useUpdateMenuItemMutation() {
       return data;
     },
     onSuccess: (data) => {
+      const updatedItem = data.data;
+      if (!updatedItem) return;
+
+      const id = Number(updatedItem.id);
+
+      // ✅ Check if "menu-items" cache exists before updating
+      const cachedMenuItems = queryClient.getQueryData<MenuItem[]>([
+        "menu-items",
+      ]);
+
+      if (cachedMenuItems && cachedMenuItems.length > 0) {
+        // Replace the old item in the cache
+        const newMenuItems = cachedMenuItems.map((item) =>
+          Number(item.id) === id ? updatedItem : item
+        );
+
+        queryClient.setQueryData<MenuItem[]>(
+          MENU_ITEMS_QUERY_KEY,
+          newMenuItems
+        );
+      }
+
+      // ✅ Also update the single [menu-item, id] cache if it exists
+      const cachedMenuItem = queryClient.getQueryData<MenuItem>([
+        "menu-item",
+        id,
+      ]);
+
+      if (cachedMenuItem) {
+        queryClient.setQueryData<MenuItem>(["menu-item", id], updatedItem);
+      }
+
       toast.success(data.message ?? "Menu item updated successfully");
     },
     onError: (error) => {
-      toast.error(error.message ?? "There was an error updating the menu item");
+      const message =
+        error.response?.data?.message ??
+        "There was an error updating the menu item";
+      toast.error(message);
+
+      const fieldErrors = error.response?.data?.data;
+      if (fieldErrors) {
+        Object.entries(fieldErrors).forEach(([field, messages]) => {
+          (messages as string[]).forEach((msg) =>
+            toast.error(`${field}: ${msg}`)
+          );
+        });
+      }
     },
   });
 }

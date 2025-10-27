@@ -19,15 +19,24 @@ import {
 import { choiceSchema, type ChoiceFormData } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ChoiceOptionItem } from "./choice-option-item";
+import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
+import { Spinner } from "@/components/ui/spinner";
 
 export function ChoiceBuilder() {
   const [isOpen, setIsOpen] = useState(false);
   const [optionLabel, setOptionLabel] = useState("");
   const [optionPrice, setOptionPrice] = useState("");
   const [optionError, setOptionError] = useState("");
+  //Getting the mutation function that updates the menu item
+  const { mutateAsync, isPending } = useUpdateMenuItemMutation();
 
-  const { choices, addChoice, editingChoice, setEditingChoice } =
-    useMenuItemForm(); // ✅ from context
+  const {
+    choices,
+    addChoice,
+    editingChoice,
+    setEditingChoice,
+    data: serverData,
+  } = useMenuItemForm(); // ✅ from context
 
   const form = useForm<ChoiceFormData>({
     resolver: zodResolver(choiceSchema),
@@ -77,11 +86,18 @@ export function ChoiceBuilder() {
     });
   };
 
-  const onSubmit = (data: ChoiceFormData) => {
+  const onSubmit = async (data: ChoiceFormData) => {
     if (data.options.length === 0) {
       setOptionError("You must add at least one option");
       return;
     }
+    const combinedChoices = [...choices, data];
+
+    const formData = new FormData();
+    formData.append("id", serverData?.id!);
+    formData.append("choices", JSON.stringify(combinedChoices));
+    await mutateAsync({ formData });
+
     //checking if the choice is being edited or added new
     if (editingChoice) {
       // Update existing choice
@@ -91,7 +107,8 @@ export function ChoiceBuilder() {
       // Add new choice
       addChoice(data); // ✅ Send to context
     }
-    console.log(data);
+    // merge existing choices + new choice data
+
     resetForm();
     setIsOpen(false);
     setOptionError("");
@@ -248,10 +265,21 @@ export function ChoiceBuilder() {
             </Button>
             <Button
               type="submit"
-              disabled={fields.length === 0 || !form.formState.isDirty}
+              disabled={
+                fields.length === 0 || !form.formState.isDirty || isPending
+              }
             >
-              <Plus />
-              {editingChoice ? "Update Choice" : "Add Choice"}
+              {isPending ? (
+                <>
+                  <Spinner className="mr-2" />
+                  {editingChoice ? "Updating Choice..." : "Adding Choice..."}
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2" />
+                  {editingChoice ? "Update Choice" : "Add Choice"}
+                </>
+              )}
             </Button>
           </div>
         </form>

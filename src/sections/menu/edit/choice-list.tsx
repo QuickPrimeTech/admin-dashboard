@@ -30,9 +30,9 @@ export function ChoicesList() {
         <CardDescription>Your added choices and options</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {choices.map((choice) => (
+        {choices.map((choice, index) => (
           <ChoiceItem
-            key={choice.id}
+            key={index}
             choice={choice}
             onEdit={() => onEditChoice(choice)}
             onRemove={() => removeChoice(choice.id!)}

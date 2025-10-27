@@ -10,6 +10,7 @@ import {
   getMenuItemById,
   errorResponse,
   successResponse,
+  deleteImageFromCloudinary,
 } from "@/helpers/common";
 import { revalidatePage } from "@/helpers/revalidator";
 import { menuItemSchema } from "@/schemas/menu";
@@ -145,10 +146,10 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (error) {
-      return errorResponse("Failed to fetch menu item", 500, error.message);
+      return createResponse(500, "Failed to fetch menu item", null);
     }
 
-    return successResponse("Menu item fetched successfully", data);
+    return createResponse(200, "Menu item fetched successfully", data);
   }
 
   //Otherwise fetch all menu items is not provided and id
@@ -165,10 +166,146 @@ export async function GET(req: NextRequest) {
   return successResponse("Menu items fetched successfully", data);
 }
 
-export async function PATCH(req: NextRequest) {
-  const formData = await req.formData();
-  console.log(formData);
-  return NextResponse.json({ message: "The data was successfully received" });
+export async function PATCH(request: NextRequest) {
+  const { user, supabase, response } = await getAuthenticatedUser();
+  if (response) return response;
+
+  try {
+    const formData = await request.formData();
+    const id = formData.get("id")?.toString();
+
+    if (!id) {
+      return createResponse(400, "Missing menu item ID", null, false);
+    }
+
+    // Fetch existing item
+    const { data: existingItem, error: fetchError } = await getMenuItemById(
+      user.id,
+      id
+    );
+    if (fetchError || !existingItem) {
+      return createResponse(
+        404,
+        "Menu item not found",
+        fetchError?.message ?? null,
+        false
+      );
+    }
+
+    // Parse JSON choices
+    const choicesEntry = formData.get("choices");
+    let choices: unknown[] = [];
+    if (typeof choicesEntry === "string") {
+      try {
+        choices = JSON.parse(choicesEntry);
+      } catch {
+        choices = [];
+      }
+    }
+
+    // Build partial update
+    const data = {
+      name: formData.get("name") ?? existingItem.name,
+      description: formData.get("description") ?? existingItem.description,
+      price: formData.get("price")
+        ? Number(formData.get("price"))
+        : existingItem.price,
+      category: formData.get("category") ?? existingItem.category,
+      is_available:
+        formData.get("is_available") !== null
+          ? formData.get("is_available") === "true"
+          : existingItem.is_available,
+      is_popular:
+        formData.get("is_popular") !== null
+          ? formData.get("is_popular") === "true"
+          : existingItem.is_popular,
+      lqip: formData.get("lqip") ?? existingItem.lqip,
+      start_time:
+        formData.get("start_time") ?? existingItem.start_time.slice(0, 5),
+      end_time: formData.get("end_time") ?? existingItem.end_time.slice(0, 5),
+      choices: choices.length ? choices : existingItem.choices,
+    };
+
+    console.log(data);
+
+    // Validate
+    const parsed = menuItemSchema.partial().safeParse(data);
+    if (!parsed.success) {
+      const errors = parsed.error.flatten().fieldErrors;
+      return createResponse(400, "Invalid form data", errors, false);
+    }
+
+    // Handle image
+    const imageFile = formData.get("image") as File | null;
+    const isRemoveRequest =
+      typeof formData.get("image") === "string" && formData.get("image") === "";
+
+    let uploadedImageUrl = existingItem.image_url;
+    let publicId = existingItem.public_id;
+
+    // 🧩 Case 1: Upload new image
+    if (imageFile && imageFile.size > 0) {
+      const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+      const uploadResult = await uploadAndReplaceImage(
+        imageFile,
+        `${sanitizedRestaurantName}/menu-items`,
+        existingItem.public_id
+      );
+      uploadedImageUrl = uploadResult.secure_url;
+      publicId = uploadResult.public_id;
+    }
+
+    // 🧩 Case 2: Remove image explicitly
+    else if (isRemoveRequest && existingItem.public_id) {
+      await deleteImageFromCloudinary(existingItem.public_id);
+      uploadedImageUrl = null;
+      publicId = null;
+      data.lqip = null; // ✅ clear LQIP if image removed
+    }
+
+    const updatePayload = {
+      ...data,
+      image_url: uploadedImageUrl,
+      public_id: publicId,
+    };
+
+    // ⏳ Simulate delay for testing loading states
+    await new Promise((r) => setTimeout(r, 2000));
+
+    // Update in Supabase
+    const { data: updatedItem, error: updateError } = await supabase
+      .from("menu_items")
+      .update(updatePayload)
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      return createResponse(
+        500,
+        "Failed to update menu item",
+        updateError.message,
+        false
+      );
+    }
+
+    await revalidatePage("/menu");
+    return createResponse(
+      200,
+      "Menu item updated successfully",
+      updatedItem,
+      true
+    );
+  } catch (err) {
+    const error = err as Error;
+    return createResponse(
+      500,
+      "An error occurred while updating menu item",
+      error.message,
+      false
+    );
+  }
 }
 
 export async function DELETE(request: NextRequest) {

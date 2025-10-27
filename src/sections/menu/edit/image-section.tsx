@@ -35,7 +35,7 @@ type ImageData = { image: File | null; lqip: string | null };
 export function ImageSection() {
   const { status, data } = useMenuItemForm();
   //Getting the mutation function that updates the menu item
-  const { mutate, isPending } = useUpdateMenuItemMutation();
+  const { mutateAsync, isPending } = useUpdateMenuItemMutation();
 
   const form = useForm<ImageFormValues>({
     resolver: zodResolver(imageSchema),
@@ -102,7 +102,8 @@ export function ImageSection() {
       formData.append("lqip", imageData.lqip ?? "");
       formData.append("id", data?.id!);
       //Sending the data to the mutation function
-      mutate({ formData });
+      await mutateAsync({ formData });
+      setImageData(null);
     } catch {
       toast.error("There was an error submitting your image");
     } finally {

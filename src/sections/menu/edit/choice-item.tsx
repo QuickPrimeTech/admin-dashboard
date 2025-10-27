@@ -31,14 +31,17 @@ export default function ChoiceItem({
       <CardContent>
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
               <h4 className="font-semibold text-foreground">{choice.title}</h4>
-              <Badge variant="secondary">
-                {choice.required ? "Required" : "Optional"}
-              </Badge>
-              <Badge variant="outline">
-                Max: {choice.maxSelectable ? choice.maxSelectable : "Unlimited"}
-              </Badge>
+              <div className="flex gap-2 items-center">
+                <Badge variant="secondary">
+                  {choice.required ? "Required" : "Optional"}
+                </Badge>
+                <Badge variant="outline">
+                  Max:{" "}
+                  {choice.maxSelectable ? choice.maxSelectable : "Unlimited"}
+                </Badge>
+              </div>
             </div>
             <div className="space-y-1">
               {choice.options.map((option, idx) => (
