@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +8,6 @@ import { Pencil, Trash2 } from "lucide-react";
 import type { ChoiceFormData } from "@/schemas/menu";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -14,18 +16,38 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
+import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ChoiceItemProps {
   choice: ChoiceFormData;
-  onRemove: () => void;
   onEdit: () => void;
 }
 
-export default function ChoiceItem({
-  choice,
-  onRemove,
-  onEdit,
-}: ChoiceItemProps) {
+export default function ChoiceItem({ choice, onEdit }: ChoiceItemProps) {
+  const [open, setOpen] = useState(false);
+  const { choices, setChoices, data: serverData } = useMenuItemForm();
+  const { mutateAsync, isPending } = useUpdateMenuItemMutation();
+
+  const handleDelete = async () => {
+    if (!serverData?.id) return;
+
+    const updatedChoices = choices.filter((c) => c.id !== choice.id);
+
+    const formData = new FormData();
+    formData.append("id", serverData.id);
+    formData.append("choices", JSON.stringify(updatedChoices));
+
+    try {
+      await mutateAsync({ formData });
+      setChoices(updatedChoices);
+      setOpen(false); // ✅ close dialog manually after success
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Card className="bg-accent/10 border-accent/20 py-3">
       <CardContent>
@@ -43,6 +65,7 @@ export default function ChoiceItem({
                 </Badge>
               </div>
             </div>
+
             <div className="space-y-1">
               {choice.options.map((option, idx) => (
                 <div
@@ -71,7 +94,8 @@ export default function ChoiceItem({
             >
               <Pencil />
             </Button>
-            <AlertDialog>
+
+            <AlertDialog open={open} onOpenChange={setOpen}>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="destructive"
@@ -81,20 +105,35 @@ export default function ChoiceItem({
                   <Trash2 />
                 </Button>
               </AlertDialogTrigger>
+
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This action cannot be undone. This will permanently delete
-                    the <strong>{choice.title}</strong> choice option from the
-                    menu item.
+                    the <strong>{choice.title}</strong> choice option.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
+
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction variant="destructive" onClick={onRemove}>
-                    Continue
-                  </AlertDialogAction>
+                  <AlertDialogCancel disabled={isPending}>
+                    Cancel
+                  </AlertDialogCancel>
+
+                  {/* Custom button instead of AlertDialogAction */}
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <>
+                        <Spinner /> Deleting...
+                      </>
+                    ) : (
+                      "Continue"
+                    )}
+                  </Button>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
