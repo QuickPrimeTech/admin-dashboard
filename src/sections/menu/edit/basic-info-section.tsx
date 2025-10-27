@@ -37,6 +37,7 @@ import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { toast } from "sonner";
+import axios from "axios";
 
 export default function BasicInfoSection() {
   const { data, status } = useMenuItemForm();
@@ -67,8 +68,23 @@ export default function BasicInfoSection() {
   }
 
   const onSubmit = (data: BasicInfoFormData) => {
-    console.log("About to update this basic info ---->", data);
-    toast.success("Successfuly updated basic information");
+    const payload = new FormData();
+
+    Object.keys(form.formState.dirtyFields).forEach((key) => {
+      const value = data[key as keyof BasicInfoFormData];
+      payload.append(
+        key,
+        typeof value === "object" ? JSON.stringify(value) : String(value)
+      );
+    });
+
+    // quick peek
+    for (const [k, v] of payload.entries()) console.log(k, v);
+
+    axios
+      .patch("/api/menu-items", payload)
+      .then((res) => toast.success(res.data.message))
+      .catch(() => toast.error("There was an error updating the form"));
   };
 
   // Render actual form when loaded
