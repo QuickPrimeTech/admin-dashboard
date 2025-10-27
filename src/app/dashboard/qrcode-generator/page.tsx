@@ -206,7 +206,7 @@ export default function ClientQR() {
         <CardTitle className="flex flex-col md:flex-row items-center w-full gap-2 justify-between">
           <span className="text-lg">Custom QR Code Generator</span>
           <Button variant={"secondary"} asChild>
-            <Link href={"/menu"}>Go Back to Menu</Link>
+            <Link href={"/dashboard/menu"}>Go Back to Menu</Link>
           </Button>
         </CardTitle>
       </CardHeader>

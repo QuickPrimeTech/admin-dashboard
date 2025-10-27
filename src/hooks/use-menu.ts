@@ -1,3 +1,5 @@
+// hooks/use-menu.ts
+
 import { ApiResponse } from "@/helpers/api-responses";
 import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
 import { MenuItem } from "@/types/menu";
@@ -229,5 +231,25 @@ export function useUpdateMenuItemMutation() {
         });
       }
     },
+  });
+}
+
+// Unique key generator for each user's categories
+const CATEGORIES_QUERY_KEY = (userId: string) => ["categories", userId];
+
+export function useCategoriesQuery(userId: string) {
+  return useQuery<string[]>({
+    queryKey: CATEGORIES_QUERY_KEY(userId),
+    queryFn: async () => {
+      const res = await axios.get("/api/categories", { params: { userId } });
+      const result = res.data;
+
+      if (!result.success)
+        throw new Error(result.message || "Failed to fetch categories");
+
+      // Expecting backend to return something like: { success: true, data: ["Appetizers", "Drinks", ...] }
+      return result.data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
   });
 }

@@ -36,6 +36,7 @@ import {
 import { Save } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
 import { useEffect } from "react";
+import { DynamicSelect } from "@/components/dynamic-select";
 
 export default function BasicInfoSection() {
   // Use the form context to save basic info
@@ -134,24 +135,7 @@ export default function BasicInfoSection() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select
-                      key={field.value}
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="appetizers">Appetizers</SelectItem>
-                        <SelectItem value="mains">Main Courses</SelectItem>
-                        <SelectItem value="sides">Sides</SelectItem>
-                        <SelectItem value="desserts">Desserts</SelectItem>
-                        <SelectItem value="beverages">Beverages</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <DynamicSelect field={field} />
                     <FormMessage />
                   </FormItem>
                 )}
