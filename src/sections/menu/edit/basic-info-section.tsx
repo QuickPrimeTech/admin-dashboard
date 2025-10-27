@@ -40,7 +40,7 @@ import { toast } from "sonner";
 import axios from "axios";
 
 export default function BasicInfoSection() {
-  const { data, status } = useMenuItemForm();
+  const { data: serverData, status } = useMenuItemForm();
   const form = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
     defaultValues: {
@@ -52,15 +52,15 @@ export default function BasicInfoSection() {
   });
 
   useEffect(() => {
-    if (data) {
+    if (serverData) {
       form.reset({
-        name: data.name || "",
-        price: data.price || 0,
-        category: data.category || "",
-        description: data.description || "",
+        name: serverData.name || "",
+        price: serverData.price || 0,
+        category: serverData.category || "",
+        description: serverData.description || "",
       });
     }
-  }, [data, form]);
+  }, [serverData, form]);
 
   // Show skeletons when loading
   if (status === "pending") {
@@ -78,8 +78,8 @@ export default function BasicInfoSection() {
       );
     });
 
-    // quick peek
-    for (const [k, v] of payload.entries()) console.log(k, v);
+    //Appending the id so that the server can know which image to edit
+    payload.append("id", serverData?.id!);
 
     axios
       .patch("/api/menu-items", payload)

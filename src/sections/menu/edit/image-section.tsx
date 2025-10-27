@@ -100,6 +100,7 @@ export function ImageSection() {
       const fd = new FormData();
       fd.append("image", imageData.image ?? "");
       fd.append("lqip", imageData.lqip ?? "");
+      fd.append("id", data?.id!);
       const { data: res } = await axios.patch("/api/menu-items", fd);
       toast.success(res.message);
     } catch {

@@ -26,9 +26,10 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { AvailabilitySkeleton } from "@/sections/menu/skeletons/availability-skeleton";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
+import axios from "axios";
 
 export default function AvailabilitySection() {
-  const { data, status } = useMenuItemForm();
+  const { data: serverData, status } = useMenuItemForm();
 
   const defaultData: AvailabilityFormData = {
     is_available: true,
@@ -44,15 +45,16 @@ export default function AvailabilitySection() {
 
   // ✅ Prefill data when fetched
   useEffect(() => {
-    if (data) {
+    if (serverData) {
+      // when you reset / pre-fill
       form.reset({
-        is_available: data.is_available ?? true,
-        is_popular: data.is_popular ?? false,
-        start_time: data.start_time ?? "00:00",
-        end_time: data.end_time ?? "23:59",
+        is_available: serverData.is_available ?? true,
+        is_popular: serverData.is_popular ?? false,
+        start_time: serverData.start_time?.slice(0, 5) ?? "00:00", // drop seconds
+        end_time: serverData.end_time?.slice(0, 5) ?? "23:59",
       });
     }
-  }, [data, form]);
+  }, [serverData, form]);
 
   // ✅ Show skeletons while loading
   if (status === "pending") {
@@ -60,8 +62,23 @@ export default function AvailabilitySection() {
   }
 
   const onSubmit = (data: AvailabilityFormData) => {
-    console.log("About to update this availability info ---->", data);
-    toast.success("Availability settings saved successfully!");
+    const payload = new FormData();
+
+    Object.keys(form.formState.dirtyFields).forEach((key) => {
+      const value = data[key as keyof AvailabilityFormData];
+      payload.append(
+        key,
+        typeof value === "object" ? JSON.stringify(value) : String(value)
+      );
+    });
+    //Appending the id so that the server can know which image to edit
+    payload.append("id", serverData?.id!);
+    axios
+      .patch("/api/menu-items", payload)
+      .then((res) => toast.success(res.data.message))
+      .catch(() =>
+        toast.error("There was an error updating the availability data")
+      );
   };
 
   return (

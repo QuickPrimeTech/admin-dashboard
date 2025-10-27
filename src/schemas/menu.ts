@@ -19,19 +19,29 @@ export const imageSchema = z.object({
 });
 
 // ✅ Define schema only for availability
-export const availabilitySchema = z.object({
-  is_available: z.boolean().default(true),
-  is_popular: z.boolean().default(false),
-  start_time: z
-    .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format")
-    .default("08:00"),
-  end_time: z
-    .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format")
-    .default("22:00"),
-});
-
+export const availabilitySchema = z
+  .object({
+    is_available: z.boolean().default(true),
+    is_popular: z.boolean().default(false),
+    start_time: z
+      .string()
+      // Accepts both 08:00 and 08:00:00 formats
+      .regex(
+        /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/,
+        "Invalid start time format"
+      )
+      .default("08:00"),
+    end_time: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, "Invalid end time format")
+      .default("22:00"),
+  })
+  // ✅ Normalize times to 24-hour "HH:MM" format for DB / backend
+  .transform((data) => ({
+    ...data,
+    start_time: data.start_time.slice(0, 5),
+    end_time: data.end_time.slice(0, 5),
+  }));
 export type AvailabilityFormData = z.infer<typeof availabilitySchema>;
 // Choice schema
 export const choiceSchema = z.object({
