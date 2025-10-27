@@ -1,5 +1,5 @@
 // app/api/menu-items/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { cloudinary } from "@/lib/server/cloudinary";
 import {

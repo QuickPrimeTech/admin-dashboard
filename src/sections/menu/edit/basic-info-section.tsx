@@ -36,8 +36,6 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import { toast } from "sonner";
-import axios from "axios";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -81,9 +79,9 @@ export default function BasicInfoSection() {
         typeof value === "object" ? JSON.stringify(value) : String(value)
       );
     });
-
+    if (!serverData?.id) return;
     //Appending the id so that the server can know which image to edit
-    formData.append("id", serverData?.id!);
+    formData.append("id", serverData.id);
 
     mutate({ formData });
   };

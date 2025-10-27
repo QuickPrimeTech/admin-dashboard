@@ -33,7 +33,7 @@ type ImageData = { image: File | null; lqip: string | null };
  *  Main component
  * ------------------------------------------------*/
 export function ImageSection() {
-  const { status, data } = useMenuItemForm();
+  const { status, data: serverData } = useMenuItemForm();
   //Getting the mutation function that updates the menu item
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
 
@@ -66,7 +66,7 @@ export function ImageSection() {
     setValue("image", undefined);
     setPreviewUrl(undefined);
     setIsServerImageRemoved(true);
-    setImageData(data?.image_url ? { image: null, lqip: null } : null);
+    setImageData(serverData?.image_url ? { image: null, lqip: null } : null);
   }
 
   /* ------------  drag & drop  ------------ */
@@ -100,7 +100,9 @@ export function ImageSection() {
       const formData = new FormData();
       formData.append("image", imageData.image ?? "");
       formData.append("lqip", imageData.lqip ?? "");
-      formData.append("id", data?.id!);
+      //Making sure the id exists
+      if (!serverData?.id) return;
+      formData.append("id", serverData.id);
       //Sending the data to the mutation function
       await mutateAsync({ formData });
       setImageData(null);
@@ -111,7 +113,7 @@ export function ImageSection() {
   }
 
   /* ------------  render  ------------ */
-  const hasExistingImage = !!data?.image_url && !isServerImageRemoved;
+  const hasExistingImage = !!serverData?.image_url && !isServerImageRemoved;
 
   return (
     <Form {...form}>
@@ -139,8 +141,8 @@ export function ImageSection() {
                 >
                   {hasExistingImage ? (
                     <ImageDisplay
-                      src={data.image_url!}
-                      placeholder={data.lqip}
+                      src={serverData.image_url!}
+                      placeholder={serverData.lqip}
                       alt="Item image"
                       onRemove={handleRemove}
                     />
@@ -161,7 +163,7 @@ export function ImageSection() {
                 </div>
 
                 {/* restore button – only when server image was removed */}
-                {isServerImageRemoved && data?.image_url && (
+                {isServerImageRemoved && serverData?.image_url && (
                   <div className="mt-2 flex justify-center">
                     <Button
                       type="button"
