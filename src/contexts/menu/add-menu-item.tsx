@@ -1,6 +1,5 @@
 // src/context/menu-item-form-context.tsx
 "use client";
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   menuItemSchema,
@@ -15,7 +14,7 @@ import {
 } from "@/helpers/file-helpers";
 import { toast } from "sonner";
 import { ZodError } from "zod";
-import axios from "axios";
+import { useCreateMenuItemMutation } from "@/hooks/use-menu";
 
 type MenuItemFormContextType = {
   imageInfo: ImageInfo | null;
@@ -55,12 +54,11 @@ export function AddMenuItemProvider({
 }: {
   children: React.ReactNode;
 }) {
-  //  Key for localStorage for persisting form data
   const localStorageKey = "add-menu-item-form-data";
 
+  // ✅ Use typed mutation
+  const { mutate, isPending } = useCreateMenuItemMutation();
   const [suspendPersist, setSuspendPersist] = useState(false);
-  //This is the state to show if the form is being submitted or not
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [imageInfo, setImageInfo] = useState<ImageInfo | null>(null);
   const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
   const [availabilityInfo, setAvailabilityInfo] =
@@ -70,7 +68,7 @@ export function AddMenuItemProvider({
     null
   );
 
-  // ✅ Load persisted data on mount
+  // Load persisted data
   useEffect(() => {
     const stored = localStorage.getItem(localStorageKey);
     if (!stored) return;
@@ -92,22 +90,11 @@ export function AddMenuItemProvider({
     }
   }, []);
 
-  const resetFormState = () => {
-    setImageInfo(null);
-    setBasicInfo(null);
-    setAvailabilityInfo(null);
-    setChoices([]);
-    setEditingChoice(null);
-    localStorage.removeItem(localStorageKey);
-  };
-
-  // ✅ Persist data but skip if nothing important changed
+  // Persist data
   useEffect(() => {
     if (suspendPersist) return;
     let timeout: NodeJS.Timeout;
-
     const persist = async () => {
-      // debounce writes to localStorage to avoid spam
       clearTimeout(timeout);
       timeout = setTimeout(async () => {
         const data = {
@@ -124,9 +111,8 @@ export function AddMenuItemProvider({
           choices,
         };
         localStorage.setItem(localStorageKey, JSON.stringify(data));
-      }, 500); // only persist after 0.5s of no change
+      }, 500);
     };
-
     persist();
     return () => clearTimeout(timeout);
   }, [
@@ -138,19 +124,23 @@ export function AddMenuItemProvider({
     imageInfo,
   ]);
 
-  const submitForm = async () => {
-    try {
-      setSuspendPersist(true);
-      if (!basicInfo) {
-        toast.error("Please fill in the basic info first.");
-        return;
-      }
-      if (!availabilityInfo) {
-        toast.error("Please fill in the availability info first.");
-        return;
-      }
+  const resetFormState = () => {
+    setImageInfo(null);
+    setBasicInfo(null);
+    setAvailabilityInfo(null);
+    setChoices([]);
+    setEditingChoice(null);
+    localStorage.removeItem(localStorageKey);
+  };
 
-      // Combine all form sections into one object
+  const submitForm = async () => {
+    if (!basicInfo) return toast.error("Please fill in the basic info first.");
+    if (!availabilityInfo)
+      return toast.error("Please fill in the availability info first.");
+
+    setSuspendPersist(true);
+
+    try {
       const data = {
         ...basicInfo,
         image: imageInfo?.image || undefined,
@@ -165,80 +155,70 @@ export function AddMenuItemProvider({
         choices,
       };
 
-      // ✅ Validate with Zod
       const validated = menuItemSchema.parse(data);
 
-      // ✅ Build FormData for multipart/form-data upload
       const formData = new FormData();
       Object.entries(validated).forEach(([key, value]) => {
         if (key === "image" && value instanceof File) {
           formData.append("image", value);
         } else if (typeof value === "object") {
-          // Convert nested objects/arrays (like choices) to JSON
           formData.append(key, JSON.stringify(value));
         } else if (value !== undefined && value !== null) {
           formData.append(key, String(value));
         }
       });
-      setIsSubmitting(true);
-      // ✅ Send to your backend
-      const res = await axios.post("/api/menu-items", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
 
-      console.log(res);
-      toast.success(res.data.message);
-      // Optionally clear the data
-      resetFormState();
+      // ✅ Send via typed mutation
+      mutate(formData, {
+        onSuccess: () => {
+          resetFormState();
+        },
+        onError: (err) => {
+          console.error("Menu item creation failed", err);
+        },
+      });
     } catch (err: unknown) {
       if (err instanceof ZodError) {
-        err.errors.forEach((issue) => {
-          toast.error(`${issue.path.join(".")}: ${issue.message}`);
-        });
-      } else if (axios.isAxiosError(err)) {
-        toast.error(err.response?.data?.message || "Server error occurred.");
-        console.error("API Error:", err.response?.data);
+        err.errors.forEach((issue) =>
+          toast.error(`${issue.path.join(".")}: ${issue.message}`)
+        );
       } else {
         toast.error("Something went wrong during submission.");
-        console.error("Unexpected Error:", err);
+        console.error(err);
       }
+    } finally {
+      setSuspendPersist(false);
     }
-    setIsSubmitting(false);
-    setSuspendPersist(false);
   };
 
-  const removeChoice = (id: string) => {
+  const addChoice = (choice: ChoiceFormData) =>
+    setChoices((prev) => [...prev, { ...choice, id: crypto.randomUUID() }]);
+
+  const removeChoice = (id: string) =>
     setChoices((prev) => prev.filter((choice) => choice.id !== id));
-  };
 
   const onEditChoice = (choice: ChoiceFormData) => {
-    //First set the editing choice to the choice to be edited
     setEditingChoice(choice);
-    //Then remove it from the choices list to avoid duplication
     removeChoice(choice.id!);
-  };
-
-  const addChoice = (choice: ChoiceFormData) => {
-    setChoices((prev) => [...prev, { ...choice, id: crypto.randomUUID() }]);
   };
 
   return (
     <MenuItemFormContext.Provider
       value={{
-        availabilityInfo,
-        setAvailabilityInfo,
-        onEditChoice,
         imageInfo,
         setImageInfo,
         basicInfo,
         setBasicInfo,
-        isSubmitting,
+        availabilityInfo,
+        setAvailabilityInfo,
         choices,
-        addChoice,
         setChoices,
+        addChoice,
         removeChoice,
+        onEditChoice,
         editingChoice,
         setEditingChoice,
+        isSubmitting: isPending,
         submitForm,
       }}
     >

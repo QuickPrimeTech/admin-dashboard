@@ -13,14 +13,16 @@ import {
 } from "@/helpers/common";
 import { revalidatePage } from "@/helpers/revalidator";
 import { menuItemSchema } from "@/schemas/menu";
+import { createResponse } from "@/helpers/api-responses";
 
 export async function POST(request: NextRequest) {
-  // checking if the client is authenticated to add a menu item
   const { user, response, supabase } = await getAuthenticatedUser();
   if (response) return response;
-  const formData = await request.formData();
+
   try {
-    //Parsing the choices to an array
+    const formData = await request.formData();
+
+    // Parse choices
     const choicesEntry = formData.get("choices");
     let choices: unknown[] = [];
     if (typeof choicesEntry === "string") {
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Safely extract values from FormData rather than asserting the entire FormData shape
+    // Extract values safely
     const data = {
       name: formData.get("name"),
       description: formData.get("description"),
@@ -46,34 +48,35 @@ export async function POST(request: NextRequest) {
       choices,
     };
 
-    //Validating the form data using the MenuItemFormData schema
+    // Validate
     const parsedData = menuItemSchema.safeParse(data);
     if (!parsedData.success) {
       const errors = parsedData.error.flatten().fieldErrors;
       console.log("Validation errors:", errors);
-      return errorResponse("Invalid form data", 400, JSON.stringify(errors));
+      return createResponse(
+        400,
+        "Invalid form data",
+        JSON.stringify(errors),
+        false
+      );
     }
-    // declaring intial values in order to determine later if the image was sent to cloudinary
-    let uploadedImageUrl = null;
-    let publicId = null;
 
-    //Getting the image file sent by the user
+    // Image upload
+    let uploadedImageUrl: string | null = null;
+    let publicId: string | null = null;
     const imageFile = data.image as File | null;
-
-    // since the user exist we can fetch the restaurant name from supabase through the user.id
     const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
-    //Checking if the image exist so that I can send it to cloudinary
+
     if (imageFile) {
-      // preparing the image to upload to cloudinary
       const uploadResult = await uploadImageToCloudinary(
         imageFile,
         `${sanitizedRestaurantName}/menu-items`
       );
-
       uploadedImageUrl = uploadResult.secure_url;
       publicId = uploadResult.public_id;
     }
-    //Now preparing the newMenuItem
+
+    // Prepare new menu item
     const newMenuItem = {
       name: data.name,
       description: data.description,
@@ -90,20 +93,37 @@ export async function POST(request: NextRequest) {
       public_id: publicId,
       user_id: user.id,
     };
-    const { error } = await supabase.from("menu_items").insert([newMenuItem]);
-    if (error) {
-      return errorResponse("Failed to save item", 500, error.message);
+
+    // Insert into Supabase and return the inserted row
+    const { data: insertedItem, error } = await supabase
+      .from("menu_items")
+      .insert([newMenuItem])
+      .select()
+      .single();
+
+    if (error || !insertedItem) {
+      return createResponse(
+        500,
+        "Failed to save item",
+        error?.message ?? "Unknown error",
+        false
+      );
     }
-    return NextResponse.json({ message: "Menu item was created successfully" });
+
+    // Return the newly inserted item including its Supabase ID
+    return createResponse(
+      200,
+      "Menu item was created successfully",
+      insertedItem,
+      true
+    );
   } catch (err) {
     const error = err as Error;
-    return NextResponse.json(
-      {
-        message:
-          error.message ||
-          "An error occured while trying to submit your menu details",
-      },
-      { status: 403 }
+    return createResponse(
+      500,
+      error.message || "An error occurred while submitting your menu details",
+      null,
+      false
     );
   }
 }

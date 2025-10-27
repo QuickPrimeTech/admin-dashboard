@@ -1,7 +1,8 @@
+import { ApiResponse } from "@/helpers/api-responses";
 import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
 import { MenuItem } from "@/types/menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 //This is the name of the key to reuse
 const MENU_ITEMS_QUERY_KEY = ["menu-items"];
@@ -105,5 +106,59 @@ export function useMenuItemQuery(id?: number) {
       return result.data as MenuItem;
     },
     enabled: !!id, // only run when id exists
+  });
+}
+
+export function useCreateMenuItemMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<MenuItem>, // Success type
+    AxiosError<ApiResponse<null>>, // Error type
+    FormData // Variables
+  >({
+    mutationFn: async (formData) => {
+      const res = await axios.post<ApiResponse<MenuItem>>(
+        "/api/menu-items",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: (res) => {
+      const newItem = res.data;
+      if (!newItem) return;
+
+      toast.success(res.message || "Menu item added successfully!");
+      // ✅ Correct query key usage
+      const previousMenuItems =
+        queryClient.getQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY) || [];
+      if (previousMenuItems.length === 0) return;
+      queryClient.setQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY, () => [
+        newItem,
+        ...previousMenuItems,
+      ]);
+    },
+    onError: (err) => {
+      const message =
+        err.response?.data?.message || "Failed to create menu item";
+      toast.error(message);
+
+      const errors = err.response?.data?.data;
+      if (errors) {
+        try {
+          const parsed = JSON.parse(errors);
+          Object.entries(parsed).forEach(([field, msgs]) => {
+            (msgs as string[]).forEach((msg) =>
+              toast.error(`${field}: ${msg}`)
+            );
+          });
+        } catch {}
+      }
+
+      console.error("Create menu item error:", err);
+    },
   });
 }

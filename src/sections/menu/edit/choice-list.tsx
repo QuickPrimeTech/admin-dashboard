@@ -14,18 +14,13 @@ import { ChoicesListSkeleton } from "../skeletons/choice-list-skeleton";
 export function ChoicesList() {
   const { data, status } = useMenuItemForm();
 
-  const editChoice = (id: string) => {
-    console.log("About to edit", id);
-  };
-  const removeChoice = (id: string) => {
-    console.log("About to remove", id);
-  };
+  const { choices, removeChoice, onEditChoice } = useMenuItemForm();
 
   //Handling the Loading state
   if (!data || status === "pending") {
     return <ChoicesListSkeleton />;
   }
-  if (data.choices.length === 0) {
+  if (choices.length === 0) {
     return null;
   }
   return (
@@ -35,11 +30,11 @@ export function ChoicesList() {
         <CardDescription>Your added choices and options</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {data.choices.map((choice) => (
+        {choices.map((choice) => (
           <ChoiceItem
             key={choice.id}
             choice={choice}
-            onEdit={() => editChoice(choice.id!)}
+            onEdit={() => onEditChoice(choice)}
             onRemove={() => removeChoice(choice.id!)}
           />
         ))}

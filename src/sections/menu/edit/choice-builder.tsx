@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
@@ -16,6 +17,7 @@ import {
   FormMessage,
 } from "@ui/form";
 import { choiceSchema, type ChoiceFormData } from "@/schemas/menu";
+import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ChoiceOptionItem } from "./choice-option-item";
 
 export function ChoiceBuilder() {
@@ -24,19 +26,26 @@ export function ChoiceBuilder() {
   const [optionPrice, setOptionPrice] = useState("");
   const [optionError, setOptionError] = useState("");
 
-  // const { data, status } = useMenuItemForm(); // ✅ from context
+  const { choices, addChoice, editingChoice, setEditingChoice } =
+    useMenuItemForm(); // ✅ from context
 
   const form = useForm<ChoiceFormData>({
     resolver: zodResolver(choiceSchema),
     defaultValues: {
-      title: "",
-      required: false,
-      maxSelectable: undefined,
-      options: [],
+      title: editingChoice ? editingChoice.title : "",
+      required: editingChoice ? editingChoice.required : false,
+      maxSelectable: editingChoice ? editingChoice.maxSelectable : undefined,
+      options: editingChoice ? editingChoice.options : [],
     },
   });
 
   const { control, handleSubmit, reset } = form;
+
+  useEffect(() => {
+    if (editingChoice) {
+      reset(editingChoice);
+    }
+  }, [editingChoice, reset]);
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -73,13 +82,22 @@ export function ChoiceBuilder() {
       setOptionError("You must add at least one option");
       return;
     }
-
+    //checking if the choice is being edited or added new
+    if (editingChoice) {
+      // Update existing choice
+      addChoice(data); // ✅ Send to context
+      setEditingChoice(null);
+    } else {
+      // Add new choice
+      addChoice(data); // ✅ Send to context
+    }
+    console.log(data);
     resetForm();
     setIsOpen(false);
     setOptionError("");
   };
 
-  if (!isOpen) {
+  if (!isOpen && !editingChoice) {
     return (
       <Button
         type="button"
@@ -217,14 +235,23 @@ export function ChoiceBuilder() {
               variant="outline"
               onClick={() => {
                 resetForm();
+                if (editingChoice) {
+                  addChoice(editingChoice);
+                }
+                // Reset to editing choice or empty
+                setEditingChoice(null);
                 setIsOpen(false);
                 setOptionError("");
               }}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={fields.length === 0}>
-              <Plus /> Update Choice
+            <Button
+              type="submit"
+              disabled={fields.length === 0 || !form.formState.isDirty}
+            >
+              <Plus />
+              {editingChoice ? "Update Choice" : "Add Choice"}
             </Button>
           </div>
         </form>
