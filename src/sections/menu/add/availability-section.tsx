@@ -30,8 +30,8 @@ export default function AvailabilitySection() {
   const defaultData: AvailabilityFormData = {
     is_available: true,
     is_popular: false,
-    start_time: "00:00",
-    end_time: "23:59",
+    start_time: "08:00",
+    end_time: "10:00",
   };
   const form = useForm<AvailabilityFormData>({
     resolver: zodResolver(availabilitySchema) as Resolver<AvailabilityFormData>,
