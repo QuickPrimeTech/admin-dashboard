@@ -23,6 +23,17 @@ import { generateBlurDataURL } from "@/helpers/file-helpers";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@ui/alert-dialog";
 
 /* -------------------------------------------------
  *  Types
@@ -139,17 +150,17 @@ export function ImageSection() {
                     !hasExistingImage && !previewUrl && "aspect-auto h-fit"
                   )}
                 >
-                  {hasExistingImage ? (
+                  {previewUrl ? (
+                    <ImageDisplay
+                      src={previewUrl}
+                      alt="Preview"
+                      onRemove={handleRemove}
+                    />
+                  ) : hasExistingImage ? (
                     <ImageDisplay
                       src={serverData.image_url!}
                       placeholder={serverData.lqip}
                       alt="Item image"
-                      onRemove={handleRemove}
-                    />
-                  ) : previewUrl ? (
-                    <ImageDisplay
-                      src={previewUrl}
-                      alt="Preview"
                       onRemove={handleRemove}
                     />
                   ) : (
@@ -178,21 +189,63 @@ export function ImageSection() {
 
                 {/* save button – only when new image is staged */}
                 {imageData && (
-                  <Button
-                    className="mt-3 w-full"
-                    onClick={submitImage}
-                    disabled={isPending}
-                  >
-                    {isPending ? (
-                      <>
-                        <Spinner /> Saving
-                      </>
+                  <>
+                    {previewUrl ? (
+                      // Normal save flow when uploading new image
+                      <Button
+                        className="mt-3 w-full"
+                        onClick={submitImage}
+                        disabled={isPending}
+                      >
+                        {isPending ? (
+                          <>
+                            <Spinner /> Saving
+                          </>
+                        ) : (
+                          <>
+                            <Save /> Save Changes
+                          </>
+                        )}
+                      </Button>
                     ) : (
-                      <>
-                        <Save /> Save Change
-                      </>
+                      // Show confirmation dialog when deleting image
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            className="mt-3 w-full"
+                            variant="destructive"
+                            disabled={isPending}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Save Changes
+                            (Delete Image)
+                          </Button>
+                        </AlertDialogTrigger>
+
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Delete Image Permanently?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. The{" "}
+                              {serverData?.name} will no longer have an image.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              variant="destructive"
+                              onClick={async () => {
+                                await submitImage();
+                              }}
+                            >
+                              Yes, Delete Image
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
-                  </Button>
+                  </>
                 )}
 
                 <FormMessage />

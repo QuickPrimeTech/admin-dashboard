@@ -13,6 +13,7 @@ import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,6 +22,7 @@ import { Input } from "@ui/input";
 import { Button } from "@ui/button";
 import { useCategoriesQuery } from "@/hooks/use-menu";
 import { Skeleton } from "./ui/skeleton";
+import { Plus } from "lucide-react";
 
 type DynamicSelectProps<
   TFieldValues extends FieldValues,
@@ -92,6 +94,10 @@ export function DynamicSelect<
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add custom category</DialogTitle>
+            <DialogDescription>
+              Enter a custom category name exactly as you want it to appear on
+              your menu. It won’t be automatically formatted or adjusted.
+            </DialogDescription>
           </DialogHeader>
           <Input
             placeholder="e.g. Brunch"
@@ -103,7 +109,10 @@ export function DynamicSelect<
             <Button variant="secondary" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={add}>Add</Button>
+            <Button onClick={add}>
+              <Plus />
+              Add
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
