@@ -1,0 +1,112 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+} from "@ui/select";
+import { FormControl } from "@ui/form";
+import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@ui/dialog";
+import { Input } from "@ui/input";
+import { Button } from "@ui/button";
+import { useCategoriesQuery } from "@/hooks/use-menu";
+import { Skeleton } from "./ui/skeleton";
+
+type DynamicSelectProps<
+  TFieldValues extends FieldValues,
+  TName extends Path<TFieldValues>
+> = {
+  field: ControllerRenderProps<TFieldValues, TName>;
+};
+
+export function DynamicSelect<
+  TFieldValues extends FieldValues,
+  TName extends Path<TFieldValues>
+>({ field }: DynamicSelectProps<TFieldValues, TName>) {
+  //Getting the categories using the react query
+  const { data: serverCategories, isPending } = useCategoriesQuery();
+
+  const [categories, setCategories] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
+  const [custom, setCustom] = useState("");
+
+  const add = () => {
+    const txt = custom.trim();
+    if (!txt) return;
+    if (!categories.includes(txt)) setCategories((o) => [...o, txt]);
+    field.onChange(txt);
+    setCustom("");
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    if (serverCategories) setCategories(serverCategories);
+  }, [serverCategories]);
+
+  return (
+    <>
+      <Select
+        key={field.value}
+        onValueChange={(v) =>
+          v === "__ADD__" ? setOpen(true) : field.onChange(v)
+        }
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {isPending ? (
+            // ✅ Loading skeletons when fetching
+            <div className="p-2 space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-6 w-full" />
+              ))}
+            </div>
+          ) : (
+            <>
+              {categories.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {o}
+                </SelectItem>
+              ))}
+              <SelectItem value="__ADD__">+ Add custom</SelectItem>
+            </>
+          )}
+        </SelectContent>
+      </Select>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add custom category</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="e.g. Brunch"
+            value={custom}
+            onChange={(e) => setCustom(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && add()}
+          />
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={add}>Add</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
