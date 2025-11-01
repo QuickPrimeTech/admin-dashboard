@@ -7,7 +7,9 @@ export async function POST() {
   const token = crypto.randomBytes(32).toString("hex");
 
   // Set expiration date (e.g. 24 hours from now)
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(
+    Date.now() + 7 * 24 * 60 * 60 * 1000
+  ).toISOString();
 
   const { error } = await supabase.from("invite_tokens").insert({
     token,

@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
       dietary_preference: [],
       image_url: uploadedImageUrl,
       public_id: publicId,
-      user_id: user.id,
     };
 
     // Insert into Supabase and return the inserted row
@@ -178,10 +177,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Fetch existing item
-    const { data: existingItem, error: fetchError } = await getMenuItemById(
-      user.id,
-      id
-    );
+    const { data: existingItem, error: fetchError } = await getMenuItemById(id);
     if (fetchError || !existingItem) {
       return createResponse(
         404,
