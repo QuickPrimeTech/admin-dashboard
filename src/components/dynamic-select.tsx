@@ -13,6 +13,7 @@ import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,6 +22,7 @@ import { Input } from "@ui/input";
 import { Button } from "@ui/button";
 import { useCategoriesQuery } from "@/hooks/use-menu";
 import { Skeleton } from "./ui/skeleton";
+import { Plus } from "lucide-react";
 
 type DynamicSelectProps<
   TFieldValues extends FieldValues,
@@ -34,7 +36,7 @@ export function DynamicSelect<
   TName extends Path<TFieldValues>
 >({ field }: DynamicSelectProps<TFieldValues, TName>) {
   //Getting the categories using the react query
-  const { data: serverCategories, isPending } = useCategoriesQuery();
+  const { data: serverCategories, isPending, isError } = useCategoriesQuery();
 
   const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -50,8 +52,15 @@ export function DynamicSelect<
   };
 
   useEffect(() => {
-    if (serverCategories) setCategories(serverCategories);
-  }, [serverCategories]);
+    if (serverCategories) {
+      setCategories(serverCategories);
+
+      // Ensure the currently selected value is included
+      if (field.value && !serverCategories.includes(field.value)) {
+        setCategories((prev) => [...prev, field.value]);
+      }
+    }
+  }, [serverCategories, field.value]);
 
   return (
     <>
@@ -82,6 +91,12 @@ export function DynamicSelect<
                   {o}
                 </SelectItem>
               ))}
+              {isError && (
+                <p className="text-sm text-destructive px-2">
+                  Failed to load categories. You can still add a custom one.
+                </p>
+              )}
+
               <SelectItem value="__ADD__">+ Add custom</SelectItem>
             </>
           )}
@@ -92,6 +107,10 @@ export function DynamicSelect<
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add custom category</DialogTitle>
+            <DialogDescription>
+              Enter a custom category name exactly as you want it to appear on
+              your menu. It won’t be automatically formatted or adjusted.
+            </DialogDescription>
           </DialogHeader>
           <Input
             placeholder="e.g. Brunch"
@@ -103,7 +122,10 @@ export function DynamicSelect<
             <Button variant="secondary" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={add}>Add</Button>
+            <Button onClick={add}>
+              <Plus />
+              Add
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
