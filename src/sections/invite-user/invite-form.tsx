@@ -1,16 +1,13 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader } from "lucide-react";
+import { Loader, Lock, MailIcon, User } from "lucide-react";
 import { toast } from "sonner";
 import {
   Form,
@@ -24,6 +21,12 @@ import { ChefHat, Eye, EyeOff } from "lucide-react";
 import { signup } from "@/app/auth/actions/actions";
 import { useRouter } from "next/navigation";
 import { InviteFormData, formSchema } from "@/schemas/invite-form";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 export function InviteSignupForm() {
   const whatsappMessage =
@@ -53,8 +56,6 @@ export function InviteSignupForm() {
       terms: false,
     },
   });
-
-  useEffect(() => {}, [token]);
 
   const onSubmit = async (values: InviteFormData) => {
     setLoading(true);
@@ -92,7 +93,7 @@ export function InviteSignupForm() {
               </p>
             </div>
           </div>
-          <CardTitle className="text-2xl md:text-3xl font-bold text-Foreground mb-2">
+          <CardTitle className="text-2xl md:text-3xl font-bold text-Foreground">
             Create your Account
           </CardTitle>
           <p className="text-gray-600 text-sm md:text-base">
@@ -104,6 +105,7 @@ export function InviteSignupForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* All your FormFields stay the same */}
+
               <FormField
                 control={form.control}
                 disabled={loading}
@@ -114,7 +116,15 @@ export function InviteSignupForm() {
                       Restaurant Name
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <InputGroup>
+                        <InputGroupInput
+                          {...field}
+                          placeholder="Write your restaurant name here..."
+                        />
+                        <InputGroupAddon>
+                          <User />
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -130,7 +140,16 @@ export function InviteSignupForm() {
                       Email Address
                     </FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} />
+                      <InputGroup>
+                        <InputGroupInput
+                          type="email"
+                          {...field}
+                          placeholder="Write your email here..."
+                        />
+                        <InputGroupAddon>
+                          <MailIcon />
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -146,23 +165,28 @@ export function InviteSignupForm() {
                       Password
                     </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
+                      <InputGroup>
+                        <InputGroupInput
                           type={showPassword ? "text" : "password"}
+                          placeholder="Write your password here..."
                           {...field}
                         />
-                        <button
-                          type="button"
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-400" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-gray-400" />
-                          )}
-                        </button>
-                      </div>
+                        <InputGroupAddon>
+                          <Lock />
+                        </InputGroupAddon>
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupButton
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-gray-400" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-gray-400" />
+                            )}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -178,25 +202,31 @@ export function InviteSignupForm() {
                       Confirm Password
                     </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
+                      <InputGroup>
+                        <InputGroupInput
                           type={showConfirmPassword ? "text" : "password"}
                           {...field}
+                          placeholder="Write your password confirmation here..."
                         />
-                        <button
-                          type="button"
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                          onClick={() =>
-                            setShowConfirmPassword((prev) => !prev)
-                          }
-                        >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-400" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-gray-400" />
-                          )}
-                        </button>
-                      </div>
+                        <InputGroupAddon>
+                          <Lock />
+                        </InputGroupAddon>
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupButton
+                            type="button"
+                            onClick={() =>
+                              setShowConfirmPassword((prev) => !prev)
+                            }
+                          >
+                            {" "}
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-4 w-4 text-gray-400" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-gray-400" />
+                            )}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
