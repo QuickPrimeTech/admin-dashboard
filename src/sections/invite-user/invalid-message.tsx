@@ -11,7 +11,7 @@ export const InvalidLinkMessage = ({ message }: { message: string }) => {
   )}`;
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh] px-4">
+    <div className="flex items-center justify-center min-h-[60vh] px-4 mt-8">
       <Card className="w-full max-w-md text-center shadow-xl">
         <CardHeader>
           {/* Icon Container */}

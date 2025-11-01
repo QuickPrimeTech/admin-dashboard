@@ -40,6 +40,12 @@ const formSchema = z
   });
 
 export function InviteSignupForm() {
+  const whatsappMessage =
+    "Hey, I have a problem with creating my account. Could I please help me?";
+  const whatsappLink = `https://wa.me/254717448835?text=${encodeURIComponent(
+    whatsappMessage
+  )}`;
+
   // declaring th router so that I can redirect the user to another page when they are created
   const router = useRouter();
 
@@ -101,7 +107,7 @@ export function InviteSignupForm() {
             </div>
           </div>
           <CardTitle className="text-2xl md:text-3xl font-bold text-Foreground mb-2">
-            Get Started
+            Create your Account
           </CardTitle>
           <p className="text-gray-600 text-sm md:text-base">
             Create your restaurant admin account
@@ -228,20 +234,22 @@ export function InviteSignupForm() {
                         htmlFor="terms"
                         className="text-sm text-gray-600 leading-snug"
                       >
-                        I agree to the{" "}
-                        <Link
-                          href="/terms"
-                          className="text-primary hover:underline"
-                        >
-                          Terms of Service
-                        </Link>{" "}
-                        and{" "}
-                        <Link
-                          href="/privacy"
-                          className="text-primary hover:underline"
-                        >
-                          Privacy Policy
-                        </Link>
+                        <span className="inline">
+                          I agree to the{" "}
+                          <Link
+                            href="/terms"
+                            className="text-primary hover:underline"
+                          >
+                            Terms of Service
+                          </Link>{" "}
+                          and{" "}
+                          <Link
+                            href="/privacy"
+                            className="text-primary hover:underline"
+                          >
+                            Privacy Policy
+                          </Link>
+                        </span>
                       </FormLabel>
                     </div>
                     <FormMessage />
@@ -263,8 +271,8 @@ export function InviteSignupForm() {
             <p className="text-xs text-gray-500">
               Need help getting started?{" "}
               <Link
-                href="/support"
-                className="text-primary-600 hover:text-primary-500"
+                href={whatsappLink}
+                className="text-primary hover:text-primary/80"
               >
                 Contact Support
               </Link>

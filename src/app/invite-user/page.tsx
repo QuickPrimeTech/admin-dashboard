@@ -42,7 +42,7 @@ export default async function InviteUserPage({
 
   return (
     <div className="min-h-screen flex">
-      <FeaturesPanel />
+      {/* <FeaturesPanel /> */}
       <InviteSignupForm />
     </div>
   );
