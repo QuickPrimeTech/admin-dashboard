@@ -23,21 +23,7 @@ import {
 import { ChefHat, Eye, EyeOff } from "lucide-react";
 import { signup } from "@/app/auth/actions/actions";
 import { useRouter } from "next/navigation";
-
-const formSchema = z
-  .object({
-    restaurantName: z.string().min(1, "Restaurant name is required"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(1, "Password is required"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-    terms: z.boolean().refine((val) => val === true, {
-      message: "You must agree to the terms",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+import { InviteFormData, formSchema } from "@/schemas/invite-form";
 
 export function InviteSignupForm() {
   const whatsappMessage =
@@ -57,7 +43,7 @@ export function InviteSignupForm() {
     useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const form = useForm({
+  const form = useForm<InviteFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       restaurantName: "",
@@ -70,7 +56,7 @@ export function InviteSignupForm() {
 
   useEffect(() => {}, [token]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: InviteFormData) => {
     setLoading(true);
     const result = await signup({
       email: values.email,
