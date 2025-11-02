@@ -1,6 +1,5 @@
 // app/invite-user/page.tsx
 
-import { FeaturesPanel } from "@/sections/invite-user/features-panel";
 import { InviteSignupForm } from "@/sections/invite-user/invite-form";
 import { InvalidLinkMessage } from "@/sections/invite-user/invalid-message";
 import { supabase } from "@/lib/server/supabase";

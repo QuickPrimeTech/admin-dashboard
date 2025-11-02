@@ -68,16 +68,14 @@ export function InviteSignupForm() {
     setLoading(false);
     if (result.success) {
       toast.success("Account created successfully!");
-      router.push(
-        `/auth/verify-pending?email=${encodeURIComponent(values.email)}`
-      );
+      router.push(`/onboarding`);
     } else {
       toast.error(result.error || "Signup failed.");
     }
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-6 md:p-12 min-h-screen lg:min-h-0">
+    <div className="flex-1 flex items-center justify-center px-4 py-6 md:px-6 min-h-screen lg:min-h-0">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center pb-6">
           <div className="flex items-center justify-center gap-3 mb-4 lg:hidden">

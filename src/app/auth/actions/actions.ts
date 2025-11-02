@@ -85,8 +85,6 @@ export async function signup({
     return { success: false, error: "Failed to delete invite token." };
   }
 
-  revalidatePath("/", "layout");
-
   return { success: true };
 }
 
