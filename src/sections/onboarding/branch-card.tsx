@@ -21,70 +21,99 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@ui/alert-dialog";
-import { deleteBranchMutation } from "@/hooks/use-branches";
+import {
+  deleteBranchMutation,
+  updateBranchMutation,
+} from "@/hooks/use-branches";
+import { useState } from "react";
+import { EditBranchDialog } from "./edit-branch-dialog";
 
 type BranchCardProps = {
   branch: Branch;
 };
 
 export function BranchCard({ branch }: BranchCardProps) {
-  const mutate = deleteBranchMutation();
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const deleteMutation = deleteBranchMutation();
+  const editMutation = updateBranchMutation();
 
+  const handleEdit = async (data: { name: string }) => {
+    const newData = { ...branch, ...data };
+    try {
+      setIsDialogOpen(false);
+      await editMutation.mutateAsync(newData);
+    } catch {
+      setIsDialogOpen(true);
+    }
+  };
   return (
-    <Card
-      key={branch.id}
-      className="border-border shadow-md hover:shadow-lg transition-shadow"
-    >
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-primary" />
-          {branch.name}
-        </CardTitle>
-        <CardDescription>{branch.location}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Button className="w-full" size="sm">
-          <ExternalLink className="mr-2" />
-          Visit Dashboard
-        </Button>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            <Edit className="mr-2" />
-            Edit
+    <>
+      <Card
+        key={branch.id}
+        className="border-border shadow-md hover:shadow-lg transition-shadow"
+      >
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" />
+            {branch.name}
+          </CardTitle>
+          <CardDescription>{branch.location}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Button className="w-full" size="sm">
+            <ExternalLink className="mr-2" />
+            Visit Dashboard
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-destructive hover:text-destructive flex-1"
-              >
-                <Trash2 className="mr-2" />
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete{" "}
-                  <span className="font-medium">{branch.name}</span> from your
-                  restaurant branches and all of its related data.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  variant="destructive"
-                  onClick={() => mutate.mutate(branch.id)}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setIsDialogOpen(() => true)}
+            >
+              <Edit className="mr-2" />
+              Edit
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive flex-1"
                 >
-                  Yes, delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </CardContent>
-    </Card>
+                  <Trash2 className="mr-2" />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete{" "}
+                    <span className="font-medium">{branch.name}</span> from your
+                    restaurant branches and all of its related data.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={() => deleteMutation.mutate(branch.id)}
+                  >
+                    Yes, delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </CardContent>
+      </Card>
+      <EditBranchDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        branch={branch}
+        onEdit={handleEdit}
+      />
+    </>
   );
 }

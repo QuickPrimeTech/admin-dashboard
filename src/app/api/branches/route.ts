@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const request = await req.json();
+  const branch = await req.json();
   const supabase = await createClient();
   //   Fetching the restaurant id
   const { data: restaurantData, error } = await supabase
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   const { data: branchData, error: branchError } = await supabase
     .from("branch_settings")
     .insert({
-      name: request.name,
+      name: branch.name,
       restaurant_id: restaurantData.id,
     })
     .select()
@@ -64,6 +64,26 @@ export async function GET() {
     200,
     "Successfully fetched all the branches",
     data,
+    true
+  );
+}
+
+export async function PATCH(req: NextRequest) {
+  const supabase = await createClient();
+  const branch = await req.json();
+  const { error } = await supabase
+    .from("branch_settings")
+    .update({
+      name: branch.name,
+    })
+    .eq("id", branch.id);
+  if (error) {
+    return createResponse<null>(500, "There was an error updating your branch");
+  }
+  return createResponse<Branch>(
+    200,
+    `Successfully updated your branch to ${branch.name}`,
+    branch,
     true
   );
 }

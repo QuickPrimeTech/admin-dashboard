@@ -114,3 +114,53 @@ export function deleteBranchMutation() {
     },
   });
 }
+export function updateBranchMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<Branch>,
+    AxiosError<ApiResponse<null>>,
+    Branch,
+    { previousBranches: Branch[] | undefined }
+  >({
+    mutationFn: async (branch) => {
+      const res = await axios.patch<ApiResponse<Branch>>(
+        `/api/branches`,
+        branch
+      );
+      return res.data;
+    },
+    // Optimistic update
+    onMutate: async (branch) => {
+      //Cancelling all the queries that maybe fetching on the background
+      await queryClient.cancelQueries({ queryKey: BRANCHES_QUERY_KEY });
+      //Getting all the previous branches for rollback on error
+      const previousBranches =
+        queryClient.getQueryData<Branch[]>(BRANCHES_QUERY_KEY);
+      //Removing the branch from the existing ones
+      queryClient.setQueryData<Branch[]>(BRANCHES_QUERY_KEY, (branches) => {
+        if (!branches) return [branch];
+        return branches.map((oldBranch) =>
+          oldBranch.id !== branch.id ? oldBranch : branch
+        );
+      });
+
+      return { previousBranches };
+    },
+    // rollback if error
+    onError: (err, _newBranch, onMutateResult) => {
+      if (onMutateResult?.previousBranches) {
+        queryClient.setQueryData(
+          BRANCHES_QUERY_KEY,
+          onMutateResult.previousBranches
+        );
+      }
+      if (err instanceof AxiosError) {
+        toast.error(err.response?.data.message);
+      }
+    },
+    onSuccess: (newBranch, _variables) => {
+      toast.success(newBranch.message);
+    },
+  });
+}
