@@ -16,7 +16,7 @@ export function LogOutButton() {
   }
   return (
     <>
-      <Button variant={"outline"} onClick={handleLogout}>
+      <Button variant={"outline"} onClick={handleLogout} className="w-fit">
         <LogOutIcon />
         Log out
       </Button>

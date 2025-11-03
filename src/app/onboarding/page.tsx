@@ -15,7 +15,8 @@ export default function OnboardingFlow() {
     <div className="min-h-screen">
       <div className="container mx-auto px-4 md:px-8 py-12 max-w-6xl">
         {/* Header Section */}
-        <div className="flex justify-between gap-2">
+        <div className="flex flex-col max-sm:items-end md:flex-row-reverse justify-between gap-2">
+          <LogOutButton />
           <div className="mb-12 space-y-2">
             <h1 className="text-2xl lg:text-4xl font-bold">
               Welcome to Your Restaurant Dashboard
@@ -25,7 +26,6 @@ export default function OnboardingFlow() {
               your first branch location.
             </p>
           </div>
-          <LogOutButton />
         </div>
         {isPending ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
