@@ -59,7 +59,12 @@ export async function updateSession(request: NextRequest) {
     const hasOnboarded = user.user_metadata?.has_onboarded;
 
     // User logged in but not onboarded
-    if (!hasOnboarded && !pathname.startsWith("/onboarding")) {
+    //Prevent redirection of apis
+    if (
+      !hasOnboarded &&
+      !pathname.startsWith("/onboarding") &&
+      !pathname.startsWith("/api")
+    ) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);

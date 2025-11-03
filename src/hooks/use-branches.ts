@@ -1,0 +1,71 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
+import { ApiResponse } from "@/helpers/api-responses";
+import { Branch } from "@/types/onboarding";
+import { toast } from "sonner";
+
+export const BRANCHES_QUERY_KEY = ["branches"];
+
+export function useBranchesQuery() {
+  return useQuery({
+    queryKey: BRANCHES_QUERY_KEY,
+    queryFn: async () => {
+      const res = await axios.get<ApiResponse<Branch[]>>("/api/branches");
+      return res.data.data;
+    },
+  });
+}
+
+export function createBranchMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<Branch>,
+    AxiosError<ApiResponse<null>>,
+    { name: string },
+    { previousBranches: Branch[] | undefined }
+  >({
+    mutationFn: async (values) => {
+      const res = await axios.post<ApiResponse<Branch>>(
+        "/api/branches",
+        values
+      );
+      return res.data;
+    },
+    // Optimistic update
+    onMutate: async (newBranch) => {
+      await queryClient.cancelQueries({ queryKey: BRANCHES_QUERY_KEY });
+
+      const previousBranches =
+        queryClient.getQueryData<Branch[]>(BRANCHES_QUERY_KEY);
+
+      queryClient.setQueryData<Branch[]>(BRANCHES_QUERY_KEY, (old) => {
+        if (!old) return [{ id: "temp-" + Date.now(), ...newBranch }];
+        return [...old, { id: "temp-" + Date.now(), ...newBranch }];
+      });
+
+      return { previousBranches };
+    },
+    // rollback if error
+    onError: (err, _newBranch, onMutateResult) => {
+      if (onMutateResult?.previousBranches) {
+        queryClient.setQueryData(
+          BRANCHES_QUERY_KEY,
+          onMutateResult.previousBranches
+        );
+      }
+      if (err instanceof AxiosError) {
+        toast.error(err.response?.data.message);
+      }
+    },
+    onSuccess: (newBranch, _variables, onMutateResult) => {
+      if (!newBranch.data) return;
+
+      queryClient.setQueryData(BRANCHES_QUERY_KEY, () => {
+        if (!onMutateResult.previousBranches) return [newBranch.data];
+        return [...onMutateResult.previousBranches, newBranch.data];
+      });
+      toast.success(newBranch.message);
+    },
+  });
+}

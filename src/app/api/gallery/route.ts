@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     if (!file) return errorResponse("No file uploaded", 400);
 
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    const sanitizedRestaurantName = await getSanitizedRestaurantName();
     const uploadResult = await uploadImageToCloudinary(
       file,
       `${sanitizedRestaurantName}/gallery`
@@ -111,7 +111,7 @@ export async function PATCH(req: NextRequest) {
   let uploadedImageUrl = "";
   let publicId = data.public_id;
   if (file) {
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    const sanitizedRestaurantName = await getSanitizedRestaurantName();
     const uploadResult = await uploadAndReplaceImage(
       file,
       `${sanitizedRestaurantName}/gallery`,

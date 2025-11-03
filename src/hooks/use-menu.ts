@@ -135,9 +135,10 @@ export function useCreateMenuItemMutation() {
       if (!newItem) return;
 
       toast.success(res.message || "Menu item added successfully!");
-      // ✅ Correct query key usage
+      //  Correct query key usage
       const previousMenuItems =
         queryClient.getQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY) || [];
+      //prevent a scenario where the menu items are not cached and then adding the item making it seem like that is the only item in the database
       if (previousMenuItems.length === 0) return;
       queryClient.setQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY, () => [
         newItem,

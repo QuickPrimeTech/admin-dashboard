@@ -22,7 +22,7 @@ export function AddBranchCard({ ...props }) {
             Start creating branches and managing your restaurant
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent>
           <Button className="w-full hover:cursor-pointer" size="sm">
             <Plus />
             Add Branch

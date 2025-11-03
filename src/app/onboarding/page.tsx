@@ -1,13 +1,14 @@
 "use client";
-import { useState } from "react";
+
 import { BranchCard } from "@/sections/onboarding/branch-card";
-import { Branch } from "@/types/onboarding";
-import { AddBranchCard } from "@/sections/onboarding/add-branch-card";
 import { OnboardingFooter } from "@/sections/onboarding/footer";
 import { AddBranchDialog } from "@/sections/onboarding/add-branch-dialog";
+import { useBranchesQuery } from "@/hooks/use-branches";
+import { BranchCardSkeleton } from "@/sections/onboarding/skeletons/branch-card-skeleton";
+import { AddBranchCardSkeleton } from "@/sections/onboarding/skeletons/add-branch-card-skeleton";
 
 export default function OnboardingFlow() {
-  const [branches, setBranches] = useState<Branch[] | null>(null);
+  const { data: branches, isPending } = useBranchesQuery();
 
   return (
     <div className="min-h-screen">
@@ -22,10 +23,16 @@ export default function OnboardingFlow() {
             first branch location.
           </p>
         </div>
-
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <BranchCardSkeleton />
+          <AddBranchCardSkeleton />
+        </div>
         {/* Branches Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {branches && branches.map((branch) => <BranchCard branch={branch} />)}
+          {branches &&
+            branches.map((branch) => (
+              <BranchCard key={branch.id} branch={branch} />
+            ))}
           <AddBranchDialog />
         </div>
         {/* Footer Help Text */}

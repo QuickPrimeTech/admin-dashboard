@@ -2,7 +2,6 @@
 import { Button } from "@ui/button";
 import {
   Dialog,
-  DialogTrigger,
   DialogTitle,
   DialogContent,
   DialogHeader,
@@ -25,6 +24,7 @@ import { BranchFormValues, branchSchema } from "@/schemas/onboarding";
 import { AddBranchCard } from "./add-branch-card";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { createBranchMutation } from "@/hooks/use-branches";
 
 export function AddBranchDialog() {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -34,13 +34,13 @@ export function AddBranchDialog() {
     defaultValues: { name: "" },
   });
 
-  const onSubmit = (values: BranchFormValues) => {
-    alert("Form submitted!");
-    console.log("About to create", values.name, "branch");
-    const newBranch = {
-      name: values.name,
-    };
+  //Importing the mutation from tanstack query
+  const mutation = createBranchMutation();
+
+  const onSubmit = async (values: BranchFormValues) => {
+    await mutation.mutateAsync(values);
     form.reset();
+    setIsDialogOpen(false);
   };
 
   return (
