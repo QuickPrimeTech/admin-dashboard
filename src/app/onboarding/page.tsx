@@ -23,19 +23,22 @@ export default function OnboardingFlow() {
             first branch location.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <BranchCardSkeleton />
-          <AddBranchCardSkeleton />
-        </div>
-        {/* Branches Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {branches &&
-            branches.map((branch) => (
-              <BranchCard key={branch.id} branch={branch} />
+        {isPending ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <BranchCardSkeleton key={index} />
             ))}
-          <AddBranchDialog />
-        </div>
-        {/* Footer Help Text */}
+            <AddBranchCardSkeleton />
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {branches &&
+              branches.map((branch) => (
+                <BranchCard key={branch.id} branch={branch} />
+              ))}
+            <AddBranchDialog />
+          </div>
+        )}
         <OnboardingFooter />
       </div>
     </div>
