@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
     .insert({
       name: request.name,
       restaurant_id: restaurantData.id,
-    });
+    })
+    .select()
+    .single();
+
   if (branchError) {
     console.log(branchError);
     return createResponse<null>(
@@ -61,6 +64,39 @@ export async function GET() {
     200,
     "Successfully fetched all the branches",
     data,
+    true
+  );
+}
+
+export async function Delete(req: NextRequest) {
+  const supabase = await createClient();
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return createResponse<null>(401, "The branch id is required", null, false);
+  }
+
+  const { data, error: deleteError } = await supabase
+    .from("branch_settings")
+    .delete()
+    .eq("id", id)
+    .select()
+    .single();
+  if (deleteError) {
+    return createResponse<null>(
+      500,
+      "Error deleting branch from the database",
+      null,
+      false
+    );
+  }
+  console.log(data);
+
+  return createResponse<Branch>(
+    200,
+    "Successfully deleted",
+    { id, name: "sample branch" },
     true
   );
 }

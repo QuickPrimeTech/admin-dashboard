@@ -38,9 +38,13 @@ export function AddBranchDialog() {
   const mutation = createBranchMutation();
 
   const onSubmit = async (values: BranchFormValues) => {
-    await mutation.mutateAsync(values);
-    form.reset();
-    setIsDialogOpen(false);
+    try {
+      setIsDialogOpen(false);
+      await mutation.mutateAsync(values);
+      form.reset();
+    } catch {
+      setIsDialogOpen(true);
+    }
   };
 
   return (

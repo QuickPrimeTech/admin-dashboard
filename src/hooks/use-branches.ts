@@ -59,13 +59,11 @@ export function createBranchMutation() {
       }
     },
     onSuccess: (newBranch, _variables, onMutateResult) => {
-      if (!newBranch.data) return;
-
+      toast.success(newBranch.message);
       queryClient.setQueryData(BRANCHES_QUERY_KEY, () => {
         if (!onMutateResult.previousBranches) return [newBranch.data];
         return [...onMutateResult.previousBranches, newBranch.data];
       });
-      toast.success(newBranch.message);
     },
   });
 }
