@@ -1,6 +1,6 @@
 // @/components/logout-dialog.tsx
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "lucide-react";
 
 interface LogOutDialogProps {
@@ -16,7 +16,9 @@ export function LogOutDialog({ open }: LogOutDialogProps) {
       >
         <Loader className="h-10 w-10 animate-spin text-primary" />
         <div>
-          <p className="text-lg font-medium">Signing you out...</p>
+          <DialogTitle className="text-lg font-medium">
+            Signing you out...
+          </DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">
             Please wait a moment
           </p>
