@@ -68,11 +68,12 @@ export async function GET() {
   );
 }
 
-export async function Delete(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
   const supabase = await createClient();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
+  console.log(id);
   if (!id) {
     return createResponse<null>(401, "The branch id is required", null, false);
   }
