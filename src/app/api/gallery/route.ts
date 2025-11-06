@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
   getAuthenticatedUser,
   uploadImageToCloudinary,
@@ -14,56 +14,61 @@ import { createClient } from "@/utils/supabase/server";
 import { createResponse } from "@/helpers/api-responses";
 
 export async function POST(req: NextRequest) {
+  const result = await req.formData();
+  console.log(result);
+  return NextResponse.json({
+    message: "You've successfully reached the post endpoint",
+  });
   //checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  // const { user, supabase, response } = await getAuthenticatedUser();
+  // if (!user) return response;
 
-  try {
-    const formData = await req.formData();
-    const title = formData.get("title") as string | null;
-    const description = formData.get("description") as string | null;
-    const is_published = formData.get("is_published") === "true";
-    const file = formData.get("file") as File | null;
-    const category = formData.get("category") as string;
+  // try {
+  //   const formData = await req.formData();
+  //   const title = formData.get("title") as string | null;
+  //   const description = formData.get("description") as string | null;
+  //   const is_published = formData.get("is_published") === "true";
+  //   const file = formData.get("file") as File | null;
+  //   const category = formData.get("category") as string;
 
-    if (!file) return errorResponse("No file uploaded", 400);
+  //   if (!file) return errorResponse("No file uploaded", 400);
 
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
-    const uploadResult = await uploadImageToCloudinary(
-      file,
-      `${sanitizedRestaurantName}/gallery`
-    );
+  // const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+  // const uploadResult = await uploadImageToCloudinary(
+  //   file,
+  //   `${sanitizedRestaurantName}/gallery`
+  // );
 
-    const galleryItem: GalleryItemInsert = {
-      title: title || null,
-      description: description || null,
-      is_published,
-      category,
-      image_url: uploadResult.secure_url,
-      public_id: uploadResult.public_id,
-      user_id: user.id,
-    };
+  // const galleryItem: GalleryItemInsert = {
+  //   title: title || null,
+  //   description: description || null,
+  //   is_published,
+  //   category,
+  //   image_url: uploadResult.secure_url,
+  //   public_id: uploadResult.public_id,
+  //   user_id: user.id,
+  // };
 
-    const { error: supabaseError } = await supabase
-      .from("gallery")
-      .insert(galleryItem);
-    if (supabaseError)
-      return errorResponse(
-        "Failed to insert into Supabase",
-        500,
-        supabaseError.message
-      );
-    await revalidatePage("/gallery");
-    return successResponse("Image uploaded to successfully", [
-      uploadResult.secure_url,
-    ]);
-  } catch (error) {
-    return errorResponse(
-      "An error occurred while uploading your gallery item",
-      500,
-      String(error)
-    );
-  }
+  //   const { error: supabaseError } = await supabase
+  //     .from("gallery")
+  //     .insert(galleryItem);
+  //   if (supabaseError)
+  //     return errorResponse(
+  //       "Failed to insert into Supabase",
+  //       500,
+  //       supabaseError.message
+  //     );
+  //   await revalidatePage("/gallery");
+  //   return successResponse("Image uploaded to successfully", [
+  //     uploadResult.secure_url,
+  //   ]);
+  // } catch (error) {
+  //   return errorResponse(
+  //     "An error occurred while uploading your gallery item",
+  //     500,
+  //     String(error)
+  //   );
+  // }
 }
 
 export async function GET() {

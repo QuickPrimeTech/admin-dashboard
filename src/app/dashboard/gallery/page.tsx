@@ -11,7 +11,7 @@ import { GalleryGrid } from "@/sections/gallery/gallery-grid";
 import { GalleryEmptyState } from "@/sections/gallery/gallery-empty-state";
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
 
-import { GalleryItem } from "@/types/gallery";
+import { GalleryItem, ServerGalleryItem } from "@/types/gallery";
 import { deleteGalleryItem } from "@/helpers/galleryHelpers";
 import { GALLERY_ITEMS_QUERY_KEY, useGalleryQuery } from "@/hooks/use-gallery";
 
@@ -23,11 +23,13 @@ export default function GalleryPage() {
 
   const queryClient = useQueryClient();
 
-  const [filteredItems, setFilteredItems] = useState<GalleryItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<ServerGalleryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showPublished, setShowPublished] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
+  const [editingItem, setEditingItem] = useState<ServerGalleryItem | null>(
+    null
+  );
 
   // ✅ Handle empty or loading states gracefully
   const categories = Array.from(
@@ -92,7 +94,7 @@ export default function GalleryPage() {
   };
 
   // ✅ Dialog handlers
-  const handleEdit = (item: GalleryItem) => {
+  const handleEdit = (item: ServerGalleryItem) => {
     setEditingItem(item);
     setIsDialogOpen(true);
   };
@@ -107,7 +109,7 @@ export default function GalleryPage() {
     queryClient.invalidateQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
   };
 
-  // ✅ Error boundary UI
+  // Error boundary UI
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center py-12">

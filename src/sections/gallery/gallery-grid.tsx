@@ -27,11 +27,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { GalleryItem } from "@/types/gallery";
+import { GalleryItem, ServerGalleryItem } from "@/types/gallery";
 
 interface Props {
-  items: GalleryItem[];
-  onEdit: (item: GalleryItem) => void;
+  items: ServerGalleryItem[];
+  onEdit: (item: ServerGalleryItem) => void;
   onDelete: (id: number) => void;
   onTogglePublished: (id: number, published: boolean) => void;
 }
