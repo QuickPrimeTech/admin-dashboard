@@ -52,7 +52,10 @@ export function GalleryGrid({
               alt={item.title || "Gallery image"}
               fill
               className="object-cover transition-transform group-hover:scale-105"
+              placeholder={item.lqip ? "blur" : "empty"}
+              blurDataURL={item.lqip || undefined}
             />
+
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
             <div className="absolute top-2 right-2">
               <Badge variant={item.is_published ? "default" : "secondary"}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -19,11 +19,10 @@ export default function GalleryPage() {
   // ✅ Fetch data with TanStack Query
   const { data: response, isError, isPending, refetch } = useGalleryQuery();
 
-  const galleryItems = response?.data ?? [];
+  const galleryItems = response ?? [];
 
   const queryClient = useQueryClient();
 
-  const [filteredItems, setFilteredItems] = useState<ServerGalleryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showPublished, setShowPublished] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,7 +35,7 @@ export default function GalleryPage() {
     new Set(galleryItems.map((item) => item.category).filter(Boolean))
   );
 
-  const filterItems = useCallback(() => {
+  const filteredItems = useMemo(() => {
     let filtered = galleryItems;
 
     if (searchTerm) {
@@ -52,12 +51,8 @@ export default function GalleryPage() {
       filtered = filtered.filter((item) => item.is_published === isPublished);
     }
 
-    setFilteredItems(filtered);
+    return filtered;
   }, [galleryItems, searchTerm, showPublished]);
-
-  useEffect(() => {
-    filterItems();
-  }, [filterItems]);
 
   // ✅ Delete item and invalidate cache
   const handleDelete = async (id: number) => {
@@ -106,7 +101,6 @@ export default function GalleryPage() {
 
   const handleItemSaved = () => {
     handleDialogClose();
-    queryClient.invalidateQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
   };
 
   // Error boundary UI
@@ -157,7 +151,10 @@ export default function GalleryPage() {
       <GalleryDialog
         categories={categories}
         open={isDialogOpen}
-        onOpenChange={handleDialogClose}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingItem(null);
+        }}
         item={editingItem}
         onSaved={handleItemSaved}
       />

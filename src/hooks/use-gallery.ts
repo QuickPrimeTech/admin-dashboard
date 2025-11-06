@@ -1,7 +1,7 @@
 // @/hooks/use-gallery.ts
 
 import { ApiResponse } from "@/helpers/api-responses";
-import { GalleryItem, ServerGalleryItem } from "@/types/gallery";
+import { ServerGalleryItem } from "@/types/gallery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ const fetchGalleryItems = async () => {
       throw new Error(data.message || "Failed to fetch gallery items");
     }
 
-    return data; // Return the parsed response (TanStack will cache this)
+    return data.data; // Return the parsed response (TanStack will cache this)
   } catch (error: any) {
     console.error("Gallery fetch error:", error);
     toast.error(
@@ -32,7 +32,7 @@ const fetchGalleryItems = async () => {
 
 //Query for getting all the gallery items
 export function useGalleryQuery() {
-  return useQuery<ApiResponse<ServerGalleryItem[]>>({
+  return useQuery<ServerGalleryItem[]>({
     queryKey: GALLERY_ITEMS_QUERY_KEY,
     queryFn: fetchGalleryItems,
   });
@@ -57,7 +57,7 @@ export function useCreateGalleryItemMutation() {
       );
       return res.data;
     },
-    // 🚀 Optimistic update: instantly show the new image
+    //  Optimistic update: instantly show the new image
     onMutate: async (newFormData) => {
       await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
 
@@ -79,33 +79,27 @@ export function useCreateGalleryItemMutation() {
         lqip: "aldfjdfad",
         created_at: new Date().toISOString(),
       };
+
       //Optimistically updating the temporary item so that the use sees instant results
-      if (prevGalleryItems?.length && prevGalleryItems.length > 0) {
-        queryClient.setQueryData(GALLERY_ITEMS_QUERY_KEY, [
-          tempItem,
-          ...prevGalleryItems,
-        ]);
-      }
+      queryClient.setQueryData(GALLERY_ITEMS_QUERY_KEY, [
+        tempItem,
+        ...(prevGalleryItems ?? []),
+      ]);
 
       return { prevGalleryItems };
     },
-    onSuccess: (res) => {
+    onSuccess: (res, _variables, onMutateResult) => {
       //Gettting the gallery image from the server
       const newItem = res.data;
+      console.log(newItem);
       if (!newItem) return;
 
       toast.success(res.message || "Gallery image added successfully!");
-      // Correct query key usage
-      const previousGalleryItems =
-        queryClient.getQueryData<ServerGalleryItem[]>(
-          GALLERY_ITEMS_QUERY_KEY
-        ) || [];
-      if (previousGalleryItems.length === 0) return;
-      //if the cache already exists, I am going to proceed by adding the gallery item
-      queryClient.setQueryData<ServerGalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY,
-        () => [newItem, ...previousGalleryItems]
-      );
+
+      queryClient.setQueryData(GALLERY_ITEMS_QUERY_KEY, [
+        newItem,
+        ...(onMutateResult.prevGalleryItems ?? []),
+      ]);
     },
     onError: (err, _variables, onMutateResult) => {
       const message =
@@ -123,16 +117,17 @@ export function useCreateGalleryItemMutation() {
       const errors = err.response?.data?.data;
       if (errors) {
         try {
-          const parsed = JSON.parse(errors);
+          const parsed =
+            typeof errors === "string" ? JSON.parse(errors) : errors;
           Object.entries(parsed).forEach(([field, msgs]) => {
             (msgs as string[]).forEach((msg) =>
               toast.error(`${field}: ${msg}`)
             );
           });
-        } catch {}
+        } catch (parseErr) {
+          console.error("Error parsing validation messages:", parseErr);
+        }
       }
-
-      console.error("Create gallery item error:", err);
     },
   });
 }

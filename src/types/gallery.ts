@@ -36,5 +36,6 @@ export type GalleryItemInsert = {
   image_url: string;
   category: string;
   public_id: string;
+  lqip: string;
   user_id: string;
 };
