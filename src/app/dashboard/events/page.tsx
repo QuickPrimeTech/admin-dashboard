@@ -13,23 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Users, Phone, Mail, Search } from "lucide-react";
 import { toast } from "sonner";
-import { ReservationStatus } from "@/types/mock-api";
+import { ReservationStatus } from "@/types/reservations";
 import { ConfirmDeleteDialog } from "@/components/dashboard/confirm-delete-dialog";
 import { Events } from "@/components/dashboard/events-skeleton";
 import { supabase } from "@/lib/server/supabase";
-
-interface PrivateEvent {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  event_date: string;
-  event_type: string;
-  guests: number;
-  status: string;
-  notes?: string;
-  created_at: string;
-}
+import { PrivateEvent } from "@/types/private-events";
 
 export default function PrivateEventsPage() {
   const [events, setEvents] = useState<PrivateEvent[]>([]);

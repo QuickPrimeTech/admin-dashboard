@@ -5,6 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MenuIcon, Calendar, Camera, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+export type StatsOverviewData = {
+  menu: number;
+  gallery: number;
+  reservations: number;
+  events: number;
+};
+
 export function StatsOverview() {
   const fetchStats = async () => {
     const res = await fetch("/api/dashboard");
@@ -17,15 +24,7 @@ export function StatsOverview() {
     return json.data;
   };
 
-  const { data: statsData, isLoading } = useQuery<
-    {
-      menu: number;
-      gallery: number;
-      reservations: number;
-      events: number;
-    },
-    Error
-  >({
+  const { data: statsData, isLoading } = useQuery<StatsOverviewData, Error>({
     queryKey: ["overview-stats"],
     queryFn: fetchStats,
     // onError: () => toast.error("Something went wrong while getting the stats")

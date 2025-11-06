@@ -18,8 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { ReservationStatus } from "@/types/mock-api";
-import { Reservation } from "@/types/reservations";
+import { Reservation, ReservationStatus } from "@/types/reservations";
 
 interface ReservationsListProps {
   reservations: Reservation[];

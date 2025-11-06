@@ -1,8 +1,7 @@
 "use client";
-
 import { logout } from "@/app/auth/actions/actions";
 import { LogOutDialog } from "@/components/logout-dialog";
-import { Button } from "@/components/ui/button";
+import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { LogOut } from "lucide-react";
 import { useState } from "react";
 
@@ -15,9 +14,9 @@ export function SidebarLogout() {
   }
   return (
     <>
-      <Button variant={"ghost"} onClick={handleLogout} className="w-full">
+      <SidebarMenuButton onClick={handleLogout} tooltip={"Sign out"}>
         <LogOut /> Sign Out
-      </Button>
+      </SidebarMenuButton>
       <LogOutDialog open={open} />
     </>
   );

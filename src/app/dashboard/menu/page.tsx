@@ -1,44 +1,24 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus, QrCode } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
-
-import { MenuItemDialog } from "@/sections/menu/menu-item-dialog";
 import { MenuFilters } from "@/sections/menu/menu-filters";
 import { MenuGrid } from "@/sections/menu/menu-grid";
-import { MenuItem } from "@/types/menu";
 import { MenuFiltersSkeleton } from "@/components/skeletons/menu-filter-skeleton";
 import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
-
-async function fetchMenuItems() {
-  const res = await fetch("/api/menu-items", { method: "GET" });
-  if (!res.ok) throw new Error("Failed to fetch menu items");
-  const result = await res.json();
-
-  if (!result.success) throw new Error(result.message || "Server error");
-  return result.data as MenuItem[];
-}
+import { useDeleteMenuMutation, useMenuQuery } from "@/hooks/use-menu";
 
 export default function MenuManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
   // 🚀 useQuery handles loading + error + caching
-  const {
-    data: menuItems = [],
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["menu-items"],
-    queryFn: fetchMenuItems,
-    staleTime: 1000 * 60, // 1 minute caching
-  });
+  const { data: menuItems = [], isLoading } = useMenuQuery();
+
+  // CRUD Handlers
+  const handleDelete = useDeleteMenuMutation();
 
   // Extract categories dynamically
   const categories = useMemo(() => {
@@ -60,39 +40,6 @@ export default function MenuManagement() {
     });
   }, [menuItems, searchTerm, selectedCategory]);
 
-  // CRUD Handlers
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await fetch(`/api/menu-items?id=${id}`, { method: "DELETE" });
-      const result = await res.json();
-
-      if (!res.ok) throw new Error(result.message || "Failed to delete");
-      toast.success("Menu item deleted successfully");
-      refetch(); // ✅ Re-fetch updated data
-    } catch {
-      toast.error("Failed to delete menu item");
-    }
-  };
-
-  const handleEdit = (item: MenuItem) => {
-    setEditingItem(item);
-    setIsDialogOpen(true);
-  };
-
-  const handleAdd = () => {
-    setIsDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-    setEditingItem(null);
-  };
-
-  const handleItemSaved = () => {
-    refetch(); // ✅ Refresh data on save
-    handleDialogClose();
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -104,9 +51,11 @@ export default function MenuManagement() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleAdd}>
-            <Plus className="size-4" />
-            Add Menu Item
+          <Button asChild>
+            <Link href={"/dashboard/menu/add"}>
+              <Plus className="size-4" />
+              Add Menu Item
+            </Link>
           </Button>
           <Button variant="secondary" asChild>
             <Link href="/dashboard/qrcode-generator">
@@ -138,22 +87,8 @@ export default function MenuManagement() {
           ))}
         </div>
       ) : (
-        <MenuGrid
-          items={filteredItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAdd={handleAdd}
-        />
+        <MenuGrid items={filteredItems} onDelete={handleDelete} />
       )}
-
-      {/* Dialog */}
-      <MenuItemDialog
-        open={isDialogOpen}
-        onOpenChange={handleDialogClose}
-        item={editingItem}
-        onSaved={handleItemSaved}
-        categories={categories}
-      />
     </div>
   );
 }

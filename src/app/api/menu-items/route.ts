@@ -1,7 +1,6 @@
 // app/api/menu-items/route.ts
 import { NextRequest } from "next/server";
 
-import { cleanFormData } from "@/lib/clean-form-data";
 import { cloudinary } from "@/lib/server/cloudinary";
 import {
   getSanitizedRestaurantName,
@@ -11,75 +10,151 @@ import {
   getMenuItemById,
   errorResponse,
   successResponse,
+  deleteImageFromCloudinary,
 } from "@/helpers/common";
-import { FormDataFields } from "@/types/menu";
 import { revalidatePage } from "@/helpers/revalidator";
+import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
+import { createResponse } from "@/helpers/api-responses";
 
 export async function POST(request: NextRequest) {
-  // checking if the client is authenticated to add a menu item
-  const { user, supabase, response } = await getAuthenticatedUser();
+  const { user, response, supabase } = await getAuthenticatedUser();
   if (response) return response;
 
   try {
     const formData = await request.formData();
-    //making the form data match the shape of the table that is being inserted to
-    const data = cleanFormData(formData) as unknown as FormDataFields;
 
-    // declaring intial values in order to determine later if the image was sent to cloudinary
-    let uploadedImageUrl = null;
-    let publicId = null;
+    // Parse choices
+    const choicesEntry = formData.get("choices");
+    let choices: unknown[] = [];
+    if (typeof choicesEntry === "string") {
+      try {
+        choices = JSON.parse(choicesEntry);
+      } catch {
+        choices = [];
+      }
+    }
 
-    //Getting the image file sent by the user
-    const imageFile = formData.get("image") as File | null;
+    // Extract values safely
+    const data = {
+      name: formData.get("name"),
+      description: formData.get("description"),
+      price: Number(formData.get("price")),
+      category: formData.get("category"),
+      image: formData.get("image"),
+      is_available: formData.get("is_available") === "true",
+      is_popular: formData.get("is_popular") === "true",
+      lqip: formData.get("lqip"),
+      start_time: formData.get("start_time"),
+      end_time: formData.get("end_time"),
+      choices,
+    };
 
-    // since the user exist we can fetch the restaurant name from supabase through the user.id
+    // Validate
+    const parsedData = menuItemSchema.safeParse(data);
+    if (!parsedData.success) {
+      const errors = parsedData.error.flatten().fieldErrors;
+      return createResponse(
+        400,
+        "Invalid form data",
+        JSON.stringify(errors),
+        false
+      );
+    }
+
+    // Image upload
+    let uploadedImageUrl: string | null = null;
+    let publicId: string | null = null;
+    const imageFile = data.image as File | null;
     const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
 
     if (imageFile) {
-      // preparing the image to upload to cloudinary
       const uploadResult = await uploadImageToCloudinary(
         imageFile,
         `${sanitizedRestaurantName}/menu-items`
       );
-
       uploadedImageUrl = uploadResult.secure_url;
       publicId = uploadResult.public_id;
     }
 
+    // Prepare new menu item
     const newMenuItem = {
       name: data.name,
       description: data.description,
-      price: parseFloat(data.price),
+      price: data.price,
       category: data.category,
-      is_available: data.is_available === "true" || data.is_available === true,
-      dietary_preference: data.dietary_preference || [],
+      is_available: data.is_available,
+      lqip: data.lqip,
+      is_popular: data.is_popular,
+      choices: data.choices,
+      start_time: data.start_time,
+      end_time: data.end_time,
+      dietary_preference: [],
       image_url: uploadedImageUrl,
       public_id: publicId,
       user_id: user.id,
     };
-    const { error } = await supabase.from("menu_items").insert([newMenuItem]);
-    if (error) {
-      return errorResponse("Failed to save item", 500, error.message);
+
+    // Insert into Supabase and return the inserted row
+    const { data: insertedItem, error } = await supabase
+      .from("menu_items")
+      .insert([newMenuItem])
+      .select()
+      .single();
+
+    if (error || !insertedItem) {
+      return createResponse(
+        500,
+        "Failed to save item",
+        error?.message ?? "Unknown error",
+        false
+      );
     }
-    //revalidating the page in the frontend for the menu items to be rendered
-    await revalidatePage("/menu");
-    // returning a response to the frontend
-    return successResponse("Menu item created successfully");
+
+    // Return the newly inserted item including its Supabase ID
+    return createResponse(
+      200,
+      "Menu item was created successfully",
+      insertedItem,
+      true
+    );
   } catch (err) {
     const error = err as Error;
-    return errorResponse("Server error", 500, error.message);
+    return createResponse(
+      500,
+      error.message || "An error occurred while submitting your menu details",
+      null,
+      false
+    );
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   // Checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
+  const { supabase, response } = await getAuthenticatedUser();
   if (response) return response;
 
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  if (id) {
+    // Fetch a single item by ID
+    const { data, error } = await supabase
+      .from("menu_items")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      return createResponse(500, "Failed to fetch menu item", null);
+    }
+
+    return createResponse(200, "Menu item fetched successfully", data);
+  }
+
+  //Otherwise fetch all menu items is not provided and id
   const { data, error } = await supabase
     .from("menu_items")
     .select("*")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -90,66 +165,148 @@ export async function GET() {
   return successResponse("Menu items fetched successfully", data);
 }
 
-export async function PATCH(req: NextRequest) {
+export async function PATCH(request: NextRequest) {
   const { user, supabase, response } = await getAuthenticatedUser();
   if (response) return response;
 
-  const formData = await req.formData();
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const price = formData.get("price") as string;
-  const category = formData.get("category") as string;
-  const imageFile = formData.get("image") as File | null;
-  const menuId = formData.get("id") as string;
+  try {
+    const formData = await request.formData();
+    const id = formData.get("id")?.toString();
 
-  if (!menuId) {
-    return errorResponse("Missing menu item ID", 400);
-  }
+    if (!id) {
+      return createResponse(400, "Missing menu item ID", null, false);
+    }
 
-  // 1️⃣ Get current menu item
-  const { data: currentItem, error } = await getMenuItemById(user.id, menuId);
-  if (error || !currentItem) return errorResponse("Item not found", 404);
-
-  let imageUrl = currentItem.image_url;
-  let publicId = currentItem.public_id;
-
-  // 2️⃣ If a new image is uploaded
-  if (imageFile && imageFile.size > 0) {
-    // Only delete existing Cloudinary image if it exists
-    const folderPath = `restaurants/${user.id}/menu-items`;
-
-    const uploadResult = await uploadAndReplaceImage(
-      imageFile,
-      folderPath,
-      publicId || undefined // this line makes it null-safe
+    // Fetch existing item
+    const { data: existingItem, error: fetchError } = await getMenuItemById(
+      user.id,
+      id
     );
+    if (fetchError || !existingItem) {
+      return createResponse(
+        404,
+        "Menu item not found",
+        fetchError?.message ?? null,
+        false
+      );
+    }
 
-    imageUrl = uploadResult.secure_url;
-    publicId = uploadResult.public_id;
+    // Parse JSON choices
+    const choicesEntry = formData.get("choices");
+    let choices: unknown[] = [];
+    if (typeof choicesEntry === "string") {
+      try {
+        choices = JSON.parse(choicesEntry);
+      } catch {
+        choices = [];
+      }
+    }
+
+    // Build partial update
+    const data: Partial<MenuItemFormData> = {
+      name: formData.get("name") ?? existingItem.name,
+      description: formData.get("description") ?? existingItem.description,
+      price: formData.get("price")
+        ? Number(formData.get("price"))
+        : existingItem.price,
+      category: formData.get("category") ?? existingItem.category,
+      is_available:
+        formData.get("is_available") !== null
+          ? formData.get("is_available") === "true"
+          : existingItem.is_available,
+      is_popular:
+        formData.get("is_popular") !== null
+          ? formData.get("is_popular") === "true"
+          : existingItem.is_popular,
+      lqip: formData.get("lqip") ?? existingItem.lqip,
+      start_time:
+        formData.get("start_time") ??
+        (existingItem.start_time ? existingItem.start_time.slice(0, 5) : null),
+      end_time:
+        formData.get("end_time") ??
+        (existingItem.end_time ? existingItem.end_time.slice(0, 5) : null),
+
+      choices: choices.length ? choices : existingItem.choices,
+    };
+
+    // Validate
+    const parsed = menuItemSchema.partial().safeParse(data);
+    if (!parsed.success) {
+      const errors = parsed.error.flatten().fieldErrors;
+      return createResponse(400, "Invalid form data", errors, false);
+    }
+
+    // Handle image
+    const imageFile = formData.get("image") as File | null;
+    const isRemoveRequest =
+      typeof formData.get("image") === "string" && formData.get("image") === "";
+
+    let uploadedImageUrl = existingItem.image_url;
+    let publicId = existingItem.public_id;
+
+    // 🧩 Case 1: Upload new image
+    if (imageFile && imageFile.size > 0) {
+      const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+      const uploadResult = await uploadAndReplaceImage(
+        imageFile,
+        `${sanitizedRestaurantName}/menu-items`,
+        existingItem.public_id
+      );
+      uploadedImageUrl = uploadResult.secure_url;
+      publicId = uploadResult.public_id;
+    }
+
+    // 🧩 Case 2: Remove image explicitly
+    else if (isRemoveRequest && existingItem.public_id) {
+      await deleteImageFromCloudinary(existingItem.public_id);
+      uploadedImageUrl = null;
+      publicId = null;
+      data.lqip = null; // ✅ clear LQIP if image removed
+    }
+
+    const updatePayload = {
+      ...data,
+      image_url: uploadedImageUrl,
+      public_id: publicId,
+    };
+
+    // ⏳ Simulate delay for testing loading states
+    await new Promise((r) => setTimeout(r, 2000));
+
+    // Update in Supabase
+    const { data: updatedItem, error: updateError } = await supabase
+      .from("menu_items")
+      .update(updatePayload)
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      return createResponse(
+        500,
+        "Failed to update menu item",
+        updateError.message,
+        false
+      );
+    }
+
+    await revalidatePage("/menu");
+    return createResponse(
+      200,
+      "Menu item updated successfully",
+      updatedItem,
+      true
+    );
+  } catch (err) {
+    const error = err as Error;
+    return createResponse(
+      500,
+      "An error occurred while updating menu item",
+      error.message,
+      false
+    );
   }
-
-  // 3️⃣ Update Supabase row
-  const { error: updateError } = await supabase
-    .from("menu_items")
-    .update({
-      name,
-      description,
-      price,
-      category,
-      image_url: imageUrl ?? null, // safe assignment
-      public_id: publicId ?? null, // safe assignment
-    })
-    .eq("id", menuId)
-    .eq("user_id", user.id)
-    .select()
-    .single();
-
-  if (updateError)
-    return errorResponse("Error updating menu item", 500, updateError.message);
-  //revalidating the page in the frontend for the menu items to be rendered
-  await revalidatePage("/menu");
-  //  returning a success message to the frontend
-  return successResponse("Menu item updated successfully");
 }
 
 export async function DELETE(request: NextRequest) {

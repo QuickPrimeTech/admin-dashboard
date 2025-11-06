@@ -28,7 +28,3 @@ export type GalleryItemInsert = {
   public_id: string;
   user_id: string;
 };
-
-export type CloudinaryUploadResult = {
-  secure_url: string;
-};

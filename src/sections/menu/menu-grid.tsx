@@ -24,15 +24,15 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
 import { MenuItem } from "@/types/menu";
+import Link from "next/link";
+import { UseMutationResult } from "@tanstack/react-query";
 
 interface MenuGridProps {
   items: MenuItem[];
-  onEdit: (item: MenuItem) => void;
-  onDelete: (id: string) => void;
-  onAdd: () => void;
+  onDelete: UseMutationResult<{ id: number }, Error, number, unknown>;
 }
 
-export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
+export function MenuGrid({ items, onDelete }: MenuGridProps) {
   if (items.length === 0) {
     return (
       <Card>
@@ -42,9 +42,11 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
             <p className="text-muted-foreground mb-4">
               Get started by adding your first menu item
             </p>
-            <Button onClick={onAdd}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Menu Item
+            <Button asChild>
+              <Link href={"/dashboard/menu/add"}>
+                <Plus />
+                Add Menu Item
+              </Link>
             </Button>
           </div>
         </CardContent>
@@ -54,14 +56,18 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((item) => (
-        <Card key={item.id} className="py-0 pb-5 overflow-hidden">
+      {items.map((item, index) => (
+        <Card key={index} className="py-0 pb-5 overflow-hidden">
           <div className="relative h-48">
             <Image
               src={item.image_url || "/placeholder.jpg"}
               alt={item.name}
               fill
               className="object-cover"
+              {...(item.lqip && {
+                placeholder: "blur",
+                blurDataURL: item.lqip,
+              })}
             />
           </div>
           <CardHeader>
@@ -85,28 +91,18 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
                 {item.category}
               </Badge>
             </div>
-            {item.dietary_preference && item.dietary_preference.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-3">
-                {item.dietary_preference.map((dietary_preference) => (
-                  <Badge
-                    key={dietary_preference}
-                    variant="secondary"
-                    className="text-xs"
-                  >
-                    {dietary_preference}
-                  </Badge>
-                ))}
-              </div>
-            )}
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onEdit(item)}
                 className="flex-1"
+                aria-label={`edit ${item.name}`}
+                asChild
               >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
+                <Link href={`/dashboard/menu/edit/${item.id}`}>
+                  <Edit />
+                  Edit
+                </Link>
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -114,8 +110,9 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:text-destructive"
+                    aria-label={`delete ${item.name}`}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -133,7 +130,7 @@ export function MenuGrid({ items, onEdit, onDelete, onAdd }: MenuGridProps) {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive hover:bg-destructive/90 text-white"
-                      onClick={() => onDelete(item.id)}
+                      onClick={() => onDelete.mutate(Number(item.id))}
                     >
                       Yes, delete
                     </AlertDialogAction>

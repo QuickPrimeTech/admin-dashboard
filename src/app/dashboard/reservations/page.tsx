@@ -5,7 +5,7 @@ import { ReservationsFilters } from "@/sections/reservations/reservations-filter
 import { ReservationsList } from "@/sections/reservations/reservations-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ReservationStatus } from "@/types/mock-api";
+import { ReservationStatus } from "@/types/reservations";
 import { supabase } from "@/lib/server/supabase";
 import { Reservation } from "@/types/reservations";
 

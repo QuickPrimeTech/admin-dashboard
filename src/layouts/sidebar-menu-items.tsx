@@ -6,7 +6,6 @@ import {
   Users,
   Camera,
   HelpCircle,
-  Video,
   Settings,
   Utensils,
   QrCode,
@@ -40,7 +39,6 @@ const menuGroups = {
   marketing: [
     { title: "QR Code", url: "/dashboard/qrcode-generator", icon: QrCode },
     { title: "FAQs", url: "/dashboard/faqs", icon: HelpCircle },
-    { title: "Follow Us", url: "/dashboard/follow-us", icon: Video },
   ],
   settings: [{ title: "Settings", url: "/dashboard/settings", icon: Settings }],
 };
