@@ -21,26 +21,6 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
 
   // fetch the gallery items from your /api/gallery route
-  const fetchGalleryItems = async () => {
-    try {
-      const res = await fetch("/api/gallery");
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message || "Failed to fetch gallery items");
-      }
-
-      setGalleryItems(json.data);
-    } catch {
-      toast.error("Failed to fetch gallery items");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchGalleryItems();
-  }, []);
 
   const categories = Array.from(
     new Set(galleryItems.map((item) => item.category).filter(Boolean))
@@ -72,7 +52,6 @@ export default function GalleryPage() {
   const handleDelete = async (id: number) => {
     try {
       await deleteGalleryItem(id);
-      fetchGalleryItems(); // refetch after delete
     } catch {
       toast.error("Failed to delete gallery item");
     }
@@ -89,7 +68,6 @@ export default function GalleryPage() {
   };
 
   const handleItemSaved = () => {
-    fetchGalleryItems();
     handleDialogClose();
   };
 
@@ -112,7 +90,6 @@ export default function GalleryPage() {
       toast.error("Failed to update publish status");
       console.error(error);
     }
-    fetchGalleryItems();
   };
 
   return (

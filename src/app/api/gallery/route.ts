@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   getAuthenticatedUser,
   uploadImageToCloudinary,
@@ -10,6 +10,8 @@ import {
 } from "@/helpers/common";
 import { GalleryItemInsert } from "@/types/gallery";
 import { revalidatePage } from "@/helpers/revalidator";
+import { createClient } from "@/utils/supabase/server";
+import { createResponse } from "@/helpers/api-responses";
 
 export async function POST(req: NextRequest) {
   //checking if the user is authenticated
@@ -66,22 +68,27 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   //checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
 
   try {
     const { data, error } = await supabase
       .from("gallery")
       .select("*")
-      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (error)
-      return errorResponse("Failed to fetch gallery items", 500, error.message);
+    if (error) return createResponse(500, "Failed to fetch gallery items");
 
-    return NextResponse.json({ success: true, data }, { status: 200 });
+    return createResponse(
+      200,
+      "Successfully fetched all the gallery items",
+      data
+    );
   } catch (error) {
-    return errorResponse("Server error", 500, String(error));
+    return createResponse(
+      500,
+      "An error occurred while fetching your gallery items",
+      error
+    );
   }
 }
 

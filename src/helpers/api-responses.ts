@@ -13,7 +13,10 @@ export function createResponse<T>(
   status: number,
   message: string,
   data: T | null = null,
-  success = true
+  success?: boolean
 ): NextResponse<ApiResponse<T>> {
-  return NextResponse.json({ message, data, success }, { status });
+  // ✅ If success isn’t explicitly provided, infer from whether data exists
+  const isSuccess = success ?? Boolean(data);
+
+  return NextResponse.json({ message, data, success: isSuccess }, { status });
 }
