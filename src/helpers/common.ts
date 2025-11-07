@@ -109,7 +109,21 @@ export async function uploadAndReplaceImage(
 
 //This is a cloudinary function that deletes an image when passed the id
 export async function deleteImageFromCloudinary(publicId: string) {
-  await cloudinary.uploader.destroy(publicId);
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+
+    // Cloudinary returns a structured object like:
+    // { result: "ok" } or { result: "not found" } or { result: "error" }
+    if (result.result !== "ok") {
+      throw new Error(
+        `Cloudinary deletion failed: ${result.result || "Unknown error"}`
+      );
+    }
+
+    return result;
+  } catch (error) {
+    throw new Error(`Failed to delete image from Cloudinary ${error}`);
+  }
 }
 
 // This are the function for returning either true of error responses

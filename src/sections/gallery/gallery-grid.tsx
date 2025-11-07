@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -27,21 +28,24 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { GalleryItem } from "@/types/gallery";
+import { ServerGalleryItem } from "@/types/gallery";
+import {
+  useDeleteGalleryItemMutation,
+  useTogglePublishedMutation,
+} from "@/hooks/use-gallery";
 
 interface Props {
-  items: GalleryItem[];
-  onEdit: (item: GalleryItem) => void;
-  onDelete: (id: number) => void;
-  onTogglePublished: (id: number, published: boolean) => void;
+  items: ServerGalleryItem[];
+  onEdit: (item: ServerGalleryItem) => void;
 }
 
-export function GalleryGrid({
-  items,
-  onEdit,
-  onDelete,
-  onTogglePublished,
-}: Props) {
+export function GalleryGrid({ items, onEdit }: Props) {
+  //Delete mutation from TanstackQuery
+  const deleteMutation = useDeleteGalleryItemMutation();
+
+  //Toogle mutation
+  const togglePublishMutation = useTogglePublishedMutation();
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item) => (
@@ -52,7 +56,10 @@ export function GalleryGrid({
               alt={item.title || "Gallery image"}
               fill
               className="object-cover transition-transform group-hover:scale-105"
+              placeholder={item.lqip ? "blur" : "empty"}
+              blurDataURL={item.lqip || undefined}
             />
+
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
             <div className="absolute top-2 right-2">
               <Badge variant={item.is_published ? "default" : "secondary"}>
@@ -82,14 +89,13 @@ export function GalleryGrid({
                     size="sm"
                     variant="secondary"
                     onClick={() =>
-                      onTogglePublished(item.id, !item.is_published)
+                      togglePublishMutation.mutate({
+                        id: item.id,
+                        is_published: !item.is_published,
+                      })
                     }
                   >
-                    {item.is_published ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {item.is_published ? <EyeOff /> : <Eye />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -140,13 +146,19 @@ export function GalleryGrid({
                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                       <AlertDialogDescription>
                         This action cannot be undone. This will permanently
-                        delete this gallery item.
+                        delete{" "}
+                        {item?.title ? (
+                          <strong>{item?.title}</strong>
+                        ) : (
+                          "this photo"
+                        )}{" "}
+                        from your gallery
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => onDelete(item.id)}
+                        onClick={() => deleteMutation.mutate(item.id)}
                         className="bg-destructive text-white hover:bg-destructive/90"
                       >
                         Yes, delete

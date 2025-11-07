@@ -1,52 +1,35 @@
 "use client";
+import { useState, useMemo } from "react";
 
-import { useState, useEffect, useCallback } from "react";
-import { toast } from "sonner";
 import { GalleryDialog } from "@/sections/gallery/gallery-dialog";
 import { GalleryHeader } from "@/sections/gallery/gallery-header";
 import { GalleryFilters } from "@/sections/gallery/gallery-filters";
 import { GalleryGrid } from "@/sections/gallery/gallery-grid";
 import { GalleryEmptyState } from "@/sections/gallery/gallery-empty-state";
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
-import { GalleryItem } from "@/types/gallery";
-import { deleteGalleryItem } from "@/helpers/galleryHelpers";
+
+import { ServerGalleryItem } from "@/types/gallery";
+import { useGalleryQuery } from "@/hooks/use-gallery";
 
 export default function GalleryPage() {
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<GalleryItem[]>([]);
+  // ✅ Fetch data with TanStack Query
+  const { data: response, isError, isPending, refetch } = useGalleryQuery();
+
+  const galleryItems = response ?? [];
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showPublished, setShowPublished] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [editingItem, setEditingItem] = useState<ServerGalleryItem | null>(
+    null
+  );
 
-  // fetch the gallery items from your /api/gallery route
-  const fetchGalleryItems = async () => {
-    try {
-      const res = await fetch("/api/gallery");
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message || "Failed to fetch gallery items");
-      }
-
-      setGalleryItems(json.data);
-    } catch {
-      toast.error("Failed to fetch gallery items");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchGalleryItems();
-  }, []);
-
+  // ✅ Handle empty or loading states gracefully
   const categories = Array.from(
     new Set(galleryItems.map((item) => item.category).filter(Boolean))
   );
 
-  const filterItems = useCallback(() => {
+  const filteredItems = useMemo(() => {
     let filtered = galleryItems;
 
     if (searchTerm) {
@@ -62,59 +45,33 @@ export default function GalleryPage() {
       filtered = filtered.filter((item) => item.is_published === isPublished);
     }
 
-    setFilteredItems(filtered);
+    return filtered;
   }, [galleryItems, searchTerm, showPublished]);
 
-  useEffect(() => {
-    filterItems();
-  }, [filterItems]);
-
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteGalleryItem(id);
-      fetchGalleryItems(); // refetch after delete
-    } catch {
-      toast.error("Failed to delete gallery item");
-    }
-  };
-
-  const handleEdit = (item: GalleryItem) => {
+  // ✅ Dialog handlers
+  const handleEdit = (item: ServerGalleryItem) => {
     setEditingItem(item);
     setIsDialogOpen(true);
   };
 
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-    setEditingItem(null);
-  };
+  // Error boundary UI
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <p className="text-muted-foreground mb-2">
+          Something went wrong fetching the gallery.
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="text-primary underline text-sm"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
-  const handleItemSaved = () => {
-    fetchGalleryItems();
-    handleDialogClose();
-  };
-
-  const togglePublished = async (id: number, isPublished: boolean) => {
-    try {
-      const res = await fetch("/api/gallery/publish-toggle", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, is_published: isPublished }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to toggle published status");
-      }
-
-      toast.success("Publish status updated");
-    } catch (error) {
-      toast.error("Failed to update publish status");
-      console.error(error);
-    }
-    fetchGalleryItems();
-  };
-
+  // ✅ UI Rendering
   return (
     <div className="space-y-6">
       <GalleryHeader onAdd={() => setIsDialogOpen(true)} />
@@ -125,7 +82,7 @@ export default function GalleryPage() {
         setShowPublished={setShowPublished}
       />
 
-      {loading ? (
+      {isPending ? (
         <GallerySkeletonGrid />
       ) : filteredItems.length === 0 ? (
         <GalleryEmptyState
@@ -134,20 +91,17 @@ export default function GalleryPage() {
           showPublished={showPublished}
         />
       ) : (
-        <GalleryGrid
-          items={filteredItems}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onTogglePublished={togglePublished}
-        />
+        <GalleryGrid items={filteredItems} onEdit={handleEdit} />
       )}
 
       <GalleryDialog
         categories={categories}
         open={isDialogOpen}
-        onOpenChange={handleDialogClose}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingItem(null);
+        }}
         item={editingItem}
-        onSaved={handleItemSaved}
       />
     </div>
   );

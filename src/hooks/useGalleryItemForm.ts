@@ -5,15 +5,25 @@ import {
   formSchema,
   FormData as FormDataProps,
 } from "@/schemas/galllery-item-schema";
-import { GalleryItem } from "@/types/gallery"; // assume you have a type for existing item
-import { addGalleryImage, updateGalleryItem } from "@/helpers/galleryHelpers";
+import { ServerGalleryItem } from "@/types/gallery"; // assume you have a type for existing item
+import { buildGalleryFormData } from "@/helpers/galleryHelpers";
+import {
+  useCreateGalleryItemMutation,
+  useUpdateGalleryItemMutation,
+} from "./use-gallery";
+import { toast } from "sonner";
+import { generateBlurDataURL } from "@/helpers/file-helpers";
 
 export function useGalleryItemForm(
-  item: GalleryItem | null | undefined,
-  onSaved: () => void
+  item: ServerGalleryItem | null | undefined,
+  onOpenChange: (open: boolean) => void
 ) {
+  //Mutation function for adding a gallery Item
+  const addMutation = useCreateGalleryItemMutation();
+  //Mutation function for adding a gallery Item
+  const updateMutation = useUpdateGalleryItemMutation();
+
   //setting the states that change the UI
-  const [uploading, setUploading] = useState<boolean>(false);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<null | File>(null);
 
@@ -50,22 +60,71 @@ export function useGalleryItemForm(
       setExistingImageUrl(null); // ADD THIS
     }
   }, [item, form]);
-
   const onSubmit = async (data: FormDataProps) => {
-    setUploading(true);
     if (item) {
-      const payload = { ...data, id: item.id };
-      updateGalleryItem(payload, setUploading, selectedFile, onSaved);
+      console.log(selectedFile);
+      //Creating a lqip if the image changed
+      let lqip;
+      if (selectedFile) {
+        lqip = await generateBlurDataURL(selectedFile);
+      }
+
+      const updatedItem = {
+        ...item,
+        ...data,
+        ...(lqip && { lqip }), // spread conditionally
+      };
+      // Editing
+      const formData = await buildGalleryFormData(
+        { id: item.id, ...data },
+        selectedFile
+      );
+
+      console.log("formData from update--->", formData);
+      console.log("Incoming data --->", data);
+
+      //close the edit diaog
+      onOpenChange(false);
+      //Running the tanstack mutation query
+      updateMutation.mutate(
+        { formData, updatedItem },
+        {
+          onSuccess: () => {
+            form.reset(); // clear form
+            setSelectedFile(null);
+            setExistingImageUrl(null);
+          },
+        }
+      );
     } else {
-      //Call the function for uploading the menu item
-      addGalleryImage(data, setUploading, selectedFile, onSaved);
+      // Creating
+      if (!selectedFile) {
+        toast.error("Please select an image to upload");
+        return;
+      }
+
+      console.log("Adding new gallery item...");
+      const formData = await buildGalleryFormData(data, selectedFile, true);
+      console.log("formData from create--->", formData);
+
+      onOpenChange(false);
+      //Running the tanstack mutation query
+      addMutation.mutate(formData, {
+        onSuccess: () => {
+          form.reset(); // clear form
+          setSelectedFile(null);
+          setExistingImageUrl(null);
+        },
+        onError: () => {
+          onOpenChange(true);
+        },
+      });
     }
   };
 
   return {
     form,
     setSelectedFile,
-    uploading,
     onSubmit,
     existingImageUrl, // ADD THIS
   };
