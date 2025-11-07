@@ -71,7 +71,7 @@ export default function GalleryPage() {
     );
   }
 
-  // ✅ UI Rendering
+  //  UI Rendering
   return (
     <div className="space-y-6">
       <GalleryHeader onAdd={() => setIsDialogOpen(true)} />
