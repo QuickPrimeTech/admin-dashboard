@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GalleryDialogProps } from "@/types/gallery";
@@ -32,12 +32,11 @@ export function GalleryDialog({
   open,
   onOpenChange,
   item,
-  onSaved,
   categories,
 }: GalleryDialogProps) {
   // hook that handles all the logic
-  const { form, uploading, onSubmit, existingImageUrl, setSelectedFile } =
-    useGalleryItemForm(item, onSaved);
+  const { form, onSubmit, existingImageUrl, setSelectedFile } =
+    useGalleryItemForm(item, onOpenChange);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -78,7 +77,6 @@ export function GalleryDialog({
                               form.setValue("image_url", url);
                             }
                           }}
-                          disabled={uploading}
                         />
 
                         {/* show preview if file is selected */}
@@ -197,16 +195,8 @@ export function GalleryDialog({
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit" disabled={uploading}>
-                  {uploading && <Loader className="animate-spin" />}
-                  {uploading
-                    ? item
-                      ? "Updating"
-                      : "Creating"
-                    : item
-                    ? "Update"
-                    : "Create"}{" "}
-                  Gallery Item
+                <Button type="submit">
+                  {item ? "Update" : "Create"} Gallery Item
                 </Button>
               </DialogFooter>
             </form>

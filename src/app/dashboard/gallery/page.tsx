@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -11,7 +11,7 @@ import { GalleryGrid } from "@/sections/gallery/gallery-grid";
 import { GalleryEmptyState } from "@/sections/gallery/gallery-empty-state";
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
 
-import { GalleryItem, ServerGalleryItem } from "@/types/gallery";
+import { ServerGalleryItem } from "@/types/gallery";
 import { deleteGalleryItem } from "@/helpers/galleryHelpers";
 import { GALLERY_ITEMS_QUERY_KEY, useGalleryQuery } from "@/hooks/use-gallery";
 
@@ -99,10 +99,6 @@ export default function GalleryPage() {
     setEditingItem(null);
   };
 
-  const handleItemSaved = () => {
-    handleDialogClose();
-  };
-
   // Error boundary UI
   if (isError) {
     return (
@@ -156,7 +152,6 @@ export default function GalleryPage() {
           if (!open) setEditingItem(null);
         }}
         item={editingItem}
-        onSaved={handleItemSaved}
       />
     </div>
   );

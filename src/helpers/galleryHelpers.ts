@@ -51,9 +51,7 @@ export async function addGalleryImage(
 
 export async function updateGalleryItem(
   data: FormDataProps & Payload,
-  setUploading: (value: boolean) => void,
-  selectedFile: File | null,
-  onSaved: () => void
+  selectedFile: File | null
 ) {
   try {
     const formData = new FormData();
@@ -77,15 +75,11 @@ export async function updateGalleryItem(
     const res = await response.json();
 
     if (res.success) {
-      setUploading(false);
-      onSaved();
       toast.success(res.message);
     } else {
-      setUploading(false);
       toast.error("Gallery item wasn’t successfully updated");
     }
   } catch {
-    setUploading(false);
     toast.error("Something went wrong");
   }
 }

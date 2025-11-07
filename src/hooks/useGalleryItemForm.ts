@@ -13,12 +13,12 @@ import { generateBlurDataURL } from "@/helpers/file-helpers";
 
 export function useGalleryItemForm(
   item: ServerGalleryItem | null | undefined,
-  onSaved: () => void
+  onOpenChange: (open: boolean) => void
 ) {
   //Mutation function for adding a gallery Item
   const addMutation = useCreateGalleryItemMutation();
+
   //setting the states that change the UI
-  const [uploading, setUploading] = useState<boolean>(false);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<null | File>(null);
 
@@ -60,7 +60,7 @@ export function useGalleryItemForm(
     if (item) {
       // If editing existing gallery item
       const payload = { ...data, id: item.id };
-      updateGalleryItem(payload, setUploading, selectedFile, onSaved);
+      updateGalleryItem(payload, selectedFile);
     } else {
       console.log("About to add gallery photo with mutation");
       if (!selectedFile) {
@@ -77,17 +77,16 @@ export function useGalleryItemForm(
       formData.append("file", selectedFile);
       formData.append("lqip", await generateBlurDataURL(selectedFile));
 
-      setUploading(true);
-
+      onOpenChange(false);
+      //Running the tanstack mutation query
       addMutation.mutate(formData, {
         onSuccess: () => {
-          onSaved(); // e.g. close modal, refresh UI
           form.reset(); // clear form
           setSelectedFile(null);
           setExistingImageUrl(null);
         },
-        onSettled: () => {
-          setUploading(false);
+        onError: () => {
+          onOpenChange(true);
         },
       });
     }
@@ -96,7 +95,6 @@ export function useGalleryItemForm(
   return {
     form,
     setSelectedFile,
-    uploading,
     onSubmit,
     existingImageUrl, // ADD THIS
   };

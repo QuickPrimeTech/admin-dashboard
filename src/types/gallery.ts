@@ -25,7 +25,6 @@ export type GalleryDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item?: ServerGalleryItem | null;
-  onSaved: () => void;
   categories: string[];
 };
 
