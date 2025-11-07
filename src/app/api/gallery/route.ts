@@ -32,11 +32,25 @@ export async function POST(req: NextRequest) {
 
     const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
 
-    //Uploading the image to cloudinary
-    const uploadResult = await uploadImageToCloudinary(
-      file,
-      `${sanitizedRestaurantName}/gallery`
-    );
+    // --- Upload to Cloudinary safely ---
+    let uploadResult;
+    try {
+      uploadResult = await uploadImageToCloudinary(
+        file,
+        `${sanitizedRestaurantName}/gallery`
+      );
+    } catch (err) {
+      console.error("Cloudinary upload failed:", err);
+      return createResponse(502, "Failed to upload image to Cloudinary");
+    }
+
+    // --- Validate upload result ---
+    if (!uploadResult?.secure_url || !uploadResult?.public_id) {
+      return createResponse(
+        502,
+        "Failed to upload image successfully. Please try again later or contact us"
+      );
+    }
 
     const galleryItem: GalleryItemInsert = {
       title: title || null,
