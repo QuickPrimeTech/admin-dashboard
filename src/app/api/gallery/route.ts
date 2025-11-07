@@ -9,7 +9,6 @@ import {
   getSanitizedRestaurantName,
 } from "@/helpers/common";
 import { GalleryItemInsert, ServerGalleryItem } from "@/types/gallery";
-import { revalidatePage } from "@/helpers/revalidator";
 import { createClient } from "@/utils/supabase/server";
 import { createResponse } from "@/helpers/api-responses";
 
@@ -124,19 +123,28 @@ export async function PATCH(req: NextRequest) {
   const is_published = formData.get("is_published") === "true";
   const category = formData.get("category") as string | null;
 
-  const { data, error } = await supabase
-    .from("gallery")
-    .select("public_id")
-    .eq("id", Number(id))
-    .eq("user_id", user.id)
-    .single();
-
-  if (error)
-    return errorResponse("Item not found or unauthorized", 404, error.message);
-
   let uploadedImageUrl = "";
-  let publicId = data.public_id;
+  let publicId;
+
+  //If a file exists I want to replace the existing one with the incoming one
   if (file) {
+    //Getting the public id of the image in order to replace it with the incoming one
+    const { data, error } = await supabase
+      .from("gallery")
+      .select("public_id")
+      .eq("id", Number(id))
+      .eq("user_id", user.id)
+      .single();
+
+    if (error)
+      return errorResponse(
+        "Item not found or unauthorized",
+        404,
+        error.message
+      );
+
+    publicId = data.public_id;
+
     const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
     const uploadResult = await uploadAndReplaceImage(
       file,
@@ -168,7 +176,6 @@ export async function PATCH(req: NextRequest) {
       500,
       updateError.message
     );
-  await revalidatePage("/gallery");
   return successResponse("Successfully updated your gallery photo.");
 }
 

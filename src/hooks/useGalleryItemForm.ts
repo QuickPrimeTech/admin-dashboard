@@ -6,8 +6,11 @@ import {
   FormData as FormDataProps,
 } from "@/schemas/galllery-item-schema";
 import { ServerGalleryItem } from "@/types/gallery"; // assume you have a type for existing item
-import { updateGalleryItem } from "@/helpers/galleryHelpers";
-import { useCreateGalleryItemMutation } from "./use-gallery";
+import { buildGalleryFormData } from "@/helpers/galleryHelpers";
+import {
+  useCreateGalleryItemMutation,
+  useUpdateGalleryItemMutation,
+} from "./use-gallery";
 import { toast } from "sonner";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
 
@@ -17,6 +20,8 @@ export function useGalleryItemForm(
 ) {
   //Mutation function for adding a gallery Item
   const addMutation = useCreateGalleryItemMutation();
+  //Mutation function for adding a gallery Item
+  const updateMutation = useUpdateGalleryItemMutation();
 
   //setting the states that change the UI
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
@@ -55,27 +60,52 @@ export function useGalleryItemForm(
       setExistingImageUrl(null); // ADD THIS
     }
   }, [item, form]);
-
   const onSubmit = async (data: FormDataProps) => {
     if (item) {
-      // If editing existing gallery item
-      const payload = { ...data, id: item.id };
-      updateGalleryItem(payload, selectedFile);
+      console.log(selectedFile);
+      //Creating a lqip if the image changed
+      let lqip;
+      if (selectedFile) {
+        lqip = await generateBlurDataURL(selectedFile);
+      }
+
+      const updatedItem = {
+        ...item,
+        ...data,
+        ...(lqip && { lqip }), // spread conditionally
+      };
+      // Editing
+      const formData = await buildGalleryFormData(
+        { id: item.id, ...data },
+        selectedFile
+      );
+
+      console.log("formData from update--->", formData);
+      console.log("Incoming data --->", data);
+
+      //close the edit diaog
+      onOpenChange(false);
+      //Running the tanstack mutation query
+      updateMutation.mutate(
+        { formData, updatedItem },
+        {
+          onSuccess: () => {
+            form.reset(); // clear form
+            setSelectedFile(null);
+            setExistingImageUrl(null);
+          },
+        }
+      );
     } else {
-      console.log("About to add gallery photo with mutation");
+      // Creating
       if (!selectedFile) {
         toast.error("Please select an image to upload");
         return;
       }
 
-      // Prepare the FormData to send with the mutation
-      const formData = new FormData();
-      formData.append("title", data.title ?? "");
-      formData.append("description", data.description ?? "");
-      formData.append("is_published", String(data.is_published));
-      formData.append("category", data.category);
-      formData.append("file", selectedFile);
-      formData.append("lqip", await generateBlurDataURL(selectedFile));
+      console.log("Adding new gallery item...");
+      const formData = await buildGalleryFormData(data, selectedFile, true);
+      console.log("formData from create--->", formData);
 
       onOpenChange(false);
       //Running the tanstack mutation query

@@ -11,12 +11,11 @@ export type GalleryItem = {
   user_id: string;
 };
 export type ServerGalleryItem = {
-  id: string;
+  id: number;
   title: string | null;
   description: string | null;
   is_published: boolean;
   image_url: string;
-  created_at: string;
   category: string;
   lqip: string | null;
 };

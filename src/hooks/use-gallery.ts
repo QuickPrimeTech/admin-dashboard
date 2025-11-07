@@ -71,14 +71,13 @@ export function useCreateGalleryItemMutation() {
         ? URL.createObjectURL(newFormData.get("file") as File)
         : "";
       const tempItem: ServerGalleryItem = {
-        id: Date.now().toString(), // temporary unique ID
+        id: Math.random(), // temporary unique ID
         title: newFormData.get("title") as string,
         description: newFormData.get("description") as string,
         category: newFormData.get("category") as string,
         is_published: newFormData.get("is_published") === "true",
         image_url: previewUrl,
         lqip: "aldfjdfad",
-        created_at: new Date().toISOString(),
       };
 
       //Optimistically updating the temporary item so that the use sees instant results
@@ -133,13 +132,73 @@ export function useCreateGalleryItemMutation() {
   });
 }
 
+export function useUpdateGalleryItemMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<ServerGalleryItem>,
+    AxiosError<ApiResponse<null>>,
+    { formData: FormData; updatedItem: ServerGalleryItem },
+    { previousGalleryItems?: ServerGalleryItem[] }
+  >({
+    mutationFn: async ({ formData }) => {
+      const res = await axios.patch(`/api/gallery`, formData);
+      return res.data;
+    },
+    onMutate: async ({ updatedItem }) => {
+      //Canceling all the query request that are taking place to prevent intefering with the optimistic update
+      await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
+
+      //Taking a snapshot of the previous gallery items in order to have a smooth rollback
+      const previousGalleryItems = queryClient.getQueryData<
+        ServerGalleryItem[]
+      >(GALLERY_ITEMS_QUERY_KEY);
+
+      //Getting the id from the formData
+      const id = updatedItem.id;
+
+      //Updating  the gallery item from the cache for the user to get immediate feedback
+      queryClient.setQueryData<ServerGalleryItem[]>(
+        GALLERY_ITEMS_QUERY_KEY,
+        (old) => {
+          return old?.map((galleryItem) =>
+            galleryItem.id === id ? updatedItem : galleryItem
+          );
+        }
+      );
+
+      //Returning the previous items for rollback on error
+      return { previousGalleryItems };
+    },
+    onError: (err, _id, onMutateResult) => {
+      const message =
+        err.response?.data.message ||
+        "An error occurred while updating your gallery photo";
+      //Rolling back to the previous galleryItems
+      if (onMutateResult?.previousGalleryItems) {
+        queryClient.setQueryData(
+          GALLERY_ITEMS_QUERY_KEY,
+          onMutateResult.previousGalleryItems
+        );
+      }
+      //Giving the user feedback that the request didn't go through
+      toast.error(message);
+    },
+    onSuccess: (deletedItem) => {
+      toast.success(
+        deletedItem.message || "Gallery photo was updated successfully"
+      );
+    },
+  });
+}
+
 export function useDeleteGalleryItemMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
     ApiResponse<ServerGalleryItem>,
     AxiosError<ApiResponse<null>>,
-    string,
+    number,
     { previousGalleryItems?: ServerGalleryItem[] }
   >({
     mutationFn: async (id) => {
@@ -176,14 +235,14 @@ export function useDeleteGalleryItemMutation() {
         err.response?.data.message ||
         "An error occurred while deleting your gallery photo";
       console.log(err);
-      //Rolling back to the previous menuItems
+      //Rolling back to the previous galleryItems
       if (onMutateResult?.previousGalleryItems) {
         queryClient.setQueryData(
           GALLERY_ITEMS_QUERY_KEY,
           onMutateResult.previousGalleryItems
         );
       }
-      //Rolling back the overview stats menu count
+      //Rolling back the overview stats gallery count
       queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
         if (!old) return;
         return { ...old, gallery: old.gallery + 1 };
@@ -193,7 +252,7 @@ export function useDeleteGalleryItemMutation() {
     },
     onSuccess: (deletedItem) => {
       toast.success(
-        deletedItem.message || "Menu Item was deleted successfully"
+        deletedItem.message || "Gallery Item was deleted successfully"
       );
     },
   });

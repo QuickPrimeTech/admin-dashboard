@@ -55,7 +55,7 @@ export default function GalleryPage() {
   // ✅ Delete item and invalidate cache
 
   // ✅ Toggle publish status with revalidation
-  const togglePublished = async (id: string, isPublished: boolean) => {
+  const togglePublished = async (id: number, isPublished: boolean) => {
     try {
       const res = await fetch("/api/gallery/publish-toggle", {
         method: "PATCH",

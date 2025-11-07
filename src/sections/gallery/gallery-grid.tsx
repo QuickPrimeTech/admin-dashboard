@@ -34,7 +34,7 @@ import { useDeleteGalleryItemMutation } from "@/hooks/use-gallery";
 interface Props {
   items: ServerGalleryItem[];
   onEdit: (item: ServerGalleryItem) => void;
-  onTogglePublished: (id: string, published: boolean) => void;
+  onTogglePublished: (id: number, published: boolean) => void;
 }
 
 export function GalleryGrid({ items, onEdit, onTogglePublished }: Props) {
