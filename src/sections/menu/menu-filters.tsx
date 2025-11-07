@@ -26,19 +26,22 @@ export function MenuFilters({
   return (
     <div className="flex w-full flex-col md:flex-row gap-4 items-center">
       {/* Search */}
-      <InputGroup className="max-w-md">
-        <InputGroupInput
-          placeholder="Search menu items..."
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-        />
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-      </InputGroup>
+      <div className="flex-none w-full md:w-[300px] lg:w-[400px]">
+        <InputGroup>
+          <InputGroupInput
+            placeholder="Search menu items..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
 
-      <ScrollArea className="rounded-lg shrink w-full">
-        <div className="flex gap-2 py-2 px-4 whitespace-nowrap bg-accent/40">
+      {/* Scrollable categories */}
+      <ScrollArea className="rounded-lg flex-1 w-0">
+        <div className="flex gap-2 py-2 px-4 bg-accent/40">
           {categories.map((category) => (
             <Button
               key={category}
