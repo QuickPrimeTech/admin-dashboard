@@ -11,7 +11,7 @@ export type GalleryItem = {
   user_id: string;
 };
 export type ServerGalleryItem = {
-  id: number;
+  id: string;
   title: string | null;
   description: string | null;
   is_published: boolean;

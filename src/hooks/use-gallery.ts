@@ -1,6 +1,7 @@
 // @/hooks/use-gallery.ts
 
 import { ApiResponse } from "@/helpers/api-responses";
+import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
 import { ServerGalleryItem } from "@/types/gallery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
@@ -70,7 +71,7 @@ export function useCreateGalleryItemMutation() {
         ? URL.createObjectURL(newFormData.get("file") as File)
         : "";
       const tempItem: ServerGalleryItem = {
-        id: Date.now(), // temporary unique ID
+        id: Date.now().toString(), // temporary unique ID
         title: newFormData.get("title") as string,
         description: newFormData.get("description") as string,
         category: newFormData.get("category") as string,
@@ -128,6 +129,72 @@ export function useCreateGalleryItemMutation() {
           console.error("Error parsing validation messages:", parseErr);
         }
       }
+    },
+  });
+}
+
+export function useDeleteGalleryItemMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<ServerGalleryItem>,
+    AxiosError<ApiResponse<null>>,
+    string,
+    { previousGalleryItems?: ServerGalleryItem[] }
+  >({
+    mutationFn: async (id) => {
+      const res = await axios.delete(`/api/gallery?id=${id}`);
+      return res.data;
+    },
+    onMutate: async (id) => {
+      //Canceling all the query request that are taking place to prevent intefering with the optimistic update
+      await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
+
+      //Taking a snapshot of the previous gallery items in order to have a smooth rollback
+      const previousGalleryItems = queryClient.getQueryData<
+        ServerGalleryItem[]
+      >(GALLERY_ITEMS_QUERY_KEY);
+
+      //Removing the gallery item from the cache for the user to get immediate feedback
+      queryClient.setQueryData<ServerGalleryItem[]>(
+        GALLERY_ITEMS_QUERY_KEY,
+        (old) => {
+          return old?.filter((galleryItem) => galleryItem.id !== id);
+        }
+      );
+
+      //Updating the overview stats from the homepage to have the reduced value
+      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+        if (!old) return;
+        return { ...old, gallery: old.gallery - 1 };
+      });
+      //Returning the previous items for rollback on error
+      return { previousGalleryItems };
+    },
+    onError: (err, _id, onMutateResult) => {
+      const message =
+        err.response?.data.message ||
+        "An error occurred while deleting your gallery photo";
+      console.log(err);
+      //Rolling back to the previous menuItems
+      if (onMutateResult?.previousGalleryItems) {
+        queryClient.setQueryData(
+          GALLERY_ITEMS_QUERY_KEY,
+          onMutateResult.previousGalleryItems
+        );
+      }
+      //Rolling back the overview stats menu count
+      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+        if (!old) return;
+        return { ...old, gallery: old.gallery + 1 };
+      });
+      //Giving the user feedback that the request didn't go through
+      toast.error(message);
+    },
+    onSuccess: (deletedItem) => {
+      toast.success(
+        deletedItem.message || "Menu Item was deleted successfully"
+      );
     },
   });
 }

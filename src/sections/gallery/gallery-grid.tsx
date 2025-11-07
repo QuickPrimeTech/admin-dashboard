@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -27,21 +28,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { GalleryItem, ServerGalleryItem } from "@/types/gallery";
+import { ServerGalleryItem } from "@/types/gallery";
+import { useDeleteGalleryItemMutation } from "@/hooks/use-gallery";
 
 interface Props {
   items: ServerGalleryItem[];
   onEdit: (item: ServerGalleryItem) => void;
-  onDelete: (id: number) => void;
-  onTogglePublished: (id: number, published: boolean) => void;
+  onTogglePublished: (id: string, published: boolean) => void;
 }
 
-export function GalleryGrid({
-  items,
-  onEdit,
-  onDelete,
-  onTogglePublished,
-}: Props) {
+export function GalleryGrid({ items, onEdit, onTogglePublished }: Props) {
+  const deleteMutation = useDeleteGalleryItemMutation();
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item) => (
@@ -143,13 +140,19 @@ export function GalleryGrid({
                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                       <AlertDialogDescription>
                         This action cannot be undone. This will permanently
-                        delete this gallery item.
+                        delete{" "}
+                        {item?.title ? (
+                          <strong>{item?.title}</strong>
+                        ) : (
+                          "this photo"
+                        )}{" "}
+                        from your gallery
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => onDelete(item.id)}
+                        onClick={() => deleteMutation.mutate(item.id)}
                         className="bg-destructive text-white hover:bg-destructive/90"
                       >
                         Yes, delete

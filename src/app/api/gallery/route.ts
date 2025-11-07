@@ -173,41 +173,44 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
   if (!id) return errorResponse("Missing gallery item ID", 400);
 
+  //Getting the public id for cloudinary to delete the image
   const { data: item, error: fetchError } = await supabase
     .from("gallery")
     .select("public_id")
     .eq("id", id)
-    .eq("user_id", user.id)
+    .select()
     .single();
 
   if (fetchError || !item) {
     return errorResponse("Gallery item not found", 404, fetchError?.message);
   }
 
-  if (item.public_id) {
+  // Delete from Cloudinary first
+  try {
     await deleteImageFromCloudinary(item.public_id);
+  } catch (cloudinaryError: any) {
+    return createResponse(502, "Failed to delete image from Cloudinary");
   }
 
+  //Deleting the image from supabase
   const { error: deleteError } = await supabase
     .from("gallery")
     .delete()
-    .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("id", id);
 
-  if (deleteError)
-    return errorResponse(
-      "Failed to delete gallery item",
-      500,
-      deleteError.message
-    );
-  await revalidatePage("/gallery");
-  return successResponse("Gallery photo deleted successfully");
+  if (deleteError) return createResponse(502, deleteError.message);
+
+  //Returning success if nothing failed
+  return createResponse(
+    200,
+    "Gallery Photo has been successfully deleted!",
+    item
+  );
 }

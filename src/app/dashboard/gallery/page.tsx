@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,7 +11,6 @@ import { GalleryEmptyState } from "@/sections/gallery/gallery-empty-state";
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
 
 import { ServerGalleryItem } from "@/types/gallery";
-import { deleteGalleryItem } from "@/helpers/galleryHelpers";
 import { GALLERY_ITEMS_QUERY_KEY, useGalleryQuery } from "@/hooks/use-gallery";
 
 export default function GalleryPage() {
@@ -55,18 +53,9 @@ export default function GalleryPage() {
   }, [galleryItems, searchTerm, showPublished]);
 
   // ✅ Delete item and invalidate cache
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteGalleryItem(id);
-      toast.success("Gallery item deleted");
-      queryClient.invalidateQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
-    } catch {
-      toast.error("Failed to delete gallery item");
-    }
-  };
 
   // ✅ Toggle publish status with revalidation
-  const togglePublished = async (id: number, isPublished: boolean) => {
+  const togglePublished = async (id: string, isPublished: boolean) => {
     try {
       const res = await fetch("/api/gallery/publish-toggle", {
         method: "PATCH",
@@ -139,7 +128,6 @@ export default function GalleryPage() {
         <GalleryGrid
           items={filteredItems}
           onEdit={handleEdit}
-          onDelete={handleDelete}
           onTogglePublished={togglePublished}
         />
       )}
