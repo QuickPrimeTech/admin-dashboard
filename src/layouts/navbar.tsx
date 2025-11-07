@@ -23,12 +23,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function AppNavbar() {
+  const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { state } = useSidebar();
 
   async function handleLogout() {
+    //Clearing the cache so that the next use can't see the other persons data
+    queryClient.clear();
     setDialogOpen(true); // show the dialog
     // Wait a short moment to show the spinner, then log out
     await logout();
