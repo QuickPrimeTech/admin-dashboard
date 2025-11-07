@@ -195,7 +195,7 @@ export function GalleryDialog({
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit">
+                <Button type="submit" disabled={!form.formState.isDirty}>
                   {item ? "Update" : "Create"} Gallery Item
                 </Button>
               </DialogFooter>

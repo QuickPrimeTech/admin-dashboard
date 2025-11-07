@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       "Image uploaded to successfully",
       data
     );
-  } catch (error) {
+  } catch {
     return createResponse(
       500,
       "An error occurred while uploading your gallery item"
@@ -202,7 +202,7 @@ export async function DELETE(request: NextRequest) {
   // Delete from Cloudinary first
   try {
     await deleteImageFromCloudinary(item.public_id);
-  } catch (cloudinaryError: any) {
+  } catch {
     return createResponse(502, "Failed to delete image from Cloudinary");
   }
 

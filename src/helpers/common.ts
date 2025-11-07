@@ -121,11 +121,8 @@ export async function deleteImageFromCloudinary(publicId: string) {
     }
 
     return result;
-  } catch (error: any) {
-    console.error("Error deleting image from Cloudinary:", error);
-    throw new Error(
-      `Failed to delete image from Cloudinary: ${error.message || error}`
-    );
+  } catch (error) {
+    throw new Error(`Failed to delete image from Cloudinary ${error}`);
   }
 }
 

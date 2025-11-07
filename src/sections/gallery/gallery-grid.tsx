@@ -29,16 +29,23 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { ServerGalleryItem } from "@/types/gallery";
-import { useDeleteGalleryItemMutation } from "@/hooks/use-gallery";
+import {
+  useDeleteGalleryItemMutation,
+  useTogglePublishedMutation,
+} from "@/hooks/use-gallery";
 
 interface Props {
   items: ServerGalleryItem[];
   onEdit: (item: ServerGalleryItem) => void;
-  onTogglePublished: (id: number, published: boolean) => void;
 }
 
-export function GalleryGrid({ items, onEdit, onTogglePublished }: Props) {
+export function GalleryGrid({ items, onEdit }: Props) {
+  //Delete mutation from TanstackQuery
   const deleteMutation = useDeleteGalleryItemMutation();
+
+  //Toogle mutation
+  const togglePublishMutation = useTogglePublishedMutation();
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item) => (
@@ -82,14 +89,13 @@ export function GalleryGrid({ items, onEdit, onTogglePublished }: Props) {
                     size="sm"
                     variant="secondary"
                     onClick={() =>
-                      onTogglePublished(item.id, !item.is_published)
+                      togglePublishMutation.mutate({
+                        id: item.id,
+                        is_published: !item.is_published,
+                      })
                     }
                   >
-                    {item.is_published ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {item.is_published ? <EyeOff /> : <Eye />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

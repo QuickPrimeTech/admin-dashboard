@@ -46,7 +46,7 @@ export default function AvailabilitySection() {
       // Reset to default values when context is cleared (after submit)
       form.reset(defaultData);
     }
-  }, [availabilityInfo, form]);
+  }, [availabilityInfo, form, defaultData]);
 
   const onSubmit = (data: AvailabilityFormData) => {
     setAvailabilityInfo(data);

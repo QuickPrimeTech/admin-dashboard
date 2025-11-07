@@ -1,7 +1,5 @@
 "use client";
 import { useState, useMemo } from "react";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { GalleryDialog } from "@/sections/gallery/gallery-dialog";
 import { GalleryHeader } from "@/sections/gallery/gallery-header";
@@ -11,15 +9,13 @@ import { GalleryEmptyState } from "@/sections/gallery/gallery-empty-state";
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
 
 import { ServerGalleryItem } from "@/types/gallery";
-import { GALLERY_ITEMS_QUERY_KEY, useGalleryQuery } from "@/hooks/use-gallery";
+import { useGalleryQuery } from "@/hooks/use-gallery";
 
 export default function GalleryPage() {
   // ✅ Fetch data with TanStack Query
   const { data: response, isError, isPending, refetch } = useGalleryQuery();
 
   const galleryItems = response ?? [];
-
-  const queryClient = useQueryClient();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showPublished, setShowPublished] = useState("all");
@@ -52,40 +48,10 @@ export default function GalleryPage() {
     return filtered;
   }, [galleryItems, searchTerm, showPublished]);
 
-  // ✅ Delete item and invalidate cache
-
-  // ✅ Toggle publish status with revalidation
-  const togglePublished = async (id: number, isPublished: boolean) => {
-    try {
-      const res = await fetch("/api/gallery/publish-toggle", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, is_published: isPublished }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to toggle published status");
-      }
-
-      toast.success("Publish status updated");
-      queryClient.invalidateQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
-    } catch (error) {
-      toast.error("Failed to update publish status");
-      console.error(error);
-    }
-  };
-
   // ✅ Dialog handlers
   const handleEdit = (item: ServerGalleryItem) => {
     setEditingItem(item);
     setIsDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-    setEditingItem(null);
   };
 
   // Error boundary UI
@@ -125,11 +91,7 @@ export default function GalleryPage() {
           showPublished={showPublished}
         />
       ) : (
-        <GalleryGrid
-          items={filteredItems}
-          onEdit={handleEdit}
-          onTogglePublished={togglePublished}
-        />
+        <GalleryGrid items={filteredItems} onEdit={handleEdit} />
       )}
 
       <GalleryDialog

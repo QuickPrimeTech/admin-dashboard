@@ -22,11 +22,13 @@ const fetchGalleryItems = async () => {
     }
 
     return data.data; // Return the parsed response (TanStack will cache this)
-  } catch (error: any) {
+  } catch (error) {
     console.error("Gallery fetch error:", error);
-    toast.error(
-      error?.response?.data?.message || "Failed to fetch gallery items"
-    );
+    if (error instanceof AxiosError) {
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch gallery items"
+      );
+    }
     throw error;
   }
 };
@@ -253,6 +255,72 @@ export function useDeleteGalleryItemMutation() {
     onSuccess: (deletedItem) => {
       toast.success(
         deletedItem.message || "Gallery Item was deleted successfully"
+      );
+    },
+  });
+}
+
+export function useTogglePublishedMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<ServerGalleryItem>,
+    AxiosError<ApiResponse<null>>,
+    { id: number; is_published: boolean },
+    { previousGalleryItems?: ServerGalleryItem[] }
+  >({
+    mutationFn: async (updatedItem) => {
+      const res = await axios.patch(
+        `/api/gallery/publish-toggle`,
+        JSON.stringify(updatedItem)
+      );
+      return res.data;
+    },
+    onMutate: async (updatedItem) => {
+      //Canceling all the query request that are taking place to prevent intefering with the optimistic update
+      await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
+
+      //Taking a snapshot of the previous gallery items in order to have a smooth rollback
+      const previousGalleryItems = queryClient.getQueryData<
+        ServerGalleryItem[]
+      >(GALLERY_ITEMS_QUERY_KEY);
+
+      //Updating the is_published to the one passed from the form
+      queryClient.setQueryData<ServerGalleryItem[]>(
+        GALLERY_ITEMS_QUERY_KEY,
+        (old) => {
+          return old?.map((galleryItem) =>
+            galleryItem.id === updatedItem.id
+              ? { ...galleryItem, is_published: updatedItem.is_published }
+              : galleryItem
+          );
+        }
+      );
+
+      //Returning the previous items for rollback on error
+      return { previousGalleryItems };
+    },
+    onError: (err, _id, onMutateResult) => {
+      const message =
+        err.response?.data.message ||
+        "An error occurred while deleting your gallery photo";
+      //Rolling back to the previous galleryItems
+      if (onMutateResult?.previousGalleryItems) {
+        queryClient.setQueryData(
+          GALLERY_ITEMS_QUERY_KEY,
+          onMutateResult.previousGalleryItems
+        );
+      }
+
+      //Giving the user feedback that the request didn't go through
+      toast.error(message);
+    },
+    onSuccess: (deletedItem, updatedItem) => {
+      toast.success(
+        deletedItem.message ||
+          `Gallery Photo was ${
+            updatedItem.is_published ? "published" : "unpublished"
+          } successfully`
       );
     },
   });
