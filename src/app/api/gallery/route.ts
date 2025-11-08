@@ -115,6 +115,7 @@ export async function PATCH(req: NextRequest) {
   const { user, supabase, response } = await getAuthenticatedUser();
   if (!user) return response;
 
+  //Getting the data from the frontend
   const formData = await req.formData();
   const id = formData.get("id") as string;
   const file = formData.get("file") as File | null;
@@ -122,9 +123,6 @@ export async function PATCH(req: NextRequest) {
   const description = formData.get("description") as string | null;
   const is_published = formData.get("is_published") === "true";
   const category = formData.get("category") as string | null;
-
-  let uploadedImageUrl = "";
-  let publicId;
 
   //If a file exists I want to replace the existing one with the incoming one
   if (file) {
@@ -143,46 +141,54 @@ export async function PATCH(req: NextRequest) {
         error.message
       );
 
-  let uploadedImageUrl = "";
-  let publicId = data.public_id;
-  if (file) {
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    let uploadedImageUrl = "";
+    let publicId = data.public_id;
+
+    //Getting the restaurant name from the db
+    const sanitizedRestaurantName = await getSanitizedRestaurantName();
+
+    // ----- THIS PART NEEDS IMPROVEMENT - THE DATA SHOULD NOT BE UPDATED IN SUPABASE IF THE IMAGE ISN'T REPLACED ------
+    //Replacing the incoming image from cloudinary with the incoming one
     const uploadResult = await uploadAndReplaceImage(
       file,
       `${sanitizedRestaurantName}/gallery`,
       publicId
     );
+
+    //Updating the variables if the cloudinary succeeded
     uploadedImageUrl = uploadResult.secure_url;
     publicId = uploadResult.public_id;
+
+    //------ I SHOULD LATER PUT A TRY CATCH BLOCK FOR THE CLOUDINARY UPLOAD FUNCTION TO MAKE SURE THE DATA DOESN'T GO TO SUPABASE IF THAT FAILS ----
+    const galleryItem = {
+      title,
+      description,
+      is_published,
+      category,
+      ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
+      ...(publicId && { public_id: publicId }),
+    };
+
+    const { error: updateError } = await supabase
+      .from("gallery")
+      .update(galleryItem)
+      .eq("id", parseInt(id))
+      .eq("user_id", user.id);
+
+    if (updateError)
+      return errorResponse(
+        "Failed to update gallery item",
+        500,
+        updateError.message
+      );
+    return successResponse("Successfully updated your gallery photo.");
   }
-
-  const galleryItem = {
-    title,
-    description,
-    is_published,
-    category,
-    ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
-    ...(publicId && { public_id: publicId }),
-  };
-
-  const { error: updateError } = await supabase
-    .from("gallery")
-    .update(galleryItem)
-    .eq("id", parseInt(id))
-    .eq("user_id", user.id);
-
-  if (updateError)
-    return errorResponse(
-      "Failed to update gallery item",
-      500,
-      updateError.message
-    );
-  return successResponse("Successfully updated your gallery photo.");
 }
 
 export async function DELETE(request: NextRequest) {
   const supabase = await createClient();
 
+  //Getting the search param for example /api/gallery?id=78
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
@@ -196,6 +202,7 @@ export async function DELETE(request: NextRequest) {
     .select()
     .single();
 
+  //If there was an error gettin the data from supabase, I will then throw an error
   if (fetchError || !item) {
     return errorResponse("Gallery item not found", 404, fetchError?.message);
   }
@@ -207,7 +214,7 @@ export async function DELETE(request: NextRequest) {
     return createResponse(502, "Failed to delete image from Cloudinary");
   }
 
-  //Deleting the image from supabase
+  //Deleting the record for the gallery image from supabase
   const { error: deleteError } = await supabase
     .from("gallery")
     .delete()

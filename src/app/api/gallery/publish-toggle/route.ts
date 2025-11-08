@@ -4,7 +4,6 @@ import { createClient } from "@/utils/supabase/server";
 import { createResponse } from "@/helpers/api-responses";
 
 export async function PATCH(req: NextRequest) {
-  //checking if the user is authenticated
   const supabase = await createClient();
 
   const { id, is_published } = await req.json();
@@ -12,6 +11,8 @@ export async function PATCH(req: NextRequest) {
   if (typeof id !== "number" || typeof is_published !== "boolean") {
     return createResponse(400, "Invalid payload");
   }
+
+  //Updating the data in supabase to change to the type specified here.
   try {
     const { data, error } = await supabase
       .from("gallery")
