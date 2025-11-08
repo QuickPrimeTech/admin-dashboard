@@ -77,6 +77,7 @@ export async function PATCH(req: NextRequest) {
       name: branch.name,
     })
     .eq("id", branch.id);
+
   if (error) {
     return createResponse<null>(500, "There was an error updating your branch");
   }

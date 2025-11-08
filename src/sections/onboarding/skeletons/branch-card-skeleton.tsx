@@ -1,6 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@ui/card";
-import { ExternalLink, Edit, Trash2 } from "lucide-react";
-import { Button } from "@ui/button";
 import { Skeleton } from "@ui/skeleton";
 
 export function BranchCardSkeleton() {

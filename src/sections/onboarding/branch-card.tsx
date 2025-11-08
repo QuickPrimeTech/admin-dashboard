@@ -8,25 +8,15 @@ import {
   CardContent,
 } from "@ui/card";
 import { Button } from "@ui/button";
-import { MapPin, ExternalLink, Edit, Trash2 } from "lucide-react";
+import { MapPin, ExternalLink, Edit } from "lucide-react";
 import { Branch } from "@/types/onboarding";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@ui/alert-dialog";
 import {
   deleteBranchMutation,
   updateBranchMutation,
 } from "@/hooks/use-branches";
 import { useState } from "react";
 import { EditBranchDialog } from "./edit-branch-dialog";
+import { DeleteAlertDialog } from "./delete-alert-dialog";
 
 type BranchCardProps = {
   branch: Branch;
@@ -74,37 +64,10 @@ export function BranchCard({ branch }: BranchCardProps) {
               <Edit className="mr-2" />
               Edit
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:text-destructive flex-1"
-                >
-                  <Trash2 className="mr-2" />
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete{" "}
-                    <span className="font-medium">{branch.name}</span> from your
-                    restaurant branches and all of its related data.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="destructive"
-                    onClick={() => deleteMutation.mutate(branch.id)}
-                  >
-                    Yes, delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DeleteAlertDialog
+              branch={branch}
+              deleteMutation={deleteMutation}
+            />
           </div>
         </CardContent>
       </Card>
