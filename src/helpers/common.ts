@@ -8,10 +8,9 @@ import { UploadResult } from "@/types/cloudinary";
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
 export async function getAuthenticatedUser() {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getUser();
+  console.log(data);
+  const { user } = data;
 
   if (!user || error) {
     return {
@@ -28,28 +27,24 @@ export async function getAuthenticatedUser() {
 }
 
 //This is the function that gets all the info about a menu items such as public Id so that actions such as deleting images is possible
-export async function getMenuItemById(userId: string, itemId: string) {
+export async function getMenuItemById(itemId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("menu_items")
     .select("*")
     .eq("id", itemId)
-    .eq("user_id", userId)
     .single();
 
   return { data, error };
 }
 
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
-export async function getSanitizedRestaurantName(
-  userId: string
-): Promise<string> {
+export async function getSanitizedRestaurantName(): Promise<string> {
   const supabase = await createClient();
 
   const { data: restaurant, error } = await supabase
     .from("restaurants")
     .select("name")
-    .eq("user_id", userId)
     .single();
 
   if (!restaurant || error || !restaurant.name) {

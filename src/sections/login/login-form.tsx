@@ -1,11 +1,9 @@
 //sections/login/login-form.tsx
 
 "use client";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,21 +27,16 @@ import { Eye, EyeOff, AlertCircle, ChefHat, Loader } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
 import Link from "next/link";
-
-const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  rememberMe: z.boolean().default(false),
-});
+import { loginSchema, LoginFormData } from "@/schemas/login";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ❗️ NO GENERIC PARAMETER HERE
+  // NO GENERIC PARAMETER HERE
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -51,7 +44,7 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError("");
     const formData = new FormData();

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     if (!file) return createResponse(400, "No file uploaded");
 
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    const sanitizedRestaurantName = await getSanitizedRestaurantName();
 
     // --- Upload to Cloudinary safely ---
     let uploadResult;
@@ -143,8 +143,9 @@ export async function PATCH(req: NextRequest) {
         error.message
       );
 
-    publicId = data.public_id;
-
+  let uploadedImageUrl = "";
+  let publicId = data.public_id;
+  if (file) {
     const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
     const uploadResult = await uploadAndReplaceImage(
       file,

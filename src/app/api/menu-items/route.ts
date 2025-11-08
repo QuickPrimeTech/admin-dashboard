@@ -15,12 +15,11 @@ import {
 import { revalidatePage } from "@/helpers/revalidator";
 import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
 import { createResponse } from "@/helpers/api-responses";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(request: NextRequest) {
-  const { user, response, supabase } = await getAuthenticatedUser();
-  if (response) return response;
-
   try {
+    const supabase = await createClient();
     const formData = await request.formData();
 
     // Parse choices
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
     let uploadedImageUrl: string | null = null;
     let publicId: string | null = null;
     const imageFile = data.image as File | null;
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    const sanitizedRestaurantName = await getSanitizedRestaurantName();
 
     if (imageFile) {
       const uploadResult = await uploadImageToCloudinary(
@@ -91,7 +90,6 @@ export async function POST(request: NextRequest) {
       dietary_preference: [],
       image_url: uploadedImageUrl,
       public_id: publicId,
-      user_id: user.id,
     };
 
     // Insert into Supabase and return the inserted row
@@ -178,10 +176,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Fetch existing item
-    const { data: existingItem, error: fetchError } = await getMenuItemById(
-      user.id,
-      id
-    );
+    const { data: existingItem, error: fetchError } = await getMenuItemById(id);
     if (fetchError || !existingItem) {
       return createResponse(
         404,
@@ -246,7 +241,7 @@ export async function PATCH(request: NextRequest) {
 
     // 🧩 Case 1: Upload new image
     if (imageFile && imageFile.size > 0) {
-      const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+      const sanitizedRestaurantName = await getSanitizedRestaurantName();
       const uploadResult = await uploadAndReplaceImage(
         imageFile,
         `${sanitizedRestaurantName}/menu-items`,

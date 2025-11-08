@@ -11,7 +11,7 @@ export const InvalidLinkMessage = ({ message }: { message: string }) => {
   )}`;
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh] px-4">
+    <div className="flex items-center justify-center min-h-[60vh] px-4 mt-8">
       <Card className="w-full max-w-md text-center shadow-xl">
         <CardHeader>
           {/* Icon Container */}
@@ -33,7 +33,7 @@ export const InvalidLinkMessage = ({ message }: { message: string }) => {
           {/* Support Button */}
           <Link
             href={whatsappLink}
-            className="inline-block bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-600 text-white px-5 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="inline-block bg-linear-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-600 text-white px-5 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Contact QuickPrimeTech Support
           </Link>
