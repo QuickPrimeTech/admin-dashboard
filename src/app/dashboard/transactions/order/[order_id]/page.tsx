@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@ui/skeleton";
+import { Badge } from "@ui/badge";
+import { Card, CardContent } from "@ui/card";
+import { Separator } from "@ui/separator";
 import {
   CalendarIcon,
   ClockIcon,
@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 
 // --- Type Definitions ---
 

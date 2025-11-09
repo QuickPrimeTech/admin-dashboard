@@ -3,7 +3,7 @@ import { Edit } from "lucide-react";
 import { BasicInfoSkeleton } from "./basic-info-skeleton";
 import { AvailabilitySkeleton } from "./availability-skeleton";
 import { ChoicesListSkeleton } from "./choice-list-skeleton";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@ui/skeleton";
 import { ImageSectionSkeleton } from "./image-section-skeleton";
 
 export function LoadingPageSkeleton() {

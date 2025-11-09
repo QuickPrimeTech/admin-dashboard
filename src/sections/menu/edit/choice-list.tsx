@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@ui/card";
 import ChoiceItem from "./choice-item";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ChoicesListSkeleton } from "../skeletons/choice-list-skeleton";

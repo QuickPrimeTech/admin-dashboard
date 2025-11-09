@@ -5,13 +5,13 @@ import {
   CardDescription,
   CardFooter,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@/components/ui/tooltip";
+} from "@ui/tooltip";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -22,10 +22,10 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+} from "@ui/alert-dialog";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@ui/button";
+import { Badge } from "@ui/badge";
 import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { ServerGalleryItem } from "@/types/gallery";

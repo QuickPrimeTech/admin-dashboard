@@ -20,7 +20,7 @@ import { choiceSchema, type ChoiceFormData } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ChoiceOptionItem } from "./choice-option-item";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
 
 export function ChoiceBuilder() {
   const [isOpen, setIsOpen] = useState(false);

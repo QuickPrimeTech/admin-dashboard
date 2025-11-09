@@ -6,20 +6,20 @@ import QRCodeStyling, {
   FileExtension,
   Gradient,
 } from "qr-code-styling";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardContent } from "@ui/card";
+import { Input } from "@ui/input";
+import { Label } from "@ui/label";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+} from "@ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
+import { Button } from "@ui/button";
 import { DownloadIcon, Upload } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@ui/scroll-area";
 import Link from "next/link";
 
 export default function ClientQR() {

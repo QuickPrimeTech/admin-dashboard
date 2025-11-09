@@ -4,14 +4,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Form,
   FormControl,
@@ -19,10 +19,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from "@ui/form";
+import { Input } from "@ui/input";
+import { Checkbox } from "@ui/checkbox";
+import { Alert, AlertDescription } from "@ui/alert";
 import { Eye, EyeOff, AlertCircle, ChefHat, Loader } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";

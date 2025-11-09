@@ -21,7 +21,7 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
 import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import {
   AlertDialog,

@@ -3,8 +3,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client"; // Adjust import path to your client
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@ui/input";
+import { Button } from "@ui/button";
 import { toast } from "sonner";
 import {
   Card,
@@ -12,17 +12,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@ui/form";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email"),

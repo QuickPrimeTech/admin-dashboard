@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@ui/dialog";
 import {
   Form,
   FormControl,
@@ -20,11 +20,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+} from "@ui/form";
+import { Input } from "@ui/input";
+import { Textarea } from "@ui/textarea";
+import { Button } from "@ui/button";
+import { Switch } from "@ui/switch";
 import { toast } from "sonner";
 import { FAQDialogProps } from "@/types/faqs";
 

@@ -4,8 +4,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@ui/card";
+import { Skeleton } from "@ui/skeleton";
 export function SettingsSkeleton() {
   return (
     <div className="grid gap-6">

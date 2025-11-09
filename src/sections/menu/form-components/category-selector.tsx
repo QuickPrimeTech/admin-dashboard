@@ -7,15 +7,10 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+} from "@ui/select";
+import { Button } from "@ui/button";
+import { Input } from "@ui/input";
+import { FormItem, FormLabel, FormControl, FormMessage } from "@ui/form";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +18,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@ui/dialog";
 import { Plus } from "lucide-react";
 import { ControllerRenderProps, FieldValues } from "react-hook-form";
 

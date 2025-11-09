@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@ui/card";
 
 export function RecentActivity() {
   const activities = [
@@ -17,7 +23,7 @@ export function RecentActivity() {
       time: "3 hours ago",
       color: "bg-orange-500",
     },
-  ]
+  ];
 
   return (
     <Card>
@@ -39,5 +45,5 @@ export function RecentActivity() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

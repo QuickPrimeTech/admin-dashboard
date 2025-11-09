@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+import { Card } from "@ui/card";
 import { ChefHat, Users, Calendar, Star } from "lucide-react";
 
 export function LoginHero() {

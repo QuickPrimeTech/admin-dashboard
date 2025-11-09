@@ -6,9 +6,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@ui/card";
+import { Badge } from "@ui/badge";
+import { Button } from "@ui/button";
 import { Calendar, Clock, Phone, Mail } from "lucide-react";
 import {
   Dialog,
@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@ui/dialog";
 import { useState } from "react";
 import { Reservation, ReservationStatus } from "@/types/reservations";
 

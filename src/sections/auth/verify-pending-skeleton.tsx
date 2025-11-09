@@ -6,8 +6,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@ui/card";
+import { Skeleton } from "@ui/skeleton";
 import { MailCheck } from "lucide-react";
 
 export function VerifyPendingSkeleton() {

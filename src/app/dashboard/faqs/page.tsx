@@ -3,14 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { FaqFilterDropdown } from "@/sections/faqs/faq-filter-dropdown";
 import { sortFaqs } from "@/helpers/faqsHelper";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@ui/dialog";
 import { Plus } from "lucide-react";
 import { FAQDialog } from "@/sections/faqs/faq-dialog";
 import { toast } from "sonner";

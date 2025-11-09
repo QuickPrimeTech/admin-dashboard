@@ -1,6 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 
 export const InvalidLinkMessage = ({ message }: { message: string }) => {
   // creating the whatsapp message for somebody getting the error

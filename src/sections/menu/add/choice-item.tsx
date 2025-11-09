@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@ui/card";
+import { Button } from "@ui/button";
+import { Badge } from "@ui/badge";
 import { Pencil, Trash2 } from "lucide-react";
 import type { ChoiceFormData } from "@/schemas/menu";
 import {
@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@ui/alert-dialog";
 
 interface ChoiceItemProps {
   choice: ChoiceFormData;

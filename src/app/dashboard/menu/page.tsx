@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { Plus, QrCode } from "lucide-react";
 import Link from "next/link";
 import { MenuFilters } from "@/sections/menu/menu-filters";

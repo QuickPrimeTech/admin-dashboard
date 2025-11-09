@@ -1,7 +1,7 @@
 // app/auth/confirm/page.tsx
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 
 export default async function ConfirmSignupPage() {
   const supabase = await createClient();

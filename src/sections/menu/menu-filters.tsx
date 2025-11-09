@@ -1,12 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { Search } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { ScrollArea, ScrollBar } from "@ui/scroll-area";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 
 interface MenuFiltersProps {
   searchTerm: string;

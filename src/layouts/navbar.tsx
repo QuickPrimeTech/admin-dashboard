@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
+import { SidebarTrigger, useSidebar } from "@ui/sidebar";
+import { Button } from "@ui/button";
 import { Bell, User } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@ui/separator";
+import { Avatar, AvatarImage, AvatarFallback } from "@ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,15 +14,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { logout } from "@/app/auth/actions/actions";
 import { LogOutDialog } from "@/components/logout-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@ui/tooltip";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function AppNavbar() {

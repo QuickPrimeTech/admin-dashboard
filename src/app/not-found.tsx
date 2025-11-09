@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronLeft, CircleX } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import {
   Empty,
   EmptyContent,
@@ -11,7 +11,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
+} from "@ui/empty";
 
 export default function NotFound() {
   const router = useRouter();

@@ -1,5 +1,5 @@
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@ui/skeleton";
 import { Search } from "lucide-react";
 
 export default function Loading() {

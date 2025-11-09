@@ -7,8 +7,8 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
-import { FormControl } from "@/components/ui/form";
+} from "@ui/select";
+import { FormControl } from "@ui/form";
 
 interface TimePicker24hProps {
   value?: string; // e.g. "13:45"

@@ -6,8 +6,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+} from "@ui/dropdown-menu";
+import { Button } from "@ui/button";
 import { ChevronDown } from "lucide-react";
 
 type FaqFilterDropdownProps = {

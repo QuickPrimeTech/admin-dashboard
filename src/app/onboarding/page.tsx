@@ -1,63 +1,125 @@
 "use client";
 
-import { BranchCard } from "@/sections/onboarding/branch-card";
-import { OnboardingFooter } from "@/sections/onboarding/footer";
-import { AddBranchDialog } from "@/sections/onboarding/add-branch-dialog";
-import { useBranchesQuery } from "@/hooks/use-branches";
-import { BranchCardSkeleton } from "@/sections/onboarding/skeletons/branch-card-skeleton";
-import { AddBranchCardSkeleton } from "@/sections/onboarding/skeletons/add-branch-card-skeleton";
-import { LogOutButton } from "@/components/logout-button";
+import { useState } from "react";
+import { RestaurantInfoStep } from "@/sections/onboarding/restaurant-info-step";
+import { BranchesStep } from "@/sections/onboarding/branches-step";
+import { CompletionStep } from "@/sections/onboarding/completion-step";
+import { OnboardingBackgroundPattern } from "@/components/background-patterns/onboarding-pattern";
 
-export default function OnboardingFlow() {
-  const { data: branches, isPending } = useBranchesQuery();
+interface RestaurantInfo {
+  name: string;
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  location: string;
+}
+
+type OnboardingStep = "restaurant-info" | "branches" | "complete";
+
+const Onboarding = () => {
+  const [currentStep, setCurrentStep] =
+    useState<OnboardingStep>("restaurant-info");
+  const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(
+    null
+  );
+  const [branches, setBranches] = useState<Branch[]>([]);
+
+  const handleRestaurantInfoComplete = (data: RestaurantInfo) => {
+    setRestaurantInfo(data);
+    setCurrentStep("branches");
+  };
+
+  const handleBranchesComplete = (branchList: Branch[]) => {
+    setBranches(branchList);
+    setCurrentStep("complete");
+  };
+
+  const handleSelectBranch = (branchId: string) => {
+    // Navigate to dashboard with selected branch
+    // router.push(`/dashboard/${branchId}`);
+  };
 
   return (
-    <div className="min-h-screen">
-      {/* Background Pattern */}
-      <div
-        className="absolute inset-0 h-full opacity-80 dark:opacity-5"
-        style={{
-          backgroundImage: `
-        linear-gradient(to right, rgba(229,231,235,0.8) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(229,231,235,0.8) 1px, transparent 1px),
-        radial-gradient(circle 500px at 20% 80%, rgba(139,92,246,0.3), transparent),
-        radial-gradient(circle 500px at 80% 20%, rgba(59,130,246,0.3), transparent)
-      `,
-          backgroundSize: "48px 48px, 48px 48px, 100% 100%, 100% 100%",
-        }}
-      />
-      <div className="relative z-10 container mx-auto px-4 md:px-8 py-12 max-w-6xl">
-        {/* Header Section */}
-        <div className="flex flex-col max-sm:items-end md:flex-row-reverse justify-between gap-2">
-          <LogOutButton />
-          <div className="mb-12 space-y-2">
-            <h1 className="text-2xl lg:text-4xl font-bold">
-              Welcome to Your Restaurant Dashboard
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Let's get your restaurant set up in minutes. Start by creating
-              your first branch location.
-            </p>
+    <div className="min-h-screen relative overflow-hidden">
+      <OnboardingBackgroundPattern />
+
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+
+      <div className="relative z-10 container mx-auto px-4 py-12">
+        {/* Progress Indicator */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="flex items-center justify-between">
+            {[
+              { key: "restaurant-info", label: "Restaurant Info" },
+              { key: "branches", label: "Branches" },
+              { key: "complete", label: "Complete" },
+            ].map((step, index) => (
+              <div key={step.key} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
+                      currentStep === step.key
+                        ? "bg-primary text-primary-foreground shadow-lg scale-110"
+                        : index <
+                          ["restaurant-info", "branches", "complete"].indexOf(
+                            currentStep
+                          )
+                        ? "bg-success text-success-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {index + 1}
+                  </div>
+                  <span className="text-xs mt-2 font-medium hidden sm:block">
+                    {step.label}
+                  </span>
+                </div>
+                {index < 2 && (
+                  <div
+                    className={`h-1 flex-1 mx-2 rounded transition-all ${
+                      index <
+                      ["restaurant-info", "branches", "complete"].indexOf(
+                        currentStep
+                      )
+                        ? "bg-success"
+                        : "bg-muted"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
-        {isPending ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {Array.from({ length: 2 }).map((_, index) => (
-              <BranchCardSkeleton key={index} />
-            ))}
-            <AddBranchCardSkeleton />
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {branches &&
-              branches.map((branch) => (
-                <BranchCard key={branch.id} branch={branch} />
-              ))}
-            <AddBranchDialog />
-          </div>
+
+        {/* Step Content */}
+        {currentStep === "restaurant-info" && (
+          <RestaurantInfoStep
+            onComplete={handleRestaurantInfoComplete}
+            initialData={restaurantInfo || undefined}
+          />
         )}
-        <OnboardingFooter />
+
+        {currentStep === "branches" && restaurantInfo && (
+          <BranchesStep
+            onComplete={handleBranchesComplete}
+            onBack={() => setCurrentStep("restaurant-info")}
+            restaurantName={restaurantInfo.name}
+          />
+        )}
+
+        {currentStep === "complete" && restaurantInfo && (
+          <CompletionStep
+            restaurantName={restaurantInfo.name}
+            branches={branches}
+            onSelectBranch={handleSelectBranch}
+          />
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default Onboarding;

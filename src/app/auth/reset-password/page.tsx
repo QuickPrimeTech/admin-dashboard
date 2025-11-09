@@ -11,16 +11,10 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+} from "@ui/card";
+import { Input } from "@ui/input";
+import { Button } from "@ui/button";
+import { Form, FormField, FormItem, FormControl, FormMessage } from "@ui/form";
 import { toast } from "sonner";
 import { EyeOff, Eye } from "lucide-react";
 

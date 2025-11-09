@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@ui/card";
 import ChoiceItem from "./choice-item";
 import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
 

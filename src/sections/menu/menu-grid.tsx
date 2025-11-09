@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -17,10 +17,10 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+} from "@ui/alert-dialog";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@ui/badge";
+import { Button } from "@ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
 import { MenuItem } from "@/types/menu";

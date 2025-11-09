@@ -8,8 +8,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@ui/sidebar";
+import { Skeleton } from "@ui/skeleton";
 import { MenuIcon } from "lucide-react";
 import { Suspense } from "react";
 import { SidebarMenuGroups } from "./sidebar-menu-items"; // ✅ single import

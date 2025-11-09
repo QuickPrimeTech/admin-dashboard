@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@ui/dialog";
 import {
   Form,
   FormControl,
@@ -16,14 +16,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+} from "@ui/form";
+import { Input } from "@ui/input";
+import { Textarea } from "@ui/textarea";
+import { Button } from "@ui/button";
+import { Switch } from "@ui/switch";
 import { UploadIcon } from "lucide-react";
 import Image from "next/image";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@ui/scroll-area";
 import { GalleryDialogProps } from "@/types/gallery";
 import { useGalleryItemForm } from "@/hooks/useGalleryItemForm";
 import { CategorySelect } from "../menu/form-components/category-selector";

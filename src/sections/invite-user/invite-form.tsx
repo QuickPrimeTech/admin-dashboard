@@ -3,10 +3,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@ui/button";
+import { Checkbox } from "@ui/checkbox";
 import { Loader, Lock, MailIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -16,7 +16,7 @@ import {
   FormControl,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@ui/form";
 import { ChefHat, Eye, EyeOff } from "lucide-react";
 import { signup } from "@/app/auth/actions/actions";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "@/components/ui/input-group";
+} from "@ui/input-group";
 
 export function InviteSignupForm() {
   const whatsappMessage =

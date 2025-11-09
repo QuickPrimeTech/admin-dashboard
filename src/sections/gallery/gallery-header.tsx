@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { Plus } from "lucide-react";
 
 export function GalleryHeader({ onAdd }: { onAdd: () => void }) {

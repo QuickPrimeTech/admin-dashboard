@@ -8,8 +8,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@ui/card";
+import { Button } from "@ui/button";
 import { MailCheck, RefreshCcw } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";

@@ -21,7 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@ui/sidebar";
 
 // Define all menu groups here in the client component
 const menuGroups = {

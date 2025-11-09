@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@ui/dialog";
 import { Loader } from "lucide-react";
 
 interface LogOutDialogProps {

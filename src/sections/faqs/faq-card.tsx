@@ -1,10 +1,5 @@
-import {
-  Card,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardTitle, CardDescription, CardContent } from "@ui/card";
+import { Button } from "@ui/button";
 import { GripVertical, Trash2, Edit } from "lucide-react";
 import { FAQ } from "@/types/faqs";
 

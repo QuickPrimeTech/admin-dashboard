@@ -1,7 +1,7 @@
 "use client";
 import { logout } from "@/app/auth/actions/actions";
 import { LogOutDialog } from "@/components/logout-dialog";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarMenuButton } from "@ui/sidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { useState } from "react";
