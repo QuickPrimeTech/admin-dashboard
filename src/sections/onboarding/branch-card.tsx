@@ -37,8 +37,8 @@ export function BranchCard({
   const deleteMutation = useDeleteBranchMutation();
 
   return (
-    <Card key={branch.id} className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="size-5 text-primary" />
           {branch.name}

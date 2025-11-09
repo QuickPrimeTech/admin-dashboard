@@ -7,6 +7,8 @@ import { celebrateSuccess, ConfettiEffect } from "@/components/confetti-effect";
 import { Branch } from "@/types/onboarding";
 import { BranchCard } from "./branch-card";
 import { useBranchesQuery } from "@/hooks/use-branches";
+import { AddBranchCardSkeleton } from "./skeletons/add-branch-card-skeleton";
+import { BranchCardSkeleton } from "./skeletons/branch-card-skeleton";
 
 interface BranchesStepProps {
   onComplete: (branches: Branch[]) => void;
@@ -45,6 +47,7 @@ export function BranchesStep({
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:px-4">
+        <BranchCardSkeleton />
         {branches &&
           branches.map((branch) => (
             <BranchCard
