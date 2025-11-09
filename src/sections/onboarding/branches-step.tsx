@@ -48,6 +48,7 @@ export function BranchesStep({
         {branches &&
           branches.map((branch) => (
             <BranchCard
+              key={branch.id}
               branch={branch}
               setEditingBranch={setEditingBranch}
               setIsAddDialogOpen={setIsAddDialogOpen}
