@@ -1,16 +1,19 @@
 import { createResponse } from "@/helpers/api-responses";
+import { BranchFormValues } from "@/schemas/onboarding";
 import { Branch } from "@/types/onboarding";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const branch = await req.json();
+  const branch = (await req.json()) as BranchFormValues;
   const supabase = await createClient();
+
   //   Fetching the restaurant id
   const { data: restaurantData, error } = await supabase
     .from("restaurants")
     .select("id")
     .single();
+
   if (error) {
     return createResponse<null>(
       500,
@@ -19,7 +22,6 @@ export async function POST(req: NextRequest) {
       false
     );
   }
-  console.log(restaurantData);
 
   //Inserting the branch into the branch_settings table
   const { data: branchData, error: branchError } = await supabase
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
 
   return createResponse<Branch>(
     200,
-    "Request received successfully",
+    `Successfully created branch "${branch.name}".`,
     branchData,
     true
   );

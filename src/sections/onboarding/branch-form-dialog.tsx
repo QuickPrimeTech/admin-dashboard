@@ -25,11 +25,16 @@ import { Plus, Edit } from "lucide-react";
 import { useEffect } from "react";
 import { BranchFormValues, branchSchema } from "@/schemas/onboarding";
 import { Branch } from "@/types/onboarding";
+import {
+  useCreateBranchMutation,
+  useUpdateBranchMutation,
+} from "@/hooks/use-branches";
+import { celebrateSuccess } from "@/components/confetti-effect";
+import { Spinner } from "@/components/ui/spinner";
 
 type BranchFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: BranchFormValues) => void | Promise<void>;
   branchData: Branch | null;
   mode?: "create" | "edit";
 };
@@ -37,10 +42,16 @@ type BranchFormDialogProps = {
 export function BranchFormDialog({
   open,
   onOpenChange,
-  onSubmit,
   branchData,
   mode = "create",
 }: BranchFormDialogProps) {
+  // All the mutations
+  const createMutation = useCreateBranchMutation();
+  const updateMutation = useUpdateBranchMutation();
+
+  //initial form state
+  const initialState: BranchFormValues = { name: "", location: "" };
+
   const form = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
     defaultValues: {
@@ -54,13 +65,28 @@ export function BranchFormDialog({
     if (branchData) {
       form.reset(branchData); // keepDirtyValues: false by default
     } else {
-      form.reset({ name: "", location: "" });
+      form.reset(initialState);
     }
   }, [branchData, form]);
 
   const handleSubmit = async (values: BranchFormValues) => {
-    await onSubmit(values);
-    if (mode === "create") form.reset({ name: "", location: "" });
+    if (mode === "create") {
+      createMutation.mutate(values, {
+        onSuccess: () => {
+          celebrateSuccess();
+          form.reset(initialState);
+        },
+      });
+    } else {
+      updateMutation.mutate(
+        { ...branchData, ...values },
+        {
+          onSuccess: () => {
+            celebrateSuccess();
+          },
+        }
+      );
+    }
   };
 
   const isEdit = mode === "edit";
@@ -126,15 +152,20 @@ export function BranchFormDialog({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">
+              <Button type="submit" disabled={createMutation.isPending}>
                 {isEdit ? (
                   <>
-                    <Edit className="mr-2 h-4 w-4" />
+                    <Edit />
                     Update Branch
+                  </>
+                ) : createMutation.isPending ? (
+                  <>
+                    <Spinner />
+                    Creating Branch...
                   </>
                 ) : (
                   <>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus />
                     Create Branch
                   </>
                 )}

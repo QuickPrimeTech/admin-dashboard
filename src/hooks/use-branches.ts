@@ -1,8 +1,11 @@
+// @/hooks/use-branches.ts
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/helpers/api-responses";
 import { Branch, Restaurant } from "@/types/onboarding";
 import { toast } from "sonner";
+import { BranchFormValues } from "@/schemas/onboarding";
 
 export const BRANCHES_QUERY_KEY = ["branches"];
 
@@ -48,7 +51,7 @@ export function useCreateBranchMutation() {
   return useMutation<
     ApiResponse<Branch>,
     AxiosError<ApiResponse<null>>,
-    { name: string },
+    BranchFormValues,
     { previousBranches: Branch[] | undefined }
   >({
     mutationFn: async (values) => {

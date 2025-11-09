@@ -1,73 +1,93 @@
 "use client";
-
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@ui/card";
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogAction,
+  AlertDialogFooter,
+} from "@ui/alert-dialog";
+import { Card, CardHeader, CardTitle, CardContent } from "@ui/card";
 import { Button } from "@ui/button";
-import { MapPin, ExternalLink, Edit } from "lucide-react";
+import { Edit2, MapPin } from "lucide-react";
 import { Branch } from "@/types/onboarding";
-import { useUpdateBranchMutation } from "@/hooks/use-branches";
-import { useState } from "react";
-import { EditBranchDialog } from "./edit-branch-dialog";
+import { Trash2 } from "lucide-react";
 
 type BranchCardProps = {
   branch: Branch;
+  setEditingBranch: (branch: Branch) => void;
+  setIsAddDialogOpen: (open: boolean) => void;
 };
 
-export function BranchCard({ branch }: BranchCardProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const editMutation = useUpdateBranchMutation();
-
-  const handleEdit = async (data: { name: string }) => {
-    const newData = { ...branch, ...data };
-    try {
-      setIsDialogOpen(false);
-      await editMutation.mutateAsync(newData);
-    } catch {
-      setIsDialogOpen(true);
-    }
+export function BranchCard({
+  branch,
+  setEditingBranch,
+  setIsAddDialogOpen,
+}: BranchCardProps) {
+  const handleDeleteBranch = (id: string) => {
+    console.log(`You are about to delete the branch with the id of ${id}`);
   };
+
   return (
     <>
-      <Card
-        key={branch.id}
-        className="border-border shadow-md hover:shadow-lg transition-shadow"
-      >
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary" />
+      <Card key={branch.id} className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <MapPin className="h-5 w-5 text-primary" />
             {branch.name}
           </CardTitle>
-          <CardDescription>{branch.location}</CardDescription>
+          <p className="text-sm text-muted-foreground mt-1">
+            {branch.location}
+          </p>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <Button className="w-full" size="sm">
-            <ExternalLink className="mr-2" />
-            Visit Dashboard
+        <CardContent className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={() => {
+              setIsAddDialogOpen(true);
+              setEditingBranch(branch);
+            }}
+          >
+            <Edit2 />
+            Edit
           </Button>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => setIsDialogOpen(() => true)}
-            >
-              <Edit className="mr-2" />
-              Edit
-            </Button>
-          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-destructive hover:text-destructive"
+              >
+                <Trash2 />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete <strong>{branch.name}</strong>{" "}
+                  and all associated data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleDeleteBranch(branch.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
-      <EditBranchDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        branch={branch}
-        onEdit={handleEdit}
-      />
     </>
   );
 }
