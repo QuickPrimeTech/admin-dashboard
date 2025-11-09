@@ -1,3 +1,5 @@
+"use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@ui/button";
@@ -15,13 +17,17 @@ import { Store } from "lucide-react";
 import { celebrateSuccess } from "@/components/confetti-effect";
 import { RestaurantFormValues, restaurantSchema } from "@/schemas/onboarding";
 import { createRestaurantMutation } from "@/hooks/use-branches";
+import { OnboardingStep } from "@/types/onboarding";
+import { Spinner } from "@/components/ui/spinner";
 
 type RestaurantInfoStepProps = {
+  setCurrentStep: (step: OnboardingStep) => void;
   onComplete: (data: RestaurantFormValues) => void;
   initialData?: RestaurantFormValues;
 };
 
 export function RestaurantInfoStep({
+  setCurrentStep,
   onComplete,
   initialData,
 }: RestaurantInfoStepProps) {
@@ -33,15 +39,25 @@ export function RestaurantInfoStep({
     defaultValues: initialData || {
       name: "",
     },
+    mode: "onChange", // Track isDirty immediately when input changes
   });
 
-  const handleSubmit = (values: RestaurantFormValues) => {
-    celebrateSuccess();
-    console.log(
-      "You are about to submit the restaurant name as " + values.name
-    );
-    createMutation.mutateAsync(values.name);
-    onComplete(values);
+  const onSubmit = async (values: RestaurantFormValues) => {
+    const isDirty = form.getFieldState("name").isDirty;
+
+    console.log(!isDirty);
+    if (!isDirty) {
+      // No changes, skip mutation
+      onComplete(values);
+      return;
+    }
+
+    await createMutation.mutateAsync(values.name, {
+      onSuccess: () => {
+        celebrateSuccess();
+        onComplete(values);
+      },
+    });
   };
 
   return (
@@ -61,10 +77,7 @@ export function RestaurantInfoStep({
 
       <Card className="p-8 shadow-lg border-2">
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -82,8 +95,20 @@ export function RestaurantInfoStep({
               )}
             />
 
-            <Button type="submit" size="lg" className="w-full">
-              Continue to Branch Setup
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? (
+                <>
+                  <Spinner />
+                  Saving restaurant...
+                </>
+              ) : (
+                "Continue to Branch Setup"
+              )}
             </Button>
           </form>
         </Form>

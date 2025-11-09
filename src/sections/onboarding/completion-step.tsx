@@ -1,25 +1,19 @@
+"use client";
+
 import { useEffect } from "react";
-import { Button } from "@ui/button";
 import { Card, CardContent } from "@ui/card";
 import { CheckCircle2, MapPin, ArrowRight } from "lucide-react";
 import { celebrateSuccess } from "@/components/confetti-effect";
-
-interface Branch {
-  id: string;
-  name: string;
-  location: string;
-}
+import { Branch } from "@/types/onboarding";
 
 interface CompletionStepProps {
   restaurantName: string;
   branches: Branch[];
-  onSelectBranch: (branchId: string) => void;
 }
 
 export function CompletionStep({
   restaurantName,
   branches,
-  onSelectBranch,
 }: CompletionStepProps) {
   useEffect(() => {
     celebrateSuccess();
@@ -50,7 +44,6 @@ export function CompletionStep({
             <Card
               key={branch.id}
               className="hover:shadow-lg transition-all cursor-pointer group hover:scale-105"
-              onClick={() => onSelectBranch(branch.id)}
             >
               <CardContent className="flex items-center justify-between p-6">
                 <div className="flex items-center gap-3">

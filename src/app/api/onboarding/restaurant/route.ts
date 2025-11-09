@@ -3,6 +3,7 @@ import { Restaurant } from "@/types/onboarding";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+//endpoint for creating a new restaurant and updating one if exists
 export async function POST(
   req: NextRequest
 ): Promise<NextResponse<ApiResponse<Restaurant>>> {

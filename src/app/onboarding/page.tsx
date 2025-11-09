@@ -7,18 +7,7 @@ import { CompletionStep } from "@/sections/onboarding/completion-step";
 import { OnboardingBackgroundPattern } from "@/components/background-patterns/onboarding-pattern";
 import { ProgressBar } from "@/sections/onboarding/progress-bar";
 import { OnboardingFooter } from "@/sections/onboarding/footer";
-
-interface RestaurantInfo {
-  name: string;
-}
-
-interface Branch {
-  id: string;
-  name: string;
-  location: string;
-}
-
-type OnboardingStep = "restaurant-info" | "branches" | "complete";
+import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 
 const Onboarding = () => {
   const [currentStep, setCurrentStep] =
@@ -33,6 +22,7 @@ const Onboarding = () => {
     { key: "branches", label: "Branches" },
     { key: "complete", label: "Complete" },
   ];
+
   const handleRestaurantInfoComplete = (data: RestaurantInfo) => {
     setRestaurantInfo(data);
     setCurrentStep("branches");
@@ -41,11 +31,6 @@ const Onboarding = () => {
   const handleBranchesComplete = (branchList: Branch[]) => {
     setBranches(branchList);
     setCurrentStep("complete");
-  };
-
-  const handleSelectBranch = (branchId: string) => {
-    // Navigate to dashboard with selected branch
-    // router.push(`/dashboard/${branchId}`);
   };
 
   return (
@@ -61,6 +46,7 @@ const Onboarding = () => {
         {/* Step Content */}
         {currentStep === "restaurant-info" && (
           <RestaurantInfoStep
+            setCurrentStep={setCurrentStep}
             onComplete={handleRestaurantInfoComplete}
             initialData={restaurantInfo || undefined}
           />
@@ -78,7 +64,6 @@ const Onboarding = () => {
           <CompletionStep
             restaurantName={restaurantInfo.name}
             branches={branches}
-            onSelectBranch={handleSelectBranch}
           />
         )}
       </div>

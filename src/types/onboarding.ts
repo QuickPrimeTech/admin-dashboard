@@ -26,3 +26,9 @@ export type Restaurant = {
   name: string;
   user_id: string;
 };
+
+export type RestaurantInfo = {
+  name: string;
+};
+
+export type OnboardingStep = "restaurant-info" | "branches" | "complete";
