@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MailCheck, RefreshCcw } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 
 export default function VerifyPendingPage() {
   const router = useRouter();
@@ -83,9 +84,9 @@ export default function VerifyPendingPage() {
           <Button
             variant="ghost"
             className="w-full text-muted-foreground text-sm"
-            onClick={() => router.push("/login")}
+            asChild
           >
-            Back to Login
+            <Link href={"/login"}>Back to Login</Link>
           </Button>
         </CardContent>
       </Card>

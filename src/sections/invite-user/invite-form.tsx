@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader, Lock, MailIcon, User } from "lucide-react";
+import { Loader, Lock, MailIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   Form,
@@ -49,7 +49,6 @@ export function InviteSignupForm() {
   const form = useForm<InviteFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      restaurantName: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -62,13 +61,12 @@ export function InviteSignupForm() {
     const result = await signup({
       email: values.email,
       password: values.password,
-      restaurantName: values.restaurantName,
       token: token ?? "",
     });
     setLoading(false);
     if (result.success) {
       toast.success("Account created successfully!");
-      router.push(`/onboarding`);
+      router.push(`/auth/verify-pending?email=${values.email}`);
     } else {
       toast.error(result.error || "Signup failed.");
     }
@@ -94,7 +92,7 @@ export function InviteSignupForm() {
           <CardTitle className="text-2xl md:text-3xl font-bold text-Foreground">
             Create your Account
           </CardTitle>
-          <p className="text-gray-600 text-sm md:text-base">
+          <p className="text-muted-foreground text-sm md:text-base">
             Create your restaurant admin account
           </p>
         </CardHeader>
@@ -102,32 +100,6 @@ export function InviteSignupForm() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* All your FormFields stay the same */}
-
-              <FormField
-                control={form.control}
-                disabled={loading}
-                name="restaurantName"
-                render={({ field }) => (
-                  <FormItem className="space-y-1.5">
-                    <FormLabel className="text-sm text-card-foreground">
-                      Restaurant Name
-                    </FormLabel>
-                    <FormControl>
-                      <InputGroup>
-                        <InputGroupInput
-                          {...field}
-                          placeholder="Write your restaurant name here..."
-                        />
-                        <InputGroupAddon>
-                          <User />
-                        </InputGroupAddon>
-                      </InputGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="email"
@@ -178,9 +150,9 @@ export function InviteSignupForm() {
                             onClick={() => setShowPassword((prev) => !prev)}
                           >
                             {showPassword ? (
-                              <EyeOff className="h-4 w-4 text-gray-400" />
+                              <EyeOff className="text-muted-foreground" />
                             ) : (
-                              <Eye className="h-4 w-4 text-gray-400" />
+                              <Eye className="text-muted-foreground" />
                             )}
                           </InputGroupButton>
                         </InputGroupAddon>
@@ -216,11 +188,10 @@ export function InviteSignupForm() {
                               setShowConfirmPassword((prev) => !prev)
                             }
                           >
-                            {" "}
                             {showConfirmPassword ? (
-                              <EyeOff className="h-4 w-4 text-gray-400" />
+                              <EyeOff className="text-muted-foreground" />
                             ) : (
-                              <Eye className="h-4 w-4 text-gray-400" />
+                              <Eye className="text-muted-foreground" />
                             )}
                           </InputGroupButton>
                         </InputGroupAddon>
@@ -236,7 +207,7 @@ export function InviteSignupForm() {
                 disabled={loading}
                 render={({ field }) => (
                   <FormItem className="space-y-1.5">
-                    <div className="flex items-start space-x-2">
+                    <div className="flex items-center space-x-2">
                       <FormControl>
                         <Checkbox
                           id="terms"

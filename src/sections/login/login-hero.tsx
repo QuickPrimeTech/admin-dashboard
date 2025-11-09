@@ -26,7 +26,7 @@ export function LoginHero() {
   ];
 
   return (
-    <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 text-white">
+    <div className="hidden lg:flex lg:flex-1 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-8 text-white">
       <div className="flex flex-col justify-center max-w-lg mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">

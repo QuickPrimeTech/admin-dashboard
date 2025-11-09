@@ -2,7 +2,6 @@ import z from "zod";
 
 export const formSchema = z
   .object({
-    restaurantName: z.string().min(1, "Restaurant name is required"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(1, "Password is required"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
