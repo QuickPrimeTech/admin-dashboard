@@ -52,7 +52,7 @@ export function LoginHero() {
               className="bg-white/10 border-white/20 backdrop-blur-sm p-4"
             >
               <div className="flex items-start gap-3">
-                <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                   <feature.icon className="h-5 w-5 text-white" />
                 </div>
                 <div>
