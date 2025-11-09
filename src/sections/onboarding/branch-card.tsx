@@ -15,6 +15,7 @@ import { Button } from "@ui/button";
 import { Edit2, MapPin } from "lucide-react";
 import { Branch } from "@/types/onboarding";
 import { Trash2 } from "lucide-react";
+import { useDeleteBranchMutation } from "@/hooks/use-branches";
 
 type BranchCardProps = {
   branch: Branch;
@@ -27,9 +28,7 @@ export function BranchCard({
   setEditingBranch,
   setIsAddDialogOpen,
 }: BranchCardProps) {
-  const handleDeleteBranch = (id: string) => {
-    console.log(`You are about to delete the branch with the id of ${id}`);
-  };
+  const deleteMutation = useDeleteBranchMutation();
 
   return (
     <>
@@ -78,7 +77,7 @@ export function BranchCard({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => handleDeleteBranch(branch.id)}
+                  onClick={() => deleteMutation.mutate(branch.id)}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   Delete

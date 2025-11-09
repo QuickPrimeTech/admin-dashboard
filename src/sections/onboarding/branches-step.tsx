@@ -4,9 +4,9 @@ import { Card, CardContent } from "@ui/card";
 import { Plus, ArrowRight } from "lucide-react";
 import { BranchFormDialog } from "./branch-form-dialog";
 import { celebrateSuccess, ConfettiEffect } from "@/components/confetti-effect";
-import { toast } from "sonner";
 import { Branch } from "@/types/onboarding";
 import { BranchCard } from "./branch-card";
+import { useBranchesQuery } from "@/hooks/use-branches";
 
 interface BranchesStepProps {
   onComplete: (branches: Branch[]) => void;
@@ -19,22 +19,15 @@ export function BranchesStep({
   onBack,
   restaurantName,
 }: BranchesStepProps) {
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const { data: branches, isPending, isError } = useBranchesQuery();
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
-  const [deletingBranch, setDeletingBranch] = useState<Branch | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-
-  const handleDeleteBranch = (id: string) => {
-    console.log(`You are about to delete branch with the id ${id}`);
-    setBranches(branches.filter((b) => b.id !== id));
-    setDeletingBranch(null);
-    toast.success("Branch deleted successfully!");
-  };
 
   const handleContinue = () => {
     celebrateSuccess();
-    setTimeout(() => onComplete(branches), 500);
+    // setTimeout(() => onComplete(branches), 500);
   };
 
   return (
@@ -52,13 +45,14 @@ export function BranchesStep({
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {branches.map((branch) => (
-          <BranchCard
-            branch={branch}
-            setEditingBranch={setEditingBranch}
-            setIsAddDialogOpen={setIsAddDialogOpen}
-          />
-        ))}
+        {branches &&
+          branches.map((branch) => (
+            <BranchCard
+              branch={branch}
+              setEditingBranch={setEditingBranch}
+              setIsAddDialogOpen={setIsAddDialogOpen}
+            />
+          ))}
 
         <Card
           className="border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group"
@@ -86,11 +80,11 @@ export function BranchesStep({
         <Button
           size="lg"
           onClick={handleContinue}
-          disabled={branches.length === 0}
+          disabled={!!(branches && branches.length === 0)}
           className="shadow-lg hover:shadow-xl transition-all"
         >
           Continue to Dashboard
-          <ArrowRight className="ml-2 h-5 w-5" />
+          <ArrowRight className="ml-2 size-5" />
         </Button>
       </div>
 

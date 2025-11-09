@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     .from("branch_settings")
     .insert({
       name: branch.name,
+      location: branch.location,
       restaurant_id: restaurantData.id,
     })
     .select()

@@ -75,6 +75,7 @@ export function BranchFormDialog({
         onSuccess: () => {
           celebrateSuccess();
           form.reset(initialState);
+          onOpenChange(false);
         },
       });
     } else {
