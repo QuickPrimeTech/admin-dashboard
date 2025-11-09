@@ -31,7 +31,7 @@ export function BranchesStep({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       <ConfettiEffect trigger={showConfetti} duration={2000} />
 
       <div className="text-center space-y-3">
@@ -44,7 +44,7 @@ export function BranchesStep({
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:px-4">
         {branches &&
           branches.map((branch) => (
             <BranchCard
@@ -73,7 +73,7 @@ export function BranchesStep({
         </Card>
       </div>
 
-      <div className="flex justify-between pt-6">
+      <div className="flex justify-between pt-6 lg:px-4">
         <Button variant="outline" size="lg" onClick={onBack}>
           Back
         </Button>
@@ -81,10 +81,9 @@ export function BranchesStep({
           size="lg"
           onClick={handleContinue}
           disabled={!!(branches && branches.length === 0)}
-          className="shadow-lg hover:shadow-xl transition-all"
         >
           Continue to Dashboard
-          <ArrowRight className="ml-2 size-5" />
+          <ArrowRight />
         </Button>
       </div>
 

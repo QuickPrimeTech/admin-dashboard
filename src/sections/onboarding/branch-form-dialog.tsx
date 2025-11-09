@@ -45,28 +45,28 @@ export function BranchFormDialog({
   branchData,
   mode = "create",
 }: BranchFormDialogProps) {
-  // All the mutations
+  // Select the appropriate mutation based on mode
   const createMutation = useCreateBranchMutation();
   const updateMutation = useUpdateBranchMutation();
+  const mutation = mode === "create" ? createMutation : updateMutation;
 
-  //initial form state
   const initialState: BranchFormValues = { name: "", location: "" };
 
   const form = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
-    defaultValues: {
-      name: branchData?.name ?? "",
-      location: branchData?.location ?? "",
-    },
+    defaultValues: initialState,
   });
 
   // Sync form when external branchData changes
   useEffect(() => {
     if (branchData) {
-      form.reset(branchData); // keepDirtyValues: false by default
-    } else {
-      form.reset(initialState);
+      form.reset({
+        name: branchData.name ?? "",
+        location: branchData.location ?? "",
+      });
+      return;
     }
+    form.reset(initialState);
   }, [branchData, form]);
 
   const handleSubmit = async (values: BranchFormValues) => {
@@ -79,18 +79,29 @@ export function BranchFormDialog({
         },
       });
     } else {
-      updateMutation.mutate(
-        { ...branchData, ...values },
-        {
-          onSuccess: () => {
-            celebrateSuccess();
-          },
-        }
-      );
+      if (branchData) {
+        updateMutation.mutate(
+          { ...branchData, ...values },
+          {
+            onSuccess: () => {
+              celebrateSuccess();
+              onOpenChange(false);
+            },
+          }
+        );
+      }
     }
   };
 
   const isEdit = mode === "edit";
+  const isPending = mutation.isPending;
+  const buttonText = isPending
+    ? isEdit
+      ? "Updating Branch..."
+      : "Creating Branch..."
+    : isEdit
+    ? "Update Branch"
+    : "Create Branch";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -153,23 +164,12 @@ export function BranchFormDialog({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {isEdit ? (
-                  <>
-                    <Edit />
-                    Update Branch
-                  </>
-                ) : createMutation.isPending ? (
-                  <>
-                    <Spinner />
-                    Creating Branch...
-                  </>
-                ) : (
-                  <>
-                    <Plus />
-                    Create Branch
-                  </>
-                )}
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+              >
+                {isPending ? <Spinner /> : isEdit ? <Edit /> : <Plus />}
+                {buttonText}
               </Button>
             </DialogFooter>
           </form>

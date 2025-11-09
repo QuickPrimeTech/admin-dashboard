@@ -74,20 +74,30 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   const supabase = await createClient();
   const branch = await req.json();
-  const { error } = await supabase
+
+  const { data, error } = await supabase
     .from("branch_settings")
-    .update({
-      name: branch.name,
-    })
-    .eq("id", branch.id);
+    .update({ name: branch.name })
+    .eq("id", branch.id)
+    .select(); // <-- ensures data is returned if RLS allows
 
   if (error) {
     return createResponse<null>(500, "There was an error updating your branch");
   }
+
+  if (!data || data.length === 0) {
+    return createResponse<null>(
+      403,
+      "You are not authorized to update this branch or it does not exist",
+      null,
+      false
+    );
+  }
+
   return createResponse<Branch>(
     200,
     `Successfully updated your branch to ${branch.name}`,
-    branch,
+    data[0],
     true
   );
 }
