@@ -15,12 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@ui/alert-dialog";
-
-interface Branch {
-  id: string;
-  name: string;
-  location: string;
-}
+import { AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
+import { Branch } from "@/types/onboarding";
 
 interface BranchesStepProps {
   onComplete: (branches: Branch[]) => void;
@@ -67,9 +63,9 @@ export function BranchesStep({
     toast.success("Branch updated successfully!");
   };
 
-  const handleDeleteBranch = () => {
-    if (!deletingBranch) return;
-    setBranches(branches.filter((b) => b.id !== deletingBranch.id));
+  const handleDeleteBranch = (id: string) => {
+    console.log(`You are about to delete branch with the id ${id}`);
+    setBranches(branches.filter((b) => b.id !== id));
     setDeletingBranch(null);
     toast.success("Branch deleted successfully!");
   };
@@ -110,20 +106,45 @@ export function BranchesStep({
                 variant="outline"
                 size="sm"
                 className="flex-1"
-                onClick={() => setEditingBranch(branch)}
+                onClick={() => {
+                  setIsAddDialogOpen(() => true);
+                  setEditingBranch(() => branch);
+                }}
               >
-                <Edit2 className="h-4 w-4 mr-1" />
+                <Edit2 />
                 Edit
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-destructive hover:text-destructive"
-                onClick={() => setDeletingBranch(branch)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete{" "}
+                      <strong>{deletingBranch?.name}</strong> and all associated
+                      data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDeleteBranch(branch.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         ))}
@@ -161,47 +182,11 @@ export function BranchesStep({
 
       <BranchFormDialog
         open={isAddDialogOpen}
+        branchData={editingBranch}
         onOpenChange={setIsAddDialogOpen}
         onSubmit={handleAddBranch}
-        mode="create"
+        mode={editingBranch ? "edit" : "create"}
       />
-
-      {editingBranch && (
-        <BranchFormDialog
-          open={!!editingBranch}
-          onOpenChange={(open) => !open && setEditingBranch(null)}
-          onSubmit={handleEditBranch}
-          defaultValues={{
-            name: editingBranch.name,
-            location: editingBranch.location,
-          }}
-          mode="edit"
-        />
-      )}
-
-      <AlertDialog
-        open={!!deletingBranch}
-        onOpenChange={(open) => !open && setDeletingBranch(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete{" "}
-              <strong>{deletingBranch?.name}</strong> and all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteBranch}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

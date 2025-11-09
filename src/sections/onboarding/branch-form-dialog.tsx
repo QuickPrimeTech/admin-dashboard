@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@ui/button";
 import {
   Dialog,
@@ -19,41 +21,46 @@ import {
   FormControl,
   FormMessage,
 } from "@ui/form";
-import { z } from "zod";
 import { Plus, Edit } from "lucide-react";
+import { useEffect } from "react";
+import { BranchFormValues, branchSchema } from "@/schemas/onboarding";
+import { Branch } from "@/types/onboarding";
 
-const branchSchema = z.object({
-  name: z.string().min(2, "Branch name must be at least 2 characters"),
-  location: z.string().min(2, "Location is required"),
-});
-
-type BranchFormValues = z.infer<typeof branchSchema>;
-
-interface BranchFormDialogProps {
+type BranchFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: BranchFormValues) => void | Promise<void>;
-  defaultValues?: BranchFormValues;
+  branchData: Branch | null;
   mode?: "create" | "edit";
-}
+};
 
 export function BranchFormDialog({
   open,
   onOpenChange,
   onSubmit,
-  defaultValues,
+  branchData,
   mode = "create",
 }: BranchFormDialogProps) {
   const form = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
-    defaultValues: defaultValues || { name: "", location: "" },
+    defaultValues: {
+      name: branchData?.name ?? "",
+      location: branchData?.location ?? "",
+    },
   });
+
+  // Sync form when external branchData changes
+  useEffect(() => {
+    if (branchData) {
+      form.reset(branchData); // keepDirtyValues: false by default
+    } else {
+      form.reset({ name: "", location: "" });
+    }
+  }, [branchData, form]);
 
   const handleSubmit = async (values: BranchFormValues) => {
     await onSubmit(values);
-    if (mode === "create") {
-      form.reset();
-    }
+    if (mode === "create") form.reset({ name: "", location: "" });
   };
 
   const isEdit = mode === "edit";
