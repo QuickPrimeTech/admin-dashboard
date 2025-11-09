@@ -14,6 +14,7 @@ import { Card } from "@ui/card";
 import { Store } from "lucide-react";
 import { celebrateSuccess } from "@/components/confetti-effect";
 import { RestaurantFormValues, restaurantSchema } from "@/schemas/onboarding";
+import { createRestaurantMutation } from "@/hooks/use-branches";
 
 type RestaurantInfoStepProps = {
   onComplete: (data: RestaurantFormValues) => void;
@@ -24,6 +25,9 @@ export function RestaurantInfoStep({
   onComplete,
   initialData,
 }: RestaurantInfoStepProps) {
+  // Mutation function from tanstack
+  const createMutation = createRestaurantMutation();
+
   const form = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantSchema),
     defaultValues: initialData || {
@@ -33,7 +37,11 @@ export function RestaurantInfoStep({
 
   const handleSubmit = (values: RestaurantFormValues) => {
     celebrateSuccess();
-    setTimeout(() => onComplete(values), 500);
+    console.log(
+      "You are about to submit the restaurant name as " + values.name
+    );
+    createMutation.mutateAsync(values.name);
+    onComplete(values);
   };
 
   return (

@@ -20,3 +20,9 @@ export type RestaurantData = {
   id: string;
   name: string;
 };
+
+export type Restaurant = {
+  id: string;
+  name: string;
+  user_id: string;
+};

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/helpers/api-responses";
-import { Branch } from "@/types/onboarding";
+import { Branch, Restaurant } from "@/types/onboarding";
 import { toast } from "sonner";
 
 export const BRANCHES_QUERY_KEY = ["branches"];
@@ -10,8 +10,34 @@ export function useBranchesQuery() {
   return useQuery({
     queryKey: BRANCHES_QUERY_KEY,
     queryFn: async () => {
-      const res = await axios.get<ApiResponse<Branch[]>>("/api/branches");
+      const res = await axios.get<ApiResponse<Branch[]>>(
+        "/api/onboarding/branches"
+      );
       return res.data.data;
+    },
+  });
+}
+
+//Tanstack function for creating a restaurant name in the restaurant table
+export function createRestaurantMutation() {
+  return useMutation<
+    ApiResponse<Restaurant>,
+    AxiosError<ApiResponse<null>>,
+    string
+  >({
+    mutationFn: async (restaurantName) => {
+      const res = await axios.post<ApiResponse<Restaurant>>(
+        "/api/onboarding/restaurant",
+        restaurantName
+      );
+
+      return res.data;
+    },
+    onError: (err) => {
+      toast.error(err.response?.data.message);
+    },
+    onSuccess: (createdRestaurant) => {
+      toast.success(createdRestaurant.message);
     },
   });
 }
@@ -27,7 +53,7 @@ export function createBranchMutation() {
   >({
     mutationFn: async (values) => {
       const res = await axios.post<ApiResponse<Branch>>(
-        "/api/branches",
+        "/api/onboarding/branches",
         values
       );
       return res.data;
@@ -79,7 +105,7 @@ export function deleteBranchMutation() {
   >({
     mutationFn: async (id) => {
       const res = await axios.delete<ApiResponse<Branch>>(
-        `/api/branches?id=${id}`
+        `/api/onboarding/branches?id=${id}`
       );
       return res.data;
     },
@@ -125,7 +151,7 @@ export function updateBranchMutation() {
   >({
     mutationFn: async (branch) => {
       const res = await axios.patch<ApiResponse<Branch>>(
-        `/api/branches`,
+        `/api/onboarding/branches`,
         branch
       );
       return res.data;
