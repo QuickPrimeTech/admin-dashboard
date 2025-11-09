@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@ui/button";
 import {
   Form,
@@ -14,17 +13,12 @@ import { Input } from "@ui/input";
 import { Card } from "@ui/card";
 import { Store } from "lucide-react";
 import { celebrateSuccess } from "@/components/confetti-effect";
+import { RestaurantFormValues, restaurantSchema } from "@/schemas/onboarding";
 
-const restaurantSchema = z.object({
-  name: z.string().min(2, "Restaurant name must be at least 2 characters"),
-});
-
-type RestaurantFormValues = z.infer<typeof restaurantSchema>;
-
-interface RestaurantInfoStepProps {
+type RestaurantInfoStepProps = {
   onComplete: (data: RestaurantFormValues) => void;
   initialData?: RestaurantFormValues;
-}
+};
 
 export function RestaurantInfoStep({
   onComplete,
@@ -48,7 +42,7 @@ export function RestaurantInfoStep({
         <div className="w-16 h-16 mx-auto rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center shadow-lg">
           <Store className="w-8 h-8 text-primary-foreground" />
         </div>
-        <h2 className="text-3xl font-bold">
+        <h2 className="text-2xl md:text-3xl font-bold">
           Welcome to Your Restaurant Dashboard
         </h2>
         <p className="text-muted-foreground text-lg">
@@ -71,8 +65,7 @@ export function RestaurantInfoStep({
                   <FormLabel className="text-base">Restaurant Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., The Golden Fork"
-                      className="h-12 text-base"
+                      placeholder="e.g., The Golden Palace Restaurant"
                       {...field}
                     />
                   </FormControl>
@@ -81,11 +74,7 @@ export function RestaurantInfoStep({
               )}
             />
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
-            >
+            <Button type="submit" size="lg" className="w-full">
               Continue to Branch Setup
             </Button>
           </form>

@@ -6,6 +6,7 @@ import { BranchesStep } from "@/sections/onboarding/branches-step";
 import { CompletionStep } from "@/sections/onboarding/completion-step";
 import { OnboardingBackgroundPattern } from "@/components/background-patterns/onboarding-pattern";
 import { ProgressBar } from "@/sections/onboarding/progress-bar";
+import { OnboardingFooter } from "@/sections/onboarding/footer";
 
 interface RestaurantInfo {
   name: string;
@@ -48,11 +49,8 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden pb-9">
       <OnboardingBackgroundPattern />
-
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
 
       <div className="relative z-10 container mx-auto px-4 py-12">
         {/* Progress Indicator */}
@@ -84,6 +82,7 @@ const Onboarding = () => {
           />
         )}
       </div>
+      <OnboardingFooter />
     </div>
   );
 };

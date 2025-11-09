@@ -86,7 +86,7 @@ export function BranchesStep({
       <div className="text-center space-y-3">
         <h2 className="text-3xl font-bold">Set Up Your Branches</h2>
         <p className="text-muted-foreground text-lg">
-          Add at least one branch location for{" "}
+          To continue please add at least one branch location for{" "}
           <span className="font-semibold text-foreground">
             {restaurantName}
           </span>
