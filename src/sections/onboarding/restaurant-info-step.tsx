@@ -45,7 +45,7 @@ export function RestaurantInfoStep({
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-lg">
+        <div className="w-16 h-16 mx-auto rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center shadow-lg">
           <Store className="w-8 h-8 text-primary-foreground" />
         </div>
         <h2 className="text-3xl font-bold">

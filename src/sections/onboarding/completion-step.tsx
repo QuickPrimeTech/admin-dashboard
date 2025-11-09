@@ -28,7 +28,7 @@ export function CompletionStep({
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="text-center space-y-4">
-        <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-success to-success/80 flex items-center justify-center shadow-lg animate-scale-in">
+        <div className="w-20 h-20 mx-auto rounded-full bg-linear-to-br from-success to-success/80 flex items-center justify-center shadow-lg animate-scale-in">
           <CheckCircle2 className="w-10 h-10 text-success-foreground" />
         </div>
         <h2 className="text-4xl font-bold">Setup Complete!</h2>
