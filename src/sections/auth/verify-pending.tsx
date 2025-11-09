@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -15,7 +15,6 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 
 export default function VerifyPendingPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 

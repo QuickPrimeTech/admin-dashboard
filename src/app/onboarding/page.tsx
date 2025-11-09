@@ -46,7 +46,6 @@ const Onboarding = () => {
         {/* Step Content */}
         {currentStep === "restaurant-info" && (
           <RestaurantInfoStep
-            setCurrentStep={setCurrentStep}
             onComplete={handleRestaurantInfoComplete}
             initialData={restaurantInfo || undefined}
           />

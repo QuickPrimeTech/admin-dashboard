@@ -1,5 +1,4 @@
 "use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@ui/button";
@@ -16,23 +15,20 @@ import { Card } from "@ui/card";
 import { Store } from "lucide-react";
 import { celebrateSuccess } from "@/components/confetti-effect";
 import { RestaurantFormValues, restaurantSchema } from "@/schemas/onboarding";
-import { createRestaurantMutation } from "@/hooks/use-branches";
-import { OnboardingStep } from "@/types/onboarding";
+import { useCreateRestaurantMutation } from "@/hooks/use-branches";
 import { Spinner } from "@/components/ui/spinner";
 
 type RestaurantInfoStepProps = {
-  setCurrentStep: (step: OnboardingStep) => void;
   onComplete: (data: RestaurantFormValues) => void;
   initialData?: RestaurantFormValues;
 };
 
 export function RestaurantInfoStep({
-  setCurrentStep,
   onComplete,
   initialData,
 }: RestaurantInfoStepProps) {
   // Mutation function from tanstack
-  const createMutation = createRestaurantMutation();
+  const createMutation = useCreateRestaurantMutation();
 
   const form = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantSchema),
@@ -70,8 +66,8 @@ export function RestaurantInfoStep({
           Welcome to Your Restaurant Dashboard
         </h2>
         <p className="text-muted-foreground text-lg">
-          Let's start by creating your restaurant. You'll add branch locations
-          next.
+          Let&apos;s start by creating your restaurant. You&apos;ll add branch
+          locations next.
         </p>
       </div>
 

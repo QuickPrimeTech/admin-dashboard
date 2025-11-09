@@ -10,13 +10,9 @@ import {
 import { Button } from "@ui/button";
 import { MapPin, ExternalLink, Edit } from "lucide-react";
 import { Branch } from "@/types/onboarding";
-import {
-  deleteBranchMutation,
-  updateBranchMutation,
-} from "@/hooks/use-branches";
+import { useUpdateBranchMutation } from "@/hooks/use-branches";
 import { useState } from "react";
 import { EditBranchDialog } from "./edit-branch-dialog";
-import { DeleteAlertDialog } from "./delete-alert-dialog";
 
 type BranchCardProps = {
   branch: Branch;
@@ -24,8 +20,7 @@ type BranchCardProps = {
 
 export function BranchCard({ branch }: BranchCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const deleteMutation = deleteBranchMutation();
-  const editMutation = updateBranchMutation();
+  const editMutation = useUpdateBranchMutation();
 
   const handleEdit = async (data: { name: string }) => {
     const newData = { ...branch, ...data };
@@ -64,10 +59,6 @@ export function BranchCard({ branch }: BranchCardProps) {
               <Edit className="mr-2" />
               Edit
             </Button>
-            <DeleteAlertDialog
-              branch={branch}
-              deleteMutation={deleteMutation}
-            />
           </div>
         </CardContent>
       </Card>

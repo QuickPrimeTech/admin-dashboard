@@ -24,7 +24,7 @@ import { BranchFormValues, branchSchema } from "@/schemas/onboarding";
 import { AddBranchCard } from "./add-branch-card";
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { createBranchMutation } from "@/hooks/use-branches";
+import { useCreateBranchMutation } from "@/hooks/use-branches";
 
 export function AddBranchDialog() {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -35,7 +35,7 @@ export function AddBranchDialog() {
   });
 
   //Importing the mutation from tanstack query
-  const mutation = createBranchMutation();
+  const mutation = useCreateBranchMutation();
 
   const onSubmit = async (values: BranchFormValues) => {
     try {

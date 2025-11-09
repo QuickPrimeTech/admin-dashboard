@@ -19,7 +19,7 @@ export function useBranchesQuery() {
 }
 
 //Tanstack function for creating a restaurant name in the restaurant table
-export function createRestaurantMutation() {
+export function useCreateRestaurantMutation() {
   return useMutation<
     ApiResponse<Restaurant>,
     AxiosError<ApiResponse<null>>,
@@ -42,7 +42,7 @@ export function createRestaurantMutation() {
   });
 }
 
-export function createBranchMutation() {
+export function useCreateBranchMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -94,7 +94,7 @@ export function createBranchMutation() {
   });
 }
 
-export function deleteBranchMutation() {
+export function useDeleteBranchMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -135,12 +135,13 @@ export function deleteBranchMutation() {
         toast.error(err.response?.data.message);
       }
     },
-    onSuccess: (newBranch, _variables) => {
+    onSuccess: (newBranch) => {
       toast.success(newBranch.message);
     },
   });
 }
-export function updateBranchMutation() {
+
+export function useUpdateBranchMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -185,7 +186,7 @@ export function updateBranchMutation() {
         toast.error(err.response?.data.message);
       }
     },
-    onSuccess: (newBranch, _variables) => {
+    onSuccess: (newBranch) => {
       toast.success(newBranch.message);
     },
   });
