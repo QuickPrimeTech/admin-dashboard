@@ -5,6 +5,7 @@ import { RestaurantInfoStep } from "@/sections/onboarding/restaurant-info-step";
 import { BranchesStep } from "@/sections/onboarding/branches-step";
 import { CompletionStep } from "@/sections/onboarding/completion-step";
 import { OnboardingBackgroundPattern } from "@/components/background-patterns/onboarding-pattern";
+import { ProgressBar } from "@/sections/onboarding/progress-bar";
 
 interface RestaurantInfo {
   name: string;
@@ -26,6 +27,11 @@ const Onboarding = () => {
   );
   const [branches, setBranches] = useState<Branch[]>([]);
 
+  const steps = [
+    { key: "restaurant-info", label: "Restaurant Info" },
+    { key: "branches", label: "Branches" },
+    { key: "complete", label: "Complete" },
+  ];
   const handleRestaurantInfoComplete = (data: RestaurantInfo) => {
     setRestaurantInfo(data);
     setCurrentStep("branches");
@@ -51,47 +57,7 @@ const Onboarding = () => {
       <div className="relative z-10 container mx-auto px-4 py-12">
         {/* Progress Indicator */}
         <div className="max-w-2xl mx-auto mb-12">
-          <div className="flex items-center justify-between">
-            {[
-              { key: "restaurant-info", label: "Restaurant Info" },
-              { key: "branches", label: "Branches" },
-              { key: "complete", label: "Complete" },
-            ].map((step, index) => (
-              <div key={step.key} className="flex items-center flex-1">
-                <div className="flex flex-col items-center flex-1">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
-                      currentStep === step.key
-                        ? "bg-primary text-primary-foreground shadow-lg scale-110"
-                        : index <
-                          ["restaurant-info", "branches", "complete"].indexOf(
-                            currentStep
-                          )
-                        ? "bg-success text-success-foreground"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {index + 1}
-                  </div>
-                  <span className="text-xs mt-2 font-medium hidden sm:block">
-                    {step.label}
-                  </span>
-                </div>
-                {index < 2 && (
-                  <div
-                    className={`h-1 flex-1 mx-2 rounded transition-all ${
-                      index <
-                      ["restaurant-info", "branches", "complete"].indexOf(
-                        currentStep
-                      )
-                        ? "bg-success"
-                        : "bg-muted"
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          <ProgressBar steps={steps} currentStep={currentStep} />
         </div>
 
         {/* Step Content */}

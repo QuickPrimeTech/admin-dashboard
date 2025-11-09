@@ -49,7 +49,7 @@ export function LoginHero() {
 
           <div className="space-y-4">
             {features.map((feature, index) => (
-              <Card key={index}>
+              <Card key={index} className="bg-transparent backdrop-blur-md">
                 <div className="flex items-start gap-3 px-3">
                   <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                     <feature.icon className="size-5 text-secondary-foreground" />
