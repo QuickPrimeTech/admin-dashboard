@@ -1,5 +1,12 @@
 import { LoginForm } from "@/sections/login/login-form";
 import { FeaturesPanel } from "@/sections/login/features-panel";
+import { Metadata } from "next";
+
+// Static metadata
+export const metadata: Metadata = {
+  title: "Login - QuickPrimeTech",
+  description: "Log in to access your QuickPrimeTech dashboard.",
+};
 
 export default function LoginPage() {
   return (
