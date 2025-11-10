@@ -7,6 +7,7 @@ import { useBranchesQuery, useOnboardUser } from "@/hooks/use-branches";
 import { BranchCardSkeleton } from "./skeletons/branch-card-skeleton";
 import { BranchCardError } from "./error/branch-card-error";
 import { AddBranchCard } from "./add-branch-card";
+import { STORAGE_KEY } from "./client-onboarding";
 
 interface BranchesStepProps {
   onComplete: (data: RestaurantInfo | null, nextStep: OnboardingStep) => void;
@@ -27,6 +28,8 @@ export function BranchesStep({
   const handleCompleteOnboarding = () => {
     setOnboardedMutation.mutate(undefined, {
       onSuccess: () => {
+        //remove the persistence because it is not needed
+        localStorage.removeItem(STORAGE_KEY);
         //Take the user to the next step
         onComplete(null, "complete");
       },
