@@ -126,7 +126,6 @@ export async function DELETE(req: NextRequest) {
       false
     );
   }
-  console.log(data);
 
   return createResponse<Branch>(
     200,

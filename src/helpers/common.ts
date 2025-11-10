@@ -9,7 +9,6 @@ import { UploadResult } from "@/types/cloudinary";
 export async function getAuthenticatedUser() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
-  console.log(data);
   const { user } = data;
 
   if (!user || error) {
