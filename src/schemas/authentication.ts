@@ -1,3 +1,4 @@
+import { getPasswordStrength } from "@/helpers/authentication";
 import z from "zod";
 
 export const formSchema = z
@@ -6,12 +7,12 @@ export const formSchema = z
     password: z
       .string()
       .min(8, "Password must be at least 8 characters long")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number")
-      .regex(
-        /[!@#$%^&*(),.?":{}|<>]/,
-        "Password must contain at least one special character"
+      .refine(
+        (val) => {
+          const { score } = getPasswordStrength(val);
+          return score >= 3; // only allow Moderate (3) or higher
+        },
+        { message: "Password must be at least Moderate strength" }
       ),
     confirmPassword: z.string().min(1, "Please confirm your password"),
     terms: z.boolean().refine((val) => val === true, {

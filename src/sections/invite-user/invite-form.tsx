@@ -17,7 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@ui/form";
-import { ChefHat, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { signup } from "@/app/auth/actions/actions";
 import { InviteFormData, formSchema } from "@/schemas/authentication";
 import {
@@ -74,19 +74,6 @@ export function InviteSignupForm() {
     <div className="flex-1 flex items-center justify-center px-4 py-6 md:px-6 min-h-screen lg:min-h-0">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center pb-6">
-          <div className="flex items-center justify-center gap-3 mb-4 lg:hidden">
-            <div className="bg-card-foreground/10 rounded-lg p-2">
-              <ChefHat className="h-6 w-6 text-card-foreground" />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-card-foreground">
-                Restaurant Admin
-              </h1>
-              <p className="text-card-foreground/70 text-sm">
-                Management Dashboard
-              </p>
-            </div>
-          </div>
           <CardTitle className="text-2xl md:text-3xl font-bold text-Foreground">
             Create your Account
           </CardTitle>
@@ -210,6 +197,7 @@ export function InviteSignupForm() {
                       <FormControl>
                         <Checkbox
                           id="terms"
+                          name="terms"
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />
