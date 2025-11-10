@@ -1,4 +1,5 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@ui/button";
@@ -17,9 +18,13 @@ import { celebrateSuccess } from "@/components/confetti-effect";
 import { RestaurantFormValues, restaurantSchema } from "@/schemas/onboarding";
 import { useCreateRestaurantMutation } from "@/hooks/use-branches";
 import { Spinner } from "@/components/ui/spinner";
+import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 
 type RestaurantInfoStepProps = {
-  onComplete: (data: RestaurantFormValues) => void;
+  onComplete: (
+    data: RestaurantInfo | Branch[],
+    nextStep: OnboardingStep
+  ) => void;
   initialData?: RestaurantFormValues;
 };
 
@@ -44,14 +49,14 @@ export function RestaurantInfoStep({
     console.log(!isDirty);
     if (!isDirty) {
       // No changes, skip mutation
-      onComplete(values);
+      onComplete(values, "branches");
       return;
     }
 
     await createMutation.mutateAsync(values.name, {
       onSuccess: () => {
         celebrateSuccess();
-        onComplete(values);
+        onComplete(values, "branches");
       },
     });
   };

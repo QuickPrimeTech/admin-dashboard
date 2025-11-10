@@ -4,14 +4,17 @@ import { Card, CardContent } from "@ui/card";
 import { Plus, ArrowRight } from "lucide-react";
 import { BranchFormDialog } from "./branch-form-dialog";
 import { celebrateSuccess, ConfettiEffect } from "@/components/confetti-effect";
-import { Branch } from "@/types/onboarding";
+import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 import { BranchCard } from "./branch-card";
 import { useBranchesQuery } from "@/hooks/use-branches";
-import { AddBranchCardSkeleton } from "./skeletons/add-branch-card-skeleton";
 import { BranchCardSkeleton } from "./skeletons/branch-card-skeleton";
+import { BranchCardError } from "./error/branch-card-error";
 
 interface BranchesStepProps {
-  onComplete: (branches: Branch[]) => void;
+  onComplete: (
+    data: RestaurantInfo | Branch[],
+    nextStep: OnboardingStep
+  ) => void;
   onBack: () => void;
   restaurantName: string;
 }
@@ -21,7 +24,7 @@ export function BranchesStep({
   onBack,
   restaurantName,
 }: BranchesStepProps) {
-  const { data: branches, isPending, isError } = useBranchesQuery();
+  const { data: branches, isPending, isError, refetch } = useBranchesQuery();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
@@ -47,7 +50,12 @@ export function BranchesStep({
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:px-4">
-        <BranchCardSkeleton />
+        {isPending &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <BranchCardSkeleton key={i} />
+          ))}
+
+        {isError && <BranchCardError refetch={refetch} />}
         {branches &&
           branches.map((branch) => (
             <BranchCard
@@ -57,7 +65,6 @@ export function BranchesStep({
               setIsAddDialogOpen={setIsAddDialogOpen}
             />
           ))}
-
         <Card
           className="border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group"
           onClick={() => {

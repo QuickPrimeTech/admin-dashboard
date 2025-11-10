@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RestaurantInfoStep } from "@/sections/onboarding/restaurant-info-step";
 import { BranchesStep } from "@/sections/onboarding/branches-step";
 import { CompletionStep } from "@/sections/onboarding/completion-step";
@@ -9,7 +9,9 @@ import { ProgressBar } from "@/sections/onboarding/progress-bar";
 import { OnboardingFooter } from "@/sections/onboarding/footer";
 import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 
-const Onboarding = () => {
+const STORAGE_KEY = "onboarding-progress";
+
+export default function Onboarding() {
   const [currentStep, setCurrentStep] =
     useState<OnboardingStep>("restaurant-info");
   const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(
@@ -17,20 +19,42 @@ const Onboarding = () => {
   );
   const [branches, setBranches] = useState<Branch[]>([]);
 
+  // Restore progress from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setCurrentStep(parsed.currentStep || "restaurant-info");
+      setRestaurantInfo(parsed.restaurantInfo || null);
+      setBranches(parsed.branches || []);
+    }
+  }, []);
+
+  // Save progress to localStorage
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ currentStep, restaurantInfo, branches })
+    );
+  }, [currentStep, restaurantInfo, branches]);
+
   const steps = [
     { key: "restaurant-info", label: "Restaurant Info" },
     { key: "branches", label: "Branches" },
     { key: "complete", label: "Complete" },
   ];
 
-  const handleRestaurantInfoComplete = (data: RestaurantInfo) => {
-    setRestaurantInfo(data);
-    setCurrentStep("branches");
-  };
+  const handleStepComplete = (
+    data: RestaurantInfo | Branch[],
+    nextStep: OnboardingStep
+  ) => {
+    if (currentStep === "restaurant-info") {
+      setRestaurantInfo(data as RestaurantInfo);
+    } else if (currentStep === "branches") {
+      setBranches(data as Branch[]);
+    }
 
-  const handleBranchesComplete = (branchList: Branch[]) => {
-    setBranches(branchList);
-    setCurrentStep("complete");
+    setCurrentStep(nextStep);
   };
 
   return (
@@ -46,14 +70,14 @@ const Onboarding = () => {
         {/* Step Content */}
         {currentStep === "restaurant-info" && (
           <RestaurantInfoStep
-            onComplete={handleRestaurantInfoComplete}
+            onComplete={handleStepComplete}
             initialData={restaurantInfo || undefined}
           />
         )}
 
         {currentStep === "branches" && restaurantInfo && (
           <BranchesStep
-            onComplete={handleBranchesComplete}
+            onComplete={handleStepComplete}
             onBack={() => setCurrentStep("restaurant-info")}
             restaurantName={restaurantInfo.name}
           />
@@ -69,6 +93,4 @@ const Onboarding = () => {
       <OnboardingFooter />
     </div>
   );
-};
-
-export default Onboarding;
+}
