@@ -38,7 +38,7 @@ export function BranchCard({
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2">
           <MapPin className="size-5 text-primary" />
           {branch.name}

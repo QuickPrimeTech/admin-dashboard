@@ -45,9 +45,11 @@ export default function ManageBranch() {
 
         {/* Loading State */}
         {isPending && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <ManageBranchSkeleton key={i} />
+              <div key={i} className="w-full sm:w-72 md:w-64 lg:w-60">
+                <ManageBranchSkeleton />
+              </div>
             ))}
           </div>
         )}
@@ -57,13 +59,18 @@ export default function ManageBranch() {
 
         {/* Loaded State */}
         {!isPending && !isError && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-in">
+          <div className="flex flex-wrap justify-center gap-4">
             {branches?.length ? (
               branches.map((branch) => (
-                <ManageBranchCard key={branch.id} branch={branch} />
+                <div
+                  key={branch.id}
+                  className="w-full md:w-64 lg:w-60 shrink-0"
+                >
+                  <ManageBranchCard branch={branch} />
+                </div>
               ))
             ) : (
-              <div className="text-center text-muted-foreground col-span-full py-10 space-y-2">
+              <div className="text-center text-muted-foreground py-10 space-y-2 w-full">
                 <p>No branches found.</p>
                 <Link
                   href="/branches/new"
