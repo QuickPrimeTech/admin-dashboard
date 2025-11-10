@@ -15,8 +15,14 @@ export default async function InviteUserPage({
 }: InviteUserPageProps) {
   const { token } = await searchParams;
 
+  const commonRequest = "Please request a new one from QuickPrimeTech.";
+
   if (!token || typeof token !== "string") {
-    return <InvalidLinkMessage message="No invite token provided." />;
+    return (
+      <InvalidLinkMessage
+        message={`No invite token provided in the URL. ${commonRequest}`}
+      />
+    );
   }
 
   const { data, error } = await supabase
@@ -27,7 +33,9 @@ export default async function InviteUserPage({
 
   if (error || !data) {
     return (
-      <InvalidLinkMessage message="This is not a valid invite link. Please request a new one from QuickPrimeTech." />
+      <InvalidLinkMessage
+        message={`This is not a valid invite link. ${commonRequest}`}
+      />
     );
   }
 
@@ -35,7 +43,9 @@ export default async function InviteUserPage({
 
   if (expired) {
     return (
-      <InvalidLinkMessage message="This invite link has expired. Please request a new one from QuickPrimeTech." />
+      <InvalidLinkMessage
+        message={`This invite link has expired. ${commonRequest}`}
+      />
     );
   }
 
