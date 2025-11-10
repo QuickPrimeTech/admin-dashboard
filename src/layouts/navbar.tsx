@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { SidebarTrigger, useSidebar } from "@ui/sidebar";
 import { Button } from "@ui/button";
-import { Bell, User } from "lucide-react";
+import { Bell, LogOut, Settings, User, UserIcon } from "lucide-react";
 import { Separator } from "@ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@ui/avatar";
 import {
@@ -58,7 +58,7 @@ export function AppNavbar() {
               <Avatar>
                 <AvatarImage src="/avatar Image" alt="avatar image" />
                 <AvatarFallback>
-                  <User className="h-4 w-4" />
+                  <User className="size-4" />
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
@@ -66,16 +66,22 @@ export function AppNavbar() {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/profile">Profile</Link>
+                <Link href="/dashboard/profile">
+                  <UserIcon />
+                  Profile
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">Settings</Link>
+                <Link href="/dashboard/settings">
+                  <Settings /> Settings
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="text-destructive focus:text-destructive"
               >
+                <LogOut className="text-inherit" />
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
