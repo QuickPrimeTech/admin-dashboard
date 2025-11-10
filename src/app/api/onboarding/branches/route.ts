@@ -53,24 +53,22 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  return createResponse<Branch[]>(500, "No Branches to see mf");
-
-  // const supabase = await createClient();
-  // const { data, error } = await supabase.from("branch_settings").select("*");
-  // if (error) {
-  //   return createResponse<null>(
-  //     500,
-  //     "Error connecting with the database",
-  //     null,
-  //     false
-  //   );
-  // }
-  // return createResponse<Branch[]>(
-  //   200,
-  //   "Successfully fetched all the branches",
-  //   data,
-  //   true
-  // );
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("branch_settings").select("*");
+  if (error) {
+    return createResponse<null>(
+      500,
+      "Error connecting with the database",
+      null,
+      false
+    );
+  }
+  return createResponse<Branch[]>(
+    200,
+    "Successfully fetched all the branches",
+    data,
+    true
+  );
 }
 
 export async function PATCH(req: NextRequest) {

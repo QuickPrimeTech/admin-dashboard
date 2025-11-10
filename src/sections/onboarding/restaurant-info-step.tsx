@@ -21,10 +21,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 
 type RestaurantInfoStepProps = {
-  onComplete: (
-    data: RestaurantInfo | Branch[],
-    nextStep: OnboardingStep
-  ) => void;
+  onComplete: (data: RestaurantInfo | null, nextStep: OnboardingStep) => void;
   initialData?: RestaurantFormValues;
 };
 

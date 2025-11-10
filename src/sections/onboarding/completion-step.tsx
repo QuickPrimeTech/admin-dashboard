@@ -3,24 +3,19 @@
 import { useEffect } from "react";
 import { Card, CardContent } from "@ui/card";
 import { CheckCircle2, MapPin, ArrowRight } from "lucide-react";
-import { celebrateSuccess } from "@/components/confetti-effect";
+import { celebrateSuccess, ConfettiEffect } from "@/components/confetti-effect";
 import { Branch } from "@/types/onboarding";
 
 interface CompletionStepProps {
   restaurantName: string;
-  branches: Branch[];
 }
 
-export function CompletionStep({
-  restaurantName,
-  branches,
-}: CompletionStepProps) {
-  useEffect(() => {
-    celebrateSuccess();
-  }, []);
+export function CompletionStep({ restaurantName }: CompletionStepProps) {
+  const branches: Branch[] = [];
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
+      <ConfettiEffect trigger={true} duration={2000} />
       <div className="text-center space-y-4">
         <div className="w-20 h-20 mx-auto rounded-full bg-linear-to-br from-success to-success/80 flex items-center justify-center shadow-lg animate-scale-in">
           <CheckCircle2 className="w-10 h-10 text-success-foreground" />

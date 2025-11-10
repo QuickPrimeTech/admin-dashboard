@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { RestaurantInfoStep } from "@/sections/onboarding/restaurant-info-step";
 import { BranchesStep } from "@/sections/onboarding/branches-step";
@@ -17,7 +16,7 @@ export default function Onboarding() {
   const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(
     null
   );
-  const [branches, setBranches] = useState<Branch[]>([]);
+  // const [branches, setBranches] = useState<Branch[]>([]);
 
   // Restore progress from localStorage
   useEffect(() => {
@@ -26,7 +25,6 @@ export default function Onboarding() {
       const parsed = JSON.parse(saved);
       setCurrentStep(parsed.currentStep || "restaurant-info");
       setRestaurantInfo(parsed.restaurantInfo || null);
-      setBranches(parsed.branches || []);
     }
   }, []);
 
@@ -34,9 +32,9 @@ export default function Onboarding() {
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ currentStep, restaurantInfo, branches })
+      JSON.stringify({ currentStep, restaurantInfo })
     );
-  }, [currentStep, restaurantInfo, branches]);
+  }, [currentStep, restaurantInfo]);
 
   const steps = [
     { key: "restaurant-info", label: "Restaurant Info" },
@@ -45,21 +43,19 @@ export default function Onboarding() {
   ];
 
   const handleStepComplete = (
-    data: RestaurantInfo | Branch[],
+    data: RestaurantInfo | null,
     nextStep: OnboardingStep
   ) => {
     if (currentStep === "restaurant-info") {
       setRestaurantInfo(data as RestaurantInfo);
-    } else if (currentStep === "branches") {
-      setBranches(data as Branch[]);
     }
-
     setCurrentStep(nextStep);
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden pb-9">
       <OnboardingBackgroundPattern />
+      {/* Confetti effect to show when the user has onboarded */}
 
       <div className="relative z-10 container mx-auto px-4 py-12">
         {/* Progress Indicator */}
@@ -84,10 +80,7 @@ export default function Onboarding() {
         )}
 
         {currentStep === "complete" && restaurantInfo && (
-          <CompletionStep
-            restaurantName={restaurantInfo.name}
-            branches={branches}
-          />
+          <CompletionStep restaurantName={restaurantInfo.name} />
         )}
       </div>
       <OnboardingFooter />

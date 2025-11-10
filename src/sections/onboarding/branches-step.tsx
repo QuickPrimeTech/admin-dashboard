@@ -3,7 +3,6 @@ import { Button } from "@ui/button";
 import { Card, CardContent } from "@ui/card";
 import { Plus, ArrowRight } from "lucide-react";
 import { BranchFormDialog } from "./branch-form-dialog";
-import { celebrateSuccess, ConfettiEffect } from "@/components/confetti-effect";
 import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 import { BranchCard } from "./branch-card";
 import { useBranchesQuery } from "@/hooks/use-branches";
@@ -11,10 +10,7 @@ import { BranchCardSkeleton } from "./skeletons/branch-card-skeleton";
 import { BranchCardError } from "./error/branch-card-error";
 
 interface BranchesStepProps {
-  onComplete: (
-    data: RestaurantInfo | Branch[],
-    nextStep: OnboardingStep
-  ) => void;
+  onComplete: (data: RestaurantInfo | null, nextStep: OnboardingStep) => void;
   onBack: () => void;
   restaurantName: string;
 }
@@ -24,21 +20,14 @@ export function BranchesStep({
   onBack,
   restaurantName,
 }: BranchesStepProps) {
+  //Getting the data using the fetch query
   const { data: branches, isPending, isError, refetch } = useBranchesQuery();
-
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
-
-  const handleContinue = () => {
-    celebrateSuccess();
-    // setTimeout(() => onComplete(branches), 500);
-  };
+  //Mutation function to mark the user has onboarded
 
   return (
     <div className="space-y-6">
-      <ConfettiEffect trigger={showConfetti} duration={2000} />
-
       <div className="text-center space-y-3">
         <h2 className="text-3xl font-bold">Set Up Your Branches</h2>
         <p className="text-muted-foreground text-lg">
@@ -90,8 +79,8 @@ export function BranchesStep({
         </Button>
         <Button
           size="lg"
-          onClick={handleContinue}
-          disabled={!!(branches && branches.length === 0)}
+          onClick={() => onComplete(null, "complete")}
+          disabled={!!branches}
         >
           Continue to Dashboard
           <ArrowRight />

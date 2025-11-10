@@ -194,3 +194,22 @@ export function useUpdateBranchMutation() {
     },
   });
 }
+
+export function useOnboardUser() {
+  return useMutation<ApiResponse<boolean>, AxiosError<ApiResponse<null>>>({
+    mutationFn: async () => {
+      const res = await axios.post<ApiResponse<boolean>>(
+        "/api/onboarding/success"
+      );
+      return res.data;
+    },
+    onError: (err) => {
+      toast.error(
+        err.response?.data.message || "There was a problem onboarding you"
+      );
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "You are successfully onboarded");
+    },
+  });
+}
