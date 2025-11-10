@@ -6,6 +6,7 @@ import { ApiResponse } from "@/helpers/api-responses";
 import { Branch, Restaurant } from "@/types/onboarding";
 import { toast } from "sonner";
 import { BranchFormValues } from "@/schemas/onboarding";
+import { createClient } from "@/utils/supabase/client";
 
 export const BRANCHES_QUERY_KEY = ["branches"];
 
@@ -17,6 +18,49 @@ export function useBranchesQuery() {
         "/api/onboarding/branches"
       );
       return res.data.data;
+    },
+  });
+}
+
+/* Get current branch for the logged-in user */
+export function useGetCurrentBranch() {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ["current-branch"],
+    queryFn: async (): Promise<Branch | null> => {
+      // 1Check if branches are already in cache
+      let branches: Branch[] | undefined =
+        queryClient.getQueryData(BRANCHES_QUERY_KEY);
+
+      // If not in cache, fetch them
+      if (!branches) {
+        const res = await axios.get<ApiResponse<Branch[]>>(
+          "/api/onboarding/branches"
+        );
+        branches = res.data.data ?? undefined;
+        // populate cache manually
+        queryClient.setQueryData(BRANCHES_QUERY_KEY, branches);
+      }
+
+      // 3️⃣ Get current user from Supabase
+      const supabase = createClient(); // make sure this is client-side
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) return null;
+
+      // 4️⃣ Find branch matching the current user
+      let currentBranch = null;
+      if(branches) {
+
+        currentBranch =
+        branches.find((branch) => branch.id === user.user_metadata.branch_id) || null;
+      }
+
+      return currentBranch;
     },
   });
 }

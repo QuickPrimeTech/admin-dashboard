@@ -53,11 +53,7 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError("");
-    const formData = new FormData();
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-
-    const response = await login(formData);
+    const response = await login(data);
     if (!response.success) {
       toast.error(response.message);
     }
