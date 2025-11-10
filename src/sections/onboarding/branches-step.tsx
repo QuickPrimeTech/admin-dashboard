@@ -57,12 +57,7 @@ export function BranchesStep({
         {isError && <BranchCardError refetch={refetch} />}
         {branches &&
           branches.map((branch) => (
-            <BranchCard
-              key={branch.id}
-              branch={branch}
-              setEditingBranch={setEditingBranch}
-              setIsAddDialogOpen={setIsAddDialogOpen}
-            />
+            <BranchCard key={branch.id} branch={branch} />
           ))}
         <Card
           className="border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group"
@@ -96,7 +91,6 @@ export function BranchesStep({
           <ArrowRight />
         </Button>
       </div>
-
       <BranchFormDialog
         open={isAddDialogOpen}
         branchData={editingBranch}

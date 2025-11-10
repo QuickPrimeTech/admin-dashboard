@@ -22,73 +22,79 @@ import { Edit2, MapPin } from "lucide-react";
 import { Branch } from "@/types/onboarding";
 import { Trash2 } from "lucide-react";
 import { useDeleteBranchMutation } from "@/hooks/use-branches";
+import { BranchFormDialog } from "./branch-form-dialog";
+import { useState } from "react";
 
 type BranchCardProps = {
   branch: Branch;
-  setEditingBranch: (branch: Branch) => void;
-  setIsAddDialogOpen: (open: boolean) => void;
 };
 
-export function BranchCard({
-  branch,
-  setEditingBranch,
-  setIsAddDialogOpen,
-}: BranchCardProps) {
+export function BranchCard({ branch }: BranchCardProps) {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const deleteMutation = useDeleteBranchMutation();
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="size-5 text-primary" />
-          {branch.name}
-        </CardTitle>
-        <CardDescription>{branch.location}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={() => {
-            setIsAddDialogOpen(true);
-            setEditingBranch(branch);
-          }}
-        >
-          <Edit2 />
-          Edit
-        </Button>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-destructive hover:text-destructive"
-            >
-              <Trash2 />
-              Delete
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete <strong>{branch.name}</strong> and
-                all associated data.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => deleteMutation.mutate(branch.id)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+    <>
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="size-5 text-primary" />
+            {branch.name}
+          </CardTitle>
+          <CardDescription>{branch.location}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={() => {
+              setIsAddDialogOpen(true);
+              setEditingBranch(branch);
+            }}
+          >
+            <Edit2 />
+            Edit
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-destructive hover:text-destructive"
               >
+                <Trash2 />
                 Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </CardContent>
-    </Card>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete <strong>{branch.name}</strong>{" "}
+                  and all associated data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => deleteMutation.mutate(branch.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
+      <BranchFormDialog
+        open={isAddDialogOpen}
+        branchData={editingBranch}
+        onOpenChange={setIsAddDialogOpen}
+        mode={editingBranch ? "edit" : "create"}
+      />
+    </>
   );
 }

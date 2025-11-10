@@ -1,20 +1,17 @@
 "use client";
-
 import { Building2, PlusCircle } from "lucide-react";
-import { ConfettiEffect } from "@/components/confetti-effect";
 import { useBranchesQuery } from "@/hooks/use-branches";
 import { BranchCardError } from "@/sections/onboarding/error/branch-card-error";
-import { ManageBranchSkeleton } from "@/sections/onboarding/skeletons/manage-branch-skeleton";
-import { ManageBranchCard } from "@/sections/onboarding/manage-branch-card";
 import { BranchesBackgroundPattern } from "@/components/background-patterns/branches-pattern";
 import Link from "next/link";
+import { BranchCard } from "@/sections/onboarding/branch-card";
+import { BranchCardSkeleton } from "@/sections/onboarding/skeletons/branch-card-skeleton";
 
 export default function ManageBranch() {
   const { data: branches, isPending, isError, refetch } = useBranchesQuery();
 
   return (
     <div className="relative min-h-screen container px-4 md:px-8 lg:px-12 mx-auto space-y-10 py-10">
-      <ConfettiEffect trigger duration={800} />
       <BranchesBackgroundPattern />
 
       {/* Header Section */}
@@ -27,14 +24,6 @@ export default function ManageBranch() {
           View, edit, and manage all your restaurant branches below. Keep your
           locations updated and organized with ease.
         </p>
-
-        <Link
-          href="/branches/new"
-          className="inline-flex items-center gap-2 text-primary font-medium hover:underline"
-        >
-          <PlusCircle className="size-4" />
-          Add New Branch
-        </Link>
       </div>
 
       {/* Branch Management Section */}
@@ -48,7 +37,7 @@ export default function ManageBranch() {
           <div className="flex flex-wrap justify-center gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="w-full sm:w-72 md:w-64 lg:w-60">
-                <ManageBranchSkeleton />
+                <BranchCardSkeleton />
               </div>
             ))}
           </div>
@@ -66,7 +55,7 @@ export default function ManageBranch() {
                   key={branch.id}
                   className="w-full md:w-64 lg:w-60 shrink-0"
                 >
-                  <ManageBranchCard branch={branch} />
+                  <BranchCard branch={branch} />
                 </div>
               ))
             ) : (
