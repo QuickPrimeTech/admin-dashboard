@@ -57,7 +57,7 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     const hasOnboarded = user.user_metadata?.has_onboarded;
-
+    const branch_id = user.user_metadata?.branch_id;
     // User logged in but not onboarded
     //Prevent redirection of apis
     if (
@@ -76,7 +76,12 @@ export async function updateSession(request: NextRequest) {
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
-
+    //if the user has onboarded and he has not chosen a branch;
+    if (hasOnboarded && !branch_id) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/branches";
+      return NextResponse.redirect(url);
+    }
     // Onboarded user trying to visit login/root
     if (pathname === "/" || pathname === "/login") {
       const url = request.nextUrl.clone();

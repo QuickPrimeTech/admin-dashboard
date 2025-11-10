@@ -3,7 +3,7 @@ import { type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  // ✅ Continue with session update middleware
+  //  Continue with session update middleware
   return await updateSession(request);
 }
 

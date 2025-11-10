@@ -1,4 +1,4 @@
-import { FormData as FormDataProps } from "@/schemas/galllery-item-schema";
+import { FormData as FormDataProps } from "@/schemas/gallery-item-schema";
 import { generateBlurDataURL } from "./file-helpers";
 
 export function buildGalleryFormData(

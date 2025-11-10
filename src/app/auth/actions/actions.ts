@@ -94,12 +94,13 @@ export async function signup({ email, password, token }: SignupProps) {
 
 export async function logout() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
   // Clear branch_id metadata first
   const { error: updateError } = await supabase.auth.updateUser({
     data: { branch_id: null },
   });
 
   if (updateError) console.error("Failed to clear branch_id:", updateError);
+  await supabase.auth.signOut();
+
   redirect("/login");
 }

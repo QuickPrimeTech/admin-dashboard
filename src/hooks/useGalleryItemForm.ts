@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   formSchema,
   FormData as FormDataProps,
-} from "@/schemas/galllery-item-schema";
+} from "@/schemas/gallery-item-schema";
 import { ServerGalleryItem } from "@/types/gallery"; // assume you have a type for existing item
 import { buildGalleryFormData } from "@/helpers/galleryHelpers";
 import {
