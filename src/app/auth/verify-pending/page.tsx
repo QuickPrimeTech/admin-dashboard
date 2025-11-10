@@ -1,21 +1,12 @@
-// app/auth/verify-pending/page.tsx
+import VerifyPendingPage from "@/sections/auth/verify-pending";
+import { Metadata } from "next";
 
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
-import { VerifyPendingSkeleton } from "@/sections/auth/verify-pending-skeleton";
-
-// Dynamically import the client component
-const VerifyPendingPage = dynamic(
-  () => import("@/sections/auth/verify-pending"),
-  {
-    ssr: !!false,
-  }
-);
+export const metadata: Metadata = {
+  title: "Check Your Email - QuickPrimeTech",
+  description:
+    "We've sent you a confirmation email. Please check your inbox to continue.",
+};
 
 export default function Page() {
-  return (
-    <Suspense fallback={<VerifyPendingSkeleton />}>
-      <VerifyPendingPage />
-    </Suspense>
-  );
+  return <VerifyPendingPage />;
 }
