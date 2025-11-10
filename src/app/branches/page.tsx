@@ -5,14 +5,15 @@ import { useBranchesQuery } from "@/hooks/use-branches";
 import { BranchCardError } from "@/sections/onboarding/error/branch-card-error";
 import { ManageBranchSkeleton } from "@/sections/onboarding/skeletons/manage-branch-skeleton";
 import { ManageBranchCard } from "@/sections/onboarding/manage-branch-card";
+import { BranchesBackgroundPattern } from "@/components/background-patterns/branches-pattern";
 
 export default function BranchesPage() {
   const { data: branches, isPending, isError, refetch } = useBranchesQuery();
 
   return (
-    <div className="container px-4 md:px-8 lg:px-12 mx-auto space-y-10 py-10">
+    <div className="relative min-h-screen container px-4 md:px-8 lg:px-12 mx-auto space-y-10 py-10">
       <ConfettiEffect trigger duration={1000} />
-
+      <BranchesBackgroundPattern />
       {/*Header Section */}
       <div className="text-center space-y-4 animate-fade-in">
         <div className="w-20 h-20 mx-auto rounded-full bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg animate-bounce-in">
