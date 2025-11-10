@@ -6,14 +6,14 @@ import { isAfter } from "date-fns";
 import { Metadata } from "next";
 
 type InviteUserPageProps = {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 };
 
 // 🔹 This runs before the page is rendered
 export async function generateMetadata({
   searchParams,
 }: InviteUserPageProps): Promise<Metadata> {
-  const token = searchParams?.token;
+  const { token } = await searchParams;
 
   if (!token) {
     return { title: "Invalid Token - QuickPrimeTech" };
@@ -42,7 +42,7 @@ export async function generateMetadata({
 export default async function InviteUserPage({
   searchParams,
 }: InviteUserPageProps) {
-  const token = searchParams?.token;
+  const { token } = await searchParams;
   const commonRequest = "Please request a new one from QuickPrimeTech.";
 
   if (!token) {
