@@ -20,15 +20,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@ui/form";
-import { Input } from "@ui/input";
 import { Checkbox } from "@ui/checkbox";
 import { Alert, AlertDescription } from "@ui/alert";
-import { Eye, EyeOff, AlertCircle, ChefHat } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, ChefHat, Lock, Mail } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
 import Link from "next/link";
 import { loginSchema, LoginFormData } from "@/schemas/login";
 import { Spinner } from "@ui/spinner";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@ui/input-group";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -97,12 +102,17 @@ export function LoginForm() {
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="admin@restaurant.com"
-                        disabled={isLoading}
-                        {...field}
-                      />
+                      <InputGroup>
+                        <InputGroupInput
+                          type="email"
+                          placeholder="Enter your email here..."
+                          disabled={isLoading}
+                          {...field}
+                        />
+                        <InputGroupAddon>
+                          <Mail />
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -113,31 +123,33 @@ export function LoginForm() {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-sm text-card-foreground">
+                      Password
+                    </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
+                      <InputGroup>
+                        <InputGroupInput
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
-                          disabled={isLoading}
+                          placeholder="Enter your password here..."
                           {...field}
                         />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
-                          disabled={isLoading}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </div>
+                        <InputGroupAddon>
+                          <Lock />
+                        </InputGroupAddon>
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupButton
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="text-muted-foreground" />
+                            ) : (
+                              <Eye className="text-muted-foreground" />
+                            )}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

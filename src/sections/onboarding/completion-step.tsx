@@ -1,9 +1,8 @@
 "use client";
-
-import { Card, CardContent } from "@ui/card";
-import { CheckCircle2, MapPin, ArrowRight } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { ConfettiEffect } from "@/components/confetti-effect";
 import { useBranchesQuery } from "@/hooks/use-branches";
+import { ManageBranchCard } from "./manage-branch-card";
 
 interface CompletionStepProps {
   restaurantName: string;
@@ -36,25 +35,7 @@ export function CompletionStep({ restaurantName }: CompletionStepProps) {
         </h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {branches.map((branch) => (
-            <Card
-              key={branch.id}
-              className="hover:shadow-lg transition-all cursor-pointer group hover:scale-105"
-            >
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
-                    <MapPin className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-lg">{branch.name}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {branch.location}
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="size-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-              </CardContent>
-            </Card>
+            <ManageBranchCard branch={branch} />
           ))}
         </div>
       </div>
