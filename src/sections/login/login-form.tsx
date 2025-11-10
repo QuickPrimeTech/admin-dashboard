@@ -23,11 +23,12 @@ import {
 import { Input } from "@ui/input";
 import { Checkbox } from "@ui/checkbox";
 import { Alert, AlertDescription } from "@ui/alert";
-import { Eye, EyeOff, AlertCircle, ChefHat, Loader } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, ChefHat } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
 import Link from "next/link";
 import { loginSchema, LoginFormData } from "@/schemas/login";
+import { Spinner } from "@ui/spinner";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -148,7 +149,7 @@ export function LoginForm() {
                   control={form.control}
                   name="rememberMe"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormItem className="flex flex-row items-center space-y-0">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
@@ -158,11 +159,9 @@ export function LoginForm() {
                           disabled={isLoading}
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-normal">
-                          Remember me
-                        </FormLabel>
-                      </div>
+                      <FormLabel className="text-sm font-normal">
+                        Remember me
+                      </FormLabel>
                     </FormItem>
                   )}
                 />
@@ -179,7 +178,7 @@ export function LoginForm() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    <Spinner />
                     Signing in...
                   </>
                 ) : (
