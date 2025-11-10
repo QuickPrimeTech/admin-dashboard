@@ -1,9 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader } from "lucide-react";
 import * as z from "zod";
 import {
   Dialog,
@@ -27,6 +25,7 @@ import { Button } from "@ui/button";
 import { Switch } from "@ui/switch";
 import { toast } from "sonner";
 import { FAQDialogProps } from "@/types/faqs";
+import { Spinner } from "@ui/spinner";
 
 const formSchema = z.object({
   question: z.string().min(1, "Question is required"),
@@ -204,7 +203,7 @@ export function FAQDialog({
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader className="animate-spin" />
+                    <Spinner />
                     {faq ? "Updating" : "Creating"} FAQ
                   </>
                 ) : (

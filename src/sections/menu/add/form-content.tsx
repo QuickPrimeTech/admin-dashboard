@@ -6,8 +6,9 @@ import BasicInfoSection from "./basic-info-section";
 import { ChoiceBuilder } from "./choice-builder";
 import { ChoicesList } from "./choice-list";
 import { ImageSection } from "./image-section";
-import { Loader, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
+import { Spinner } from "@ui/spinner";
 
 export function FormContent() {
   const { submitForm, isSubmitting } = useMenuItemForm();
@@ -27,7 +28,7 @@ export function FormContent() {
             <Button type="submit" onClick={submitForm}>
               {isSubmitting ? (
                 <>
-                  <Loader className="animate-spin" />
+                  <Spinner />
                   Saving Menu Item
                 </>
               ) : (

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@ui/button";
 import { Checkbox } from "@ui/checkbox";
-import { Loader, Lock, MailIcon } from "lucide-react";
+import { Lock, MailIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   Form,
@@ -27,6 +27,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@ui/input-group";
+import { Spinner } from "@ui/spinner";
 
 export function InviteSignupForm() {
   const whatsappMessage =
@@ -246,7 +247,7 @@ export function InviteSignupForm() {
                 className="w-full flex items-center justify-center gap-2"
                 disabled={loading}
               >
-                {loading && <Loader className="animate-spin" />}
+                {loading && <Spinner />}
                 {loading ? "Creating account" : "Create Account"}
               </Button>
             </form>
