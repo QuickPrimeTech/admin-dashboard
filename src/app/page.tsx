@@ -1,5 +1,5 @@
 import { LoginForm } from "@/sections/login/login-form";
-import { LoginHero } from "@/sections/login/login-hero";
+import { LoginHero } from "@/sections/login/features-panel";
 
 export default function LoginPage() {
   return (

@@ -2,37 +2,37 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@ui/card";
 import { ChefHat, Users, Calendar, Star } from "lucide-react";
 
-export function LoginHero() {
-  const features = [
-    {
-      icon: ChefHat,
-      title: "Menu Management",
-      description: "Easily manage your restaurant's menu items and pricing",
-    },
-    {
-      icon: Calendar,
-      title: "Reservations",
-      description: "Track and manage customer reservations efficiently",
-    },
-    {
-      icon: Users,
-      title: "Private Events",
-      description: "Handle private event bookings and special occasions",
-    },
-    {
-      icon: Star,
-      title: "Gallery & Social",
-      description: "Showcase your restaurant with photos and social media",
-    },
-  ];
+const features = [
+  {
+    icon: ChefHat,
+    title: "Menu Management",
+    description: "Easily manage your restaurant's menu items and pricing",
+  },
+  {
+    icon: Calendar,
+    title: "Reservations",
+    description: "Track and manage customer reservations efficiently",
+  },
+  {
+    icon: Users,
+    title: "Private Events",
+    description: "Handle private event bookings and special occasions",
+  },
+  {
+    icon: Star,
+    title: "Gallery & Social",
+    description: "Showcase your restaurant with photos and social media",
+  },
+];
 
+export function FeaturesPanel() {
   return (
     <ScrollArea className="h-screen">
-      <div className="hidden lg:flex lg:flex-1 bg-linear-to-br from-primary/20  to-primary/5 p-8 text-foreground">
+      <div className="hidden lg:flex lg:flex-1 bg-linear-to-br from-secondary  to-primary/5 p-8 text-foreground">
         <div className="flex flex-col justify-center max-w-lg mx-auto">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 bg-primary-foreground rounded-lg flex items-center justify-center">
+              <div className="size-12 bg-primary-foreground rounded-lg flex items-center justify-center">
                 <ChefHat className="h-6 w-6 text-primary" />
               </div>
               <div>

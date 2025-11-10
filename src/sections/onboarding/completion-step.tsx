@@ -14,7 +14,7 @@ export function CompletionStep({ restaurantName }: CompletionStepProps) {
   const branches = data || [];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="md:px-4 space-y-8">
       <ConfettiEffect trigger={true} duration={2000} />
       <div className="text-center space-y-4">
         <div className="w-20 h-20 mx-auto rounded-full bg-linear-to-br from-success to-success/80 flex items-center justify-center shadow-lg animate-scale-in">
@@ -34,7 +34,7 @@ export function CompletionStep({ restaurantName }: CompletionStepProps) {
         <h3 className="text-xl font-semibold text-center">
           Select a branch to manage
         </h3>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {branches.map((branch) => (
             <Card
               key={branch.id}
@@ -52,7 +52,7 @@ export function CompletionStep({ restaurantName }: CompletionStepProps) {
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="size-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </CardContent>
             </Card>
           ))}
