@@ -35,7 +35,7 @@ export function CompletionStep({ restaurantName }: CompletionStepProps) {
         </h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {branches.map((branch) => (
-            <ManageBranchCard branch={branch} />
+            <ManageBranchCard key={branch.id} branch={branch} />
           ))}
         </div>
       </div>
