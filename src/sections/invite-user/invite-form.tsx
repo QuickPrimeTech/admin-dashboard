@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
-import { useSearchParams } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import { Button } from "@ui/button";
 import { Checkbox } from "@ui/checkbox";
 import { Lock, MailIcon } from "lucide-react";
@@ -19,8 +19,7 @@ import {
 } from "@ui/form";
 import { ChefHat, Eye, EyeOff } from "lucide-react";
 import { signup } from "@/app/auth/actions/actions";
-import { useRouter } from "next/navigation";
-import { InviteFormData, formSchema } from "@/schemas/invite-form";
+import { InviteFormData, formSchema } from "@/schemas/authentication";
 import {
   InputGroup,
   InputGroupAddon,
@@ -28,6 +27,7 @@ import {
   InputGroupInput,
 } from "@ui/input-group";
 import { Spinner } from "@ui/spinner";
+import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
 
 export function InviteSignupForm() {
   const whatsappMessage =
@@ -35,9 +35,6 @@ export function InviteSignupForm() {
   const whatsappLink = `https://wa.me/254717448835?text=${encodeURIComponent(
     whatsappMessage
   )}`;
-
-  // declaring th router so that I can redirect the user to another page when they are created
-  const router = useRouter();
 
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -67,7 +64,7 @@ export function InviteSignupForm() {
     setLoading(false);
     if (result.success) {
       toast.success("Account created successfully!");
-      router.push(`/auth/verify-pending?email=${values.email}`);
+      redirect(`/auth/verify-pending?email=${values.email}`);
     } else {
       toast.error(result.error || "Signup failed.");
     }
@@ -202,6 +199,7 @@ export function InviteSignupForm() {
                   </FormItem>
                 )}
               />
+              <PasswordStrengthMeter password={form.watch("password")} />
               <FormField
                 control={form.control}
                 name="terms"
