@@ -5,7 +5,7 @@ import { Plus, ArrowRight } from "lucide-react";
 import { BranchFormDialog } from "./branch-form-dialog";
 import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 import { BranchCard } from "./branch-card";
-import { useBranchesQuery } from "@/hooks/use-branches";
+import { useBranchesQuery, useOnboardUser } from "@/hooks/use-branches";
 import { BranchCardSkeleton } from "./skeletons/branch-card-skeleton";
 import { BranchCardError } from "./error/branch-card-error";
 
@@ -22,10 +22,20 @@ export function BranchesStep({
 }: BranchesStepProps) {
   //Getting the data using the fetch query
   const { data: branches, isPending, isError, refetch } = useBranchesQuery();
+  const setOnboardedMutation = useOnboardUser();
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
-  //Mutation function to mark the user has onboarded
 
+  //Mutation function to mark the user has onboarded
+  const handleCompleteOnboarding = () => {
+    setOnboardedMutation.mutate(undefined, {
+      onSuccess: () => {
+        //Take the user to the next step
+        onComplete(null, "complete");
+      },
+    });
+  };
   return (
     <div className="space-y-6">
       <div className="text-center space-y-3">
@@ -79,8 +89,8 @@ export function BranchesStep({
         </Button>
         <Button
           size="lg"
-          onClick={() => onComplete(null, "complete")}
-          disabled={!!branches}
+          onClick={handleCompleteOnboarding}
+          disabled={isPending || isError || !branches || branches.length === 0}
         >
           Continue to Dashboard
           <ArrowRight />

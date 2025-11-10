@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
 import { Card, CardContent } from "@ui/card";
 import { CheckCircle2, MapPin, ArrowRight } from "lucide-react";
-import { celebrateSuccess, ConfettiEffect } from "@/components/confetti-effect";
-import { Branch } from "@/types/onboarding";
+import { ConfettiEffect } from "@/components/confetti-effect";
+import { useBranchesQuery } from "@/hooks/use-branches";
 
 interface CompletionStepProps {
   restaurantName: string;
 }
 
 export function CompletionStep({ restaurantName }: CompletionStepProps) {
-  const branches: Branch[] = [];
+  const { data } = useBranchesQuery();
+  const branches = data || [];
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">

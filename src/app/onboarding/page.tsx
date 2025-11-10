@@ -6,7 +6,7 @@ import { CompletionStep } from "@/sections/onboarding/completion-step";
 import { OnboardingBackgroundPattern } from "@/components/background-patterns/onboarding-pattern";
 import { ProgressBar } from "@/sections/onboarding/progress-bar";
 import { OnboardingFooter } from "@/sections/onboarding/footer";
-import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
+import { OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 
 const STORAGE_KEY = "onboarding-progress";
 
