@@ -17,7 +17,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 import {
-  forgotPassworFormData,
+  ForgotPassworFormData,
   forgotPasswordSchema,
 } from "@/schemas/authentication";
 
@@ -29,7 +29,7 @@ export function ForgotPasswordForm() {
     defaultValues: { email: "" },
   });
 
-  const handleReset = async (data: forgotPassworFormData) => {
+  const handleReset = async (data: ForgotPassworFormData) => {
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(data.email, {

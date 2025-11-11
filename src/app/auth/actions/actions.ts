@@ -104,5 +104,3 @@ export async function logout() {
 
   redirect("/login");
 }
-
-export async function resetPassword() {}

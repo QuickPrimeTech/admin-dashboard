@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@/utils/supabase/client";
@@ -22,10 +21,11 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-
-const schema = z.object({
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+import {
+  resetPasswordSchema,
+  ResetPassworFormData,
+} from "@/schemas/authentication";
+import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -36,18 +36,18 @@ export default function ResetPasswordPage() {
   const supabase = createClient();
 
   const form = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: { password: "" },
   });
 
-  const onSubmit = async (value: z.infer<typeof schema>) => {
+  const onSubmit = async (value: ResetPassworFormData) => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({
         password: value.password,
       });
       if (error) {
-        toast.error("An error occurred while resetting your password.");
+        toast.error(error.message);
         return;
       }
       toast.success("Your password was successfully changed.");
@@ -56,8 +56,8 @@ export default function ResetPasswordPage() {
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
+      setLoading(() => false);
     }
-    setLoading(false);
   };
 
   const PasswordIcon = showPassword ? EyeOff : Eye;
@@ -100,6 +100,7 @@ export default function ResetPasswordPage() {
                   </FormItem>
                 )}
               />
+              <PasswordStrengthMeter password={form.watch("password")} />
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Resetting..." : "Reset Password"}
               </Button>
