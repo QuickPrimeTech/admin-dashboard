@@ -26,7 +26,7 @@ import { Eye, EyeOff, AlertCircle, ChefHat, Lock, Mail } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
 import Link from "next/link";
-import { loginSchema, LoginFormData } from "@/schemas/login";
+import { loginSchema, LoginFormData } from "@/schemas/authentication";
 import { Spinner } from "@ui/spinner";
 import {
   InputGroup,

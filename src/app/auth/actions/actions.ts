@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
 import { SignupProps } from "@/types/authentication";
-import { LoginFormData } from "@/schemas/login";
+import { LoginFormData } from "@/schemas/authentication";
 
 export async function login(loginData: LoginFormData) {
   const supabase = await createClient();
@@ -104,3 +104,5 @@ export async function logout() {
 
   redirect("/login");
 }
+
+export async function resetPassword() {}

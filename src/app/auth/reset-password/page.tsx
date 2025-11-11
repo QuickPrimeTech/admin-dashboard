@@ -12,11 +12,16 @@ import {
   CardTitle,
   CardDescription,
 } from "@ui/card";
-import { Input } from "@ui/input";
 import { Button } from "@ui/button";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@ui/form";
 import { toast } from "sonner";
 import { EyeOff, Eye } from "lucide-react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 const schema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -55,6 +60,8 @@ export default function ResetPasswordPage() {
     setLoading(false);
   };
 
+  const PasswordIcon = showPassword ? EyeOff : Eye;
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md shadow-lg">
@@ -72,25 +79,22 @@ export default function ResetPasswordPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <div className="relative">
-                        <Input
+                      <InputGroup>
+                        <InputGroupInput
                           type={showPassword ? "text" : "password"}
                           placeholder="New password"
                           {...field}
                           className="pr-10"
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-5 h-5" />
-                          ) : (
-                            <Eye className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
+                        <InputGroupAddon align={"inline-end"}>
+                          <InputGroupButton
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            <PasswordIcon className="size-5" />
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

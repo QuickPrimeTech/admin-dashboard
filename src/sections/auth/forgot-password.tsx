@@ -10,27 +10,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@ui/card";
-import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@ui/form";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import { Mail } from "lucide-react";
 import Link from "next/link";
-
-const formSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-});
+import {
+  forgotPassworFormData,
+  forgotPasswordSchema,
+} from "@/schemas/authentication";
 
 export function ForgotPasswordForm() {
   const [loading, setLoading] = useState(false);
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: "" },
   });
 
-  const handleReset = async (data: z.infer<typeof formSchema>) => {
+  const handleReset = async (data: forgotPassworFormData) => {
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
