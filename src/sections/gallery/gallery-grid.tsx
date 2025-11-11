@@ -28,15 +28,15 @@ import { Button } from "@ui/button";
 import { Badge } from "@ui/badge";
 import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { ServerGalleryItem } from "@/types/gallery";
+import { GalleryItem } from "@/types/gallery";
 import {
   useDeleteGalleryItemMutation,
   useTogglePublishedMutation,
 } from "@/hooks/use-gallery";
 
 interface Props {
-  items: ServerGalleryItem[];
-  onEdit: (item: ServerGalleryItem) => void;
+  items: GalleryItem[];
+  onEdit: (item: GalleryItem) => void;
 }
 
 export function GalleryGrid({ items, onEdit }: Props) {

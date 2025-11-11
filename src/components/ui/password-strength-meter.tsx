@@ -43,6 +43,7 @@ const colors = [
   "bg-red-500",
   "bg-orange-500",
   "bg-yellow-500",
+  "bg-emerald-700",
   "bg-green-500",
 ];
 

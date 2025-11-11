@@ -88,4 +88,3 @@ export type ImageFormValues = z.infer<typeof imageSchema>;
 // Type exports
 export type ChoiceOptionFormData = z.infer<typeof choiceOptionSchema>;
 export type ChoiceFormData = z.infer<typeof choiceSchema>;
-export type ImageFormData = z.infer<typeof imageSchema>;

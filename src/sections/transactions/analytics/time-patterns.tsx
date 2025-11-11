@@ -10,7 +10,7 @@ import {
 } from "@ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@ui/chart";
 import { Skeleton } from "@ui/skeleton";
-import type { AnalyticsData } from "@/types/transactions/analytics";
+import type { AnalyticsData } from "@/types/transactions";
 
 type TimePatternsProps = {
   data?: AnalyticsData["data"];

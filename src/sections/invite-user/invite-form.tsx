@@ -19,7 +19,7 @@ import {
 } from "@ui/form";
 import { Eye, EyeOff } from "lucide-react";
 import { signup } from "@/app/auth/actions/actions";
-import { InviteFormData, formSchema } from "@/schemas/authentication";
+import { SignupFormData, signupSchema } from "@/schemas/authentication";
 import {
   InputGroup,
   InputGroupAddon,
@@ -44,8 +44,8 @@ export function InviteSignupForm() {
     useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const form = useForm<InviteFormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -54,7 +54,7 @@ export function InviteSignupForm() {
     },
   });
 
-  const onSubmit = async (values: InviteFormData) => {
+  const onSubmit = async (values: SignupFormData) => {
     setLoading(true);
     const result = await signup({
       email: values.email,
@@ -209,14 +209,18 @@ export function InviteSignupForm() {
                         <span className="inline">
                           I agree to the{" "}
                           <Link
-                            href="/terms"
+                            href="https://quickprimetech.com/terms-service"
+                            rel="noopener noreferrer"
+                            target="_blank"
                             className="text-primary hover:underline"
                           >
                             Terms of Service
                           </Link>{" "}
                           and{" "}
                           <Link
-                            href="/privacy"
+                            href="https://quickprimetech.com/privacy-policy"
+                            rel="noopener noreferrer"
+                            target="_blank"
                             className="text-primary hover:underline"
                           >
                             Privacy Policy

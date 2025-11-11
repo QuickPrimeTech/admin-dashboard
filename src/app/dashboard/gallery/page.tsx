@@ -8,7 +8,7 @@ import { GalleryGrid } from "@/sections/gallery/gallery-grid";
 import { GalleryEmptyState } from "@/sections/gallery/gallery-empty-state";
 import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
 
-import { ServerGalleryItem } from "@/types/gallery";
+import { GalleryItem } from "@/types/gallery";
 import { useGalleryQuery } from "@/hooks/use-gallery";
 
 export default function GalleryPage() {
@@ -20,9 +20,7 @@ export default function GalleryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showPublished, setShowPublished] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ServerGalleryItem | null>(
-    null
-  );
+  const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
 
   // ✅ Handle empty or loading states gracefully
   const categories = Array.from(
@@ -49,7 +47,7 @@ export default function GalleryPage() {
   }, [galleryItems, searchTerm, showPublished]);
 
   // ✅ Dialog handlers
-  const handleEdit = (item: ServerGalleryItem) => {
+  const handleEdit = (item: GalleryItem) => {
     setEditingItem(item);
     setIsDialogOpen(true);
   };

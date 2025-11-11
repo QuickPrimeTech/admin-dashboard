@@ -8,7 +8,7 @@ import {
   successResponse,
   getSanitizedRestaurantName,
 } from "@/helpers/common";
-import { GalleryItemInsert, ServerGalleryItem } from "@/types/gallery";
+import { GalleryItemInsert, GalleryItem } from "@/types/gallery";
 import { createClient } from "@/utils/supabase/server";
 import { createResponse } from "@/helpers/api-responses";
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     if (supabaseError) return createResponse(500, supabaseError.message);
 
-    return createResponse<ServerGalleryItem>(
+    return createResponse<GalleryItem>(
       200,
       "Image uploaded to successfully",
       data

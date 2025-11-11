@@ -18,7 +18,7 @@ import { celebrateSuccess } from "@/components/confetti-effect";
 import { RestaurantFormValues, restaurantSchema } from "@/schemas/onboarding";
 import { useCreateRestaurantMutation } from "@/hooks/use-branches";
 import { Spinner } from "@/components/ui/spinner";
-import { Branch, OnboardingStep, RestaurantInfo } from "@/types/onboarding";
+import { OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 
 type RestaurantInfoStepProps = {
   onComplete: (data: RestaurantInfo | null, nextStep: OnboardingStep) => void;

@@ -21,6 +21,7 @@ import Link from "next/link";
 import { RestaurantName } from "./restaurant-name";
 import { ChefHat, ChevronDown, Building2, Settings } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Branch } from "@/types/onboarding";
 
 export function CurrentBranchDropdown() {
   const queryClient = useQueryClient();
@@ -33,7 +34,7 @@ export function CurrentBranchDropdown() {
     setSelectedBranch(currentBranch);
   }
 
-  const handleSwitchBranch = (branch: any) => {
+  const handleSwitchBranch = (branch: Branch) => {
     setSelectedBranch(branch);
     queryClient.setQueryData(["current-branch"], branch); // update cache
   };
