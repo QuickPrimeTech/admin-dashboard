@@ -100,7 +100,9 @@ export default function ResetPasswordPage() {
                   </FormItem>
                 )}
               />
-              <PasswordStrengthMeter password={form.watch("password")} />
+              {form.watch("password").length > 0 && (
+                <PasswordStrengthMeter password={form.watch("password")} />
+              )}
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Resetting..." : "Reset Password"}
               </Button>
