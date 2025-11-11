@@ -16,11 +16,6 @@ export type Branch = {
   is_open?: true;
 };
 
-export type RestaurantData = {
-  id: string;
-  name: string;
-};
-
 export type Restaurant = {
   id: string;
   name: string;

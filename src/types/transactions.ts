@@ -72,21 +72,25 @@ export type OrderItem = {
   price: number;
   category: string;
   quantity: number;
-  description: string;
-  image?: string;
+  description?: string;
+  image_url?: string;
 };
+
+type OrderStatus = "success" | "pending" | "failed" | "completed" | "cancelled";
 
 export type Order = {
   id: string;
-  items: OrderItem[];
-  total: number;
-  status: "success" | "pending" | "failed" | "completed" | "cancelled";
-  payment_method?: string;
-  pickup_time?: string;
-  created_at: string;
-  user_id: string;
   name: string;
   phone: string;
+  email: string;
+  items: OrderItem[];
+  payment_method?: string;
+  total: number;
+  status: OrderStatus;
+  pickup_date: string;
+  pickup_time: string;
+  special_instructions?: string;
+  created_at: string;
 };
 
 export type RawAnalyticsResponse = {
