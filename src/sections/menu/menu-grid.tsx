@@ -21,7 +21,7 @@ import {
 
 import { Badge } from "@ui/badge";
 import { Button } from "@ui/button";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { MenuItem } from "@/types/menu";
 import Link from "next/link";
@@ -59,22 +59,34 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
       {items.map((item, index) => (
         <Card key={index} className="py-0 pb-5 overflow-hidden">
           <div className="relative h-48">
-            <Image
-              src={item.image_url || "/placeholder.jpg"}
-              alt={item.name}
-              fill
-              className="object-cover"
-              {...(item.lqip && {
-                placeholder: "blur",
-                blurDataURL: item.lqip,
-              })}
-            />
+           {item.image_url ? (
+  <Image
+    src={item.image_url}
+    alt={item.name}
+    fill
+    className="object-cover"
+    {...(item.lqip && {
+      placeholder: "blur",
+      blurDataURL: item.lqip,
+    })}
+  />
+) : (
+  <div
+    role="img"
+    aria-label={`${item.name} image not available`}
+    className="flex gap-2 h-full w-full items-center justify-center bg-muted text-muted-foreground dark:bg-muted/50"
+  >
+    <ImageIcon className="size-6"/>
+    <span className="text-sm font-medium">No image</span>
+  </div>
+)}
+
           </div>
           <CardHeader>
             <div className="flex justify-between items-start">
               <CardTitle className="text-lg">{item.name}</CardTitle>
               <Badge
-                variant={item.is_available ? "default" : "secondary"}
+                variant={item.is_available ? "secondary" : "outline"}
                 className="ml-2"
               >
                 {item.is_available ? "Available" : "Unavailable"}
@@ -86,7 +98,7 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center mb-3">
-              <span className="text-lg font-bold">Ksh{item.price}</span>
+              <span className="text-lg font-bold">Ksh{" "}{item.price}</span>
               <Badge variant="outline" className="capitalize">
                 {item.category}
               </Badge>
