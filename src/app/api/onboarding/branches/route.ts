@@ -112,7 +112,7 @@ export async function DELETE(req: NextRequest) {
     return createResponse<null>(401, "The branch id is required", null, false);
   }
 
-  const { data, error: deleteError } = await supabase
+  const { error: deleteError } = await supabase
     .from("branch_settings")
     .delete()
     .eq("id", id)

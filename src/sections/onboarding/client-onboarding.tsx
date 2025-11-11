@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { RestaurantInfoStep } from "@/sections/onboarding/restaurant-info-step";
 import { BranchesStep } from "@/sections/onboarding/branches-step";
 import { CompletionStep } from "@/sections/onboarding/completion-step";
-import { OnboardingBackgroundPattern } from "@/components/background-patterns/onboarding-pattern";
 import { ProgressBar } from "@/sections/onboarding/progress-bar";
 import { OnboardingFooter } from "@/sections/onboarding/footer";
 import { OnboardingStep, RestaurantInfo } from "@/types/onboarding";
