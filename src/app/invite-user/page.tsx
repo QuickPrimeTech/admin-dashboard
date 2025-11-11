@@ -1,7 +1,7 @@
 // app/invite-user/page.tsx
 import { InviteSignupForm } from "@/sections/invite-user/invite-form";
 import { InvalidLinkMessage } from "@/sections/invite-user/invalid-message";
-import { supabase } from "@/lib/server/supabase";
+import { createClient } from "@/utils/supabase/server";
 import { isAfter } from "date-fns";
 import { Metadata } from "next";
 
@@ -18,6 +18,8 @@ export async function generateMetadata({
   if (!token) {
     return { title: "Invalid Token - QuickPrimeTech" };
   }
+
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("invite_tokens")
@@ -52,6 +54,7 @@ export default async function InviteUserPage({
       />
     );
   }
+    const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("invite_tokens")
