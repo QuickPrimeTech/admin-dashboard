@@ -1,7 +1,7 @@
 // app/api/menu-items/route.ts
 import { NextRequest } from "next/server";
 
-import { cloudinary } from "@/lib/server/server";
+import { cloudinary } from "@/utils/cloudinary/server";
 import {
   getSanitizedRestaurantName,
   getAuthenticatedUser,
@@ -74,7 +74,17 @@ export async function POST(request: NextRequest) {
       uploadedImageUrl = uploadResult.secure_url;
       publicId = uploadResult.public_id;
     }
+    //Getting the authorised user;
+    const {data: {user}, error: userError} = await supabase.auth.getUser();
 
+    if(userError) {
+      return createResponse(403, "Anauthorised request");
+    }
+
+    const branch_id = user?.user_metadata.branch_id;
+    if(!branch_id) {
+      return createResponse(403, "You have to select a branch first before creating a menu item");
+    }
     // Prepare new menu item
     const newMenuItem = {
       name: data.name,
@@ -89,6 +99,7 @@ export async function POST(request: NextRequest) {
       end_time: data.end_time,
       dietary_preference: [],
       image_url: uploadedImageUrl,
+      branch_id,
       public_id: publicId,
     };
 
@@ -265,8 +276,6 @@ export async function PATCH(request: NextRequest) {
       public_id: publicId,
     };
 
-    // ⏳ Simulate delay for testing loading states
-    await new Promise((r) => setTimeout(r, 2000));
 
     // Update in Supabase
     const { data: updatedItem, error: updateError } = await supabase
@@ -306,8 +315,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   // Checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (response) return response;
+const supabase = await createClient();
 
   try {
     const { searchParams } = new URL(request.url);
@@ -321,7 +329,6 @@ export async function DELETE(request: NextRequest) {
       .from("menu_items")
       .select("public_id")
       .eq("id", id)
-      .eq("user_id", user.id)
       .single();
 
     if (fetchError || !item) {
@@ -336,7 +343,6 @@ export async function DELETE(request: NextRequest) {
       .from("menu_items")
       .delete()
       .eq("id", id)
-      .eq("user_id", user.id);
 
     if (deleteError) {
       return errorResponse(

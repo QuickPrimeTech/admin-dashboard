@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
-import { cloudinary } from "@/lib/server/server";
+import { cloudinary } from "@/utils/cloudinary/server";
 import { UploadResult } from "@/types/cloudinary";
 
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
