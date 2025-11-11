@@ -209,14 +209,18 @@ export function InviteSignupForm() {
                         <span className="inline">
                           I agree to the{" "}
                           <Link
-                            href="/terms"
+                            href="https://quickprimetech.com/terms-service"
+                            rel="noopener noreferrer"
+                            target="_blank"
                             className="text-primary hover:underline"
                           >
                             Terms of Service
                           </Link>{" "}
                           and{" "}
                           <Link
-                            href="/privacy"
+                            href="https://quickprimetech.com/privacy-policy"
+                            rel="noopener noreferrer"
+                            target="_blank"
                             className="text-primary hover:underline"
                           >
                             Privacy Policy
