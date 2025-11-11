@@ -26,7 +26,7 @@ import {
 } from "@ui/empty";
 import { Skeleton } from "@ui/skeleton";
 import { Badge } from "@ui/badge";
-import type { AnalyticsData } from "@/types/transactions/analytics";
+import type { AnalyticsData } from "@/types/transactions";
 
 type CustomersSectionProps = {
   data?: AnalyticsData["data"];

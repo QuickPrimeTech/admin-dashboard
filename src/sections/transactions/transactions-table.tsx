@@ -45,26 +45,8 @@ import { Skeleton } from "@ui/skeleton";
 import Link from "next/link";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@ui/hover-card";
 import { formatDate, formatTime12Hour } from "@/utils/date-formatters";
+import { ApiResponse, Payment } from "@/types/transactions";
 
-export type Payment = {
-  id: string;
-  order_id: string;
-  phone: string;
-  amount: number;
-  status: "pending" | "success" | "failed";
-  created_at: string;
-  user_id: string;
-  order?: {
-    name: string;
-  };
-};
-
-type ApiResponse = {
-  status: number;
-  success: boolean;
-  message: string;
-  data?: Payment[];
-};
 type TransactionsTableProps = {
   phone?: string;
 };

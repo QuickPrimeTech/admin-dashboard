@@ -1,3 +1,24 @@
+export type ApiResponse = {
+  status: number;
+  success: boolean;
+  message: string;
+  data?: Payment[];
+};
+
+export type Payment = {
+  id: string;
+  order_id: string;
+  phone: string;
+  amount: number;
+  status: "pending" | "success" | "failed";
+  created_at: string;
+  user_id: string;
+  order?: {
+    name: string;
+  };
+};
+
+/* --------------------ANALYTICS TYPES ---------------------- */
 export type AnalyticsData = {
   success: boolean;
   data: {
@@ -43,16 +64,6 @@ export type AnalyticsData = {
       }>;
     };
   };
-};
-
-export type Payment = {
-  id: string;
-  amount: number;
-  status: "success" | "failed" | "pending";
-  created_at: string;
-  phone: string;
-  user_id: string;
-  order_id: string;
 };
 
 export type OrderItem = {

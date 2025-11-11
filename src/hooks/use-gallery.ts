@@ -2,7 +2,7 @@
 
 import { ApiResponse } from "@/helpers/api-responses";
 import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
-import { ServerGalleryItem } from "@/types/gallery";
+import { GalleryItem } from "@/types/gallery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -35,7 +35,7 @@ const fetchGalleryItems = async () => {
 
 //Query for getting all the gallery items
 export function useGalleryQuery() {
-  return useQuery<ServerGalleryItem[]>({
+  return useQuery<GalleryItem[]>({
     queryKey: GALLERY_ITEMS_QUERY_KEY,
     queryFn: fetchGalleryItems,
   });
@@ -45,13 +45,13 @@ export function useCreateGalleryItemMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ApiResponse<ServerGalleryItem>, // Success type
+    ApiResponse<GalleryItem>, // Success type
     AxiosError<ApiResponse<null>>, // Error type
     FormData, // Variables
-    { prevGalleryItems?: ServerGalleryItem[] }
+    { prevGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async (formData) => {
-      const res = await axios.post<ApiResponse<ServerGalleryItem>>(
+      const res = await axios.post<ApiResponse<GalleryItem>>(
         "/api/gallery",
         formData,
         {
@@ -64,7 +64,7 @@ export function useCreateGalleryItemMutation() {
     onMutate: async (newFormData) => {
       await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
 
-      const prevGalleryItems = queryClient.getQueryData<ServerGalleryItem[]>(
+      const prevGalleryItems = queryClient.getQueryData<GalleryItem[]>(
         GALLERY_ITEMS_QUERY_KEY
       );
 
@@ -72,7 +72,7 @@ export function useCreateGalleryItemMutation() {
       const previewUrl = newFormData.get("file")
         ? URL.createObjectURL(newFormData.get("file") as File)
         : "";
-      const tempItem: ServerGalleryItem = {
+      const tempItem: GalleryItem = {
         id: Math.random(), // temporary unique ID
         title: newFormData.get("title") as string,
         description: newFormData.get("description") as string,
@@ -138,10 +138,10 @@ export function useUpdateGalleryItemMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ApiResponse<ServerGalleryItem>,
+    ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
-    { formData: FormData; updatedItem: ServerGalleryItem },
-    { previousGalleryItems?: ServerGalleryItem[] }
+    { formData: FormData; updatedItem: GalleryItem },
+    { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async ({ formData }) => {
       const res = await axios.patch(`/api/gallery`, formData);
@@ -152,15 +152,15 @@ export function useUpdateGalleryItemMutation() {
       await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
-      const previousGalleryItems = queryClient.getQueryData<
-        ServerGalleryItem[]
-      >(GALLERY_ITEMS_QUERY_KEY);
+      const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
+        GALLERY_ITEMS_QUERY_KEY
+      );
 
       //Getting the id from the formData
       const id = updatedItem.id;
 
       //Updating  the gallery item from the cache for the user to get immediate feedback
-      queryClient.setQueryData<ServerGalleryItem[]>(
+      queryClient.setQueryData<GalleryItem[]>(
         GALLERY_ITEMS_QUERY_KEY,
         (old) => {
           return old?.map((galleryItem) =>
@@ -198,10 +198,10 @@ export function useDeleteGalleryItemMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ApiResponse<ServerGalleryItem>,
+    ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
     number,
-    { previousGalleryItems?: ServerGalleryItem[] }
+    { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async (id) => {
       const res = await axios.delete(`/api/gallery?id=${id}`);
@@ -212,12 +212,12 @@ export function useDeleteGalleryItemMutation() {
       await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
-      const previousGalleryItems = queryClient.getQueryData<
-        ServerGalleryItem[]
-      >(GALLERY_ITEMS_QUERY_KEY);
+      const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
+        GALLERY_ITEMS_QUERY_KEY
+      );
 
       //Removing the gallery item from the cache for the user to get immediate feedback
-      queryClient.setQueryData<ServerGalleryItem[]>(
+      queryClient.setQueryData<GalleryItem[]>(
         GALLERY_ITEMS_QUERY_KEY,
         (old) => {
           return old?.filter((galleryItem) => galleryItem.id !== id);
@@ -264,10 +264,10 @@ export function useTogglePublishedMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ApiResponse<ServerGalleryItem>,
+    ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
     { id: number; is_published: boolean },
-    { previousGalleryItems?: ServerGalleryItem[] }
+    { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async (updatedItem) => {
       const res = await axios.patch(
@@ -281,12 +281,12 @@ export function useTogglePublishedMutation() {
       await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
-      const previousGalleryItems = queryClient.getQueryData<
-        ServerGalleryItem[]
-      >(GALLERY_ITEMS_QUERY_KEY);
+      const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
+        GALLERY_ITEMS_QUERY_KEY
+      );
 
       //Updating the is_published to the one passed from the form
-      queryClient.setQueryData<ServerGalleryItem[]>(
+      queryClient.setQueryData<GalleryItem[]>(
         GALLERY_ITEMS_QUERY_KEY,
         (old) => {
           return old?.map((galleryItem) =>

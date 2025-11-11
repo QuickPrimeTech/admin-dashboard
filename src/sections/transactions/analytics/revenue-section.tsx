@@ -12,7 +12,7 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@ui/chart";
 import { Skeleton } from "@ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
-import type { AnalyticsData } from "@/types/transactions/analytics";
+import type { AnalyticsData } from "@/types/transactions";
 
 type RevenueSectionProps = {
   data?: AnalyticsData["data"];

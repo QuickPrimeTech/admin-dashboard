@@ -12,7 +12,7 @@ import { CustomersSection } from "@/sections/transactions/analytics/customers-se
 import { TimePatterns } from "@/sections/transactions/analytics/time-patterns";
 import { PopularItems } from "@/sections/transactions/analytics/popular-items";
 import { ButtonGroup } from "@ui/button-group";
-import { AnalyticsData } from "@/types/transactions/analytics";
+import { AnalyticsData } from "@/types/transactions";
 import { transformAnalytics } from "@/utils/transactions/analytics/use-analytics";
 import {
   DropdownMenu,

@@ -5,7 +5,7 @@ import {
   formSchema,
   FormData as FormDataProps,
 } from "@/schemas/gallery-item-schema";
-import { ServerGalleryItem } from "@/types/gallery"; // assume you have a type for existing item
+import { GalleryItem } from "@/types/gallery"; // assume you have a type for existing item
 import { buildGalleryFormData } from "@/helpers/galleryHelpers";
 import {
   useCreateGalleryItemMutation,
@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
 
 export function useGalleryItemForm(
-  item: ServerGalleryItem | null | undefined,
+  item: GalleryItem | null | undefined,
   onOpenChange: (open: boolean) => void
 ) {
   //Mutation function for adding a gallery Item
