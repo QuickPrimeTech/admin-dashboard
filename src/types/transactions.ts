@@ -91,6 +91,7 @@ export type Order = {
   pickup_time: string;
   special_instructions?: string;
   created_at: string;
+  user_id: string;
 };
 
 export type RawAnalyticsResponse = {

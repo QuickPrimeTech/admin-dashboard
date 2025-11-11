@@ -10,14 +10,3 @@ export interface MenuItem extends AvailabilityFormData, BasicInfoFormData {
   lqip: string;
   id: string;
 }
-
-export type FormDataFields = {
-  id?: string;
-  name: string;
-  description: string;
-  price: string;
-  category: string;
-  is_available: string | boolean;
-  dietary_preference?: string[];
-  image_url?: string;
-};

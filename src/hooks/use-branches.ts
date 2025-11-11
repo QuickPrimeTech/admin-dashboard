@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { BranchFormValues } from "@/schemas/onboarding";
 import { createClient } from "@/utils/supabase/client";
 
-export const BRANCHES_QUERY_KEY = ["branches"];
+const BRANCHES_QUERY_KEY = ["branches"];
 
 export function useBranchesQuery() {
   return useQuery({
@@ -54,10 +54,11 @@ export function useGetCurrentBranch() {
 
       // 4️⃣ Find branch matching the current user
       let currentBranch = null;
-      if(branches) {
-
+      if (branches) {
         currentBranch =
-        branches.find((branch) => branch.id === user.user_metadata.branch_id) || null;
+          branches.find(
+            (branch) => branch.id === user.user_metadata.branch_id
+          ) || null;
       }
 
       return currentBranch;
