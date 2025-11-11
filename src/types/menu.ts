@@ -4,19 +4,6 @@ import {
   ChoiceFormData,
 } from "@/schemas/menu";
 
-export interface ChoiceOption {
-  label: string;
-  price?: number;
-}
-
-export interface Choice {
-  id?: string;
-  title: string;
-  required?: boolean;
-  maxSelectable?: number;
-  options: ChoiceOption[];
-}
-
 export interface MenuItem extends AvailabilityFormData, BasicInfoFormData {
   choices: ChoiceFormData[];
   image_url: string;
