@@ -41,6 +41,7 @@ export async function getMenuItemById(itemId: string) {
 export async function getSanitizedPath(): Promise<string> {
   const supabase = await createClient();
 
+  //Get the restaurant name from the restaurant table
   const { data: restaurant, error } = await supabase
     .from("restaurants")
     .select("name")
@@ -50,12 +51,42 @@ export async function getSanitizedPath(): Promise<string> {
     throw new Error("Restaurant not found for this user");
   }
 
-  const sanitized = restaurant.name
+  //Get the current branch of the restaurant
+  const {data: {user}, error: userError} = await supabase.auth.getUser();
+
+  //catching the error
+  if(userError) {
+    throw new Error(userError.message)
+  }
+  const currentBranchId = user?.user_metadata.branch_id;
+
+  if(!currentBranchId) {
+    throw new Error("You need to select a branc before starting creating and updating menu items");
+  }
+
+  //Getting the branchName
+
+  const {data: branchData, error: branchError} = await supabase.from("branch_settings").select('name').eq("id", currentBranchId).single()
+
+  // catching error while fetching the current branch
+  if (branchError || !branchData.name) {
+    throw new Error("There was an error getting your current branch")
+  }
+
+  const currentBranchName = branchData.name;
+
+   // Create sanitized path
+  const sanitizedRestaurant = restaurant.name
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9\-]/g, "");
 
-  return sanitized;
+  const sanitizedBranch = currentBranchName
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
+
+    return `${sanitizedRestaurant}/${sanitizedBranch}`;
 }
 
 //This is the function that gets the folder path and uploads the image

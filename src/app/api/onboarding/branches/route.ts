@@ -107,7 +107,6 @@ export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
-  console.log(id);
   if (!id) {
     return createResponse<null>(401, "The branch id is required", null, false);
   }
@@ -118,6 +117,7 @@ export async function DELETE(req: NextRequest) {
     .eq("id", id)
     .select()
     .single();
+
   if (deleteError) {
     return createResponse<null>(
       500,
