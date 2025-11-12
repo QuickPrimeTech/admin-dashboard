@@ -1,37 +1,29 @@
 // /app/api/stats/route.ts
 import { NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/helpers/common";
+import { createClient } from "@/utils/supabase/server";
 
 export async function GET() {
-  const { user, response, supabase } = await getAuthenticatedUser();
-
-  if (response) {
-    return response;
-  }
+  const supabase = await createClient();
 
   try {
     const [menuRes, reservationsRes, eventsRes, galleryRes] = await Promise.all(
       [
         supabase
           .from("menu_items")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id),
+          .select("*", { count: "exact", head: true }),
 
         supabase
           .from("reservations")
           .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id)
           .eq("status", "pending"),
 
         supabase
           .from("private_events")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id),
+          .select("*", { count: "exact", head: true }),
 
         supabase
           .from("gallery")
           .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id),
       ]
     );
 

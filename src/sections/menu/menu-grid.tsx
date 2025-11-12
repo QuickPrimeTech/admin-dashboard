@@ -1,11 +1,10 @@
 "use client";
-
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@ui/card";
 import {
   AlertDialog,
@@ -16,12 +15,11 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogAction
 } from "@ui/alert-dialog";
-
 import { Badge } from "@ui/badge";
 import { Button } from "@ui/button";
-import { Edit, Trash2, Plus, ImageIcon } from "lucide-react";
+import { Edit, Trash2, Plus, ImageOff } from "lucide-react";
 import Image from "next/image";
 import { MenuItem } from "@/types/menu";
 import Link from "next/link";
@@ -72,13 +70,25 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
   />
 ) : (
   <div
-    role="img"
-    aria-label={`${item.name} image not available`}
-    className="flex gap-2 h-full w-full items-center justify-center bg-muted text-muted-foreground dark:bg-muted/50"
-  >
-    <ImageIcon className="size-6"/>
+  role="img"
+  aria-label={`${item.name} image not available`}
+  className="flex flex-col items-center justify-center h-full w-full 
+             bg-linear-to-br from-muted to-background/50 
+             dark:from-muted/30 dark:to-muted/10 
+             text-muted-foreground
+             border border-border/50
+             rounded-md
+             transition-colors
+             hover:from-muted/80 hover:to-background/60"
+>
+  <div className="flex items-center gap-2">
+    <div className="p-2 rounded-full bg-muted-foreground/10">
+      <ImageOff className="size-6 opacity-70" />
+    </div>
     <span className="text-sm font-medium">No image</span>
   </div>
+</div>
+
 )}
 
           </div>
