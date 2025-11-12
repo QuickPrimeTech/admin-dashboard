@@ -175,8 +175,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (response) return response;
+  const supabase = await createClient();
 
   try {
     const formData = await request.formData();
@@ -282,7 +281,6 @@ export async function PATCH(request: NextRequest) {
       .from("menu_items")
       .update(updatePayload)
       .eq("id", id)
-      .eq("user_id", user.id)
       .select()
       .single();
 
