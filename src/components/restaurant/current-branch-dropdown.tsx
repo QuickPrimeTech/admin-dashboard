@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useBranchesQuery, useGetCurrentBranch } from "@/hooks/use-branches";
 import { Skeleton } from "@ui/skeleton";
@@ -15,7 +14,7 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@ui/dropdown-menu";
 import Link from "next/link";
 import { RestaurantName } from "./restaurant-name";
@@ -61,9 +60,9 @@ export function CurrentBranchDropdown() {
       <DropdownMenuTrigger asChild>
         <div
           className="
-            flex items-center gap-2 px-3 py-2 w-56 rounded-md
+            flex items-center gap-2 px-3 py-2 rounded-md
             hover:bg-secondary transition-colors cursor-pointer
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shadow-md
           "
         >
           <div className="flex items-center justify-center rounded-full bg-primary text-primary-foreground h-6 w-6">
@@ -119,5 +118,6 @@ export function CurrentBranchDropdown() {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+        
   );
 }

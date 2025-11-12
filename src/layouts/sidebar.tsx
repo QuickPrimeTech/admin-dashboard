@@ -7,6 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarSeparator,
 } from "@ui/sidebar";
 import { SidebarMenuGroups } from "./sidebar-menu-items";
 import { SidebarLogout } from "./sidebar-logout";
@@ -26,6 +27,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        <SidebarSeparator className="mx-0" />
         {/* All menu groups rendered from client component */}
         <SidebarMenuGroups />
       </SidebarContent>
