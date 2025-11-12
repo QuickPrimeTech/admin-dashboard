@@ -62,9 +62,11 @@ export function DynamicSelect<
     }
   }, [serverCategories, field.value]);
 
+  console.log("This is the field ---->", field);
   return (
     <>
       <Select
+        key={field.value}
         onValueChange={(v) =>
           v === "__ADD__" ? setOpen(true) : field.onChange(v)
         }

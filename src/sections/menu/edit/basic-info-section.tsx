@@ -43,6 +43,7 @@ export default function BasicInfoSection() {
     },
   });
 
+  console.log("Server data for updated menu item ------->", serverData);
   useEffect(() => {
     if (serverData) {
       form.reset({
