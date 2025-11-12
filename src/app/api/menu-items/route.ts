@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 import { cloudinary } from "@/utils/cloudinary/server";
 import {
-  getSanitizedRestaurantName,
+  getSanitizedPath,
   getAuthenticatedUser,
   uploadImageToCloudinary,
   uploadAndReplaceImage,
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     let uploadedImageUrl: string | null = null;
     let publicId: string | null = null;
     const imageFile = data.image as File | null;
-    const sanitizedRestaurantName = await getSanitizedRestaurantName();
+    const sanitizedRestaurantName = await getSanitizedPath();
 
     if (imageFile) {
       const uploadResult = await uploadImageToCloudinary(
@@ -251,7 +251,7 @@ export async function PATCH(request: NextRequest) {
 
     // 🧩 Case 1: Upload new image
     if (imageFile && imageFile.size > 0) {
-      const sanitizedRestaurantName = await getSanitizedRestaurantName();
+      const sanitizedRestaurantName = await getSanitizedPath();
       const uploadResult = await uploadAndReplaceImage(
         imageFile,
         `${sanitizedRestaurantName}/menu-items`,

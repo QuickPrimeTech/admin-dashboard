@@ -38,7 +38,7 @@ export async function getMenuItemById(itemId: string) {
 }
 
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
-export async function getSanitizedRestaurantName(): Promise<string> {
+export async function getSanitizedPath(): Promise<string> {
   const supabase = await createClient();
 
   const { data: restaurant, error } = await supabase

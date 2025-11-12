@@ -6,7 +6,7 @@ import {
   deleteImageFromCloudinary,
   errorResponse,
   successResponse,
-  getSanitizedRestaurantName,
+  getSanitizedPath,
 } from "@/helpers/common";
 import { GalleryItemInsert, GalleryItem } from "@/types/gallery";
 import { createClient } from "@/utils/supabase/server";
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     if (!file) return createResponse(400, "No file uploaded");
 
-    const sanitizedRestaurantName = await getSanitizedRestaurantName();
+    const sanitizedRestaurantName = await getSanitizedPath();
 
     // --- Upload to Cloudinary safely ---
     let uploadResult;
@@ -145,7 +145,7 @@ export async function PATCH(req: NextRequest) {
     let publicId = data.public_id;
 
     //Getting the restaurant name from the db
-    const sanitizedRestaurantName = await getSanitizedRestaurantName();
+    const sanitizedRestaurantName = await getSanitizedPath();
 
     // ----- THIS PART NEEDS IMPROVEMENT - THE DATA SHOULD NOT BE UPDATED IN SUPABASE IF THE IMAGE ISN'T REPLACED ------
     //Replacing the incoming image from cloudinary with the incoming one
