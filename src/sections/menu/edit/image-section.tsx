@@ -216,8 +216,19 @@ export function ImageSection() {
                             variant="destructive"
                             disabled={isPending}
                           >
-                            <Trash2 className="mr-2 h-4 w-4" /> Save Changes
-                            (Delete Image)
+                            {
+                              isPending ? (
+                                <>
+                                <Spinner />
+                                Deleting image...
+                                </>
+                              ):(
+                                <>
+                                <Trash2 /> Save Changes
+                                (Delete Image)
+                                </>
+                              )
+                            }
                           </Button>
                         </AlertDialogTrigger>
 
