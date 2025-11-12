@@ -246,15 +246,6 @@ export function useCategoriesQuery() {
     queryFn: async (): Promise<string[]> => {
       const supabase = createClient();
 
-      // 1️⃣ Ensure user is authenticated
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError) throw userError;
-      if (!user) throw new Error("You must be logged in to view categories.");
-
       //Try to get cached menu items
       const cachedMenuItems =
         queryClient.getQueryData<MenuItem[]>(MENU_ITEMS_QUERY_KEY);
@@ -271,7 +262,6 @@ export function useCategoriesQuery() {
       const { data, error } = await supabase
         .from("menu_items")
         .select("category")
-        .eq("user_id", user.id);
 
       if (error) throw error;
 

@@ -65,7 +65,6 @@ export function DynamicSelect<
   return (
     <>
       <Select
-        key={field.value}
         onValueChange={(v) =>
           v === "__ADD__" ? setOpen(true) : field.onChange(v)
         }
