@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useBranchesQuery, useGetCurrentBranch } from "@/hooks/use-branches";
 import { Skeleton } from "@ui/skeleton";
 import {
@@ -23,72 +23,29 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Branch } from "@/types/onboarding";
 import { switchBranch } from "@/app/actions/branches";
 import { useBranch } from "@providers/branch-provider";
+import { Button } from "../ui/button";
+import { useSidebar } from "../ui/sidebar";
 
-export function CurrentBranchDropdown() {
+type CurrentBranchDropdownContent = {
+  branches:  Branch[] | null | undefined;
+  selectedBranch: Branch | null | undefined;
+  setSelectedBranch:  Dispatch<SetStateAction<Branch | null | undefined>>;
+}
 
-  //Getting the setBranchId from the context
-  const {setBranchId, branchId} = useBranch();
-  //Calling the QueryClient
-  const queryClient = useQueryClient();
-  const { data: currentBranch, isLoading: isLoadingCurrent } =
-    useGetCurrentBranch(branchId);
+function CurrentBranchDropdownContent({branches,selectedBranch, setSelectedBranch}: CurrentBranchDropdownContent) {
 
-  const { data: branches, isLoading: isLoadingBranches } = useBranchesQuery();
-  const [selectedBranch, setSelectedBranch] = useState(currentBranch);
-
-  if (currentBranch && selectedBranch?.id !== currentBranch.id) {
-    setSelectedBranch(currentBranch);
-  }
-
-  const handleSwitchBranch = async (branch: Branch) => {
+const queryClient = useQueryClient();
+const {setBranchId} = useBranch();
+   const handleSwitchBranch = async (branch: Branch) => {
     setSelectedBranch(branch);
     queryClient.setQueryData(["current-branch"], branch); // update cache
     await switchBranch(branch.id);
     setBranchId(branch.id);
     
   };
-
-  if (isLoadingCurrent || isLoadingBranches) {
-    return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted w-56">
-        <Skeleton className="h-6 w-6 rounded-full" />
-        <div className="flex-1 space-y-1">
-          <Skeleton className="h-4 w-32 rounded-md" />
-          <Skeleton className="h-3 w-24 rounded-md" />
-        </div>
-        <Skeleton className="h-4 w-4 rounded-md" />
-      </div>
-    );
-  }
-
-  if (!selectedBranch) {
-    return <p className="truncate text-muted-foreground">No branch selected</p>;
-  }
-
+  
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <div
-          className="
-            flex items-center gap-2 px-3 py-2 rounded-md
-            hover:bg-secondary transition-colors cursor-pointer
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shadow-md
-          "
-        >
-          <div className="flex items-center justify-center rounded-full bg-primary text-primary-foreground h-6 w-6">
-            <ChefHat className="size-4" />
-          </div>
-          <div className="flex-1 flex flex-col text-sm leading-tight">
-            <RestaurantName />
-            <p className="truncate text-muted-foreground">
-              {selectedBranch.name}
-            </p>
-          </div>
-          <ChevronDown className="size-4 text-muted-foreground" />
-        </div>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="start" className="w-56">
+     <DropdownMenuContent align="start" className="w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs uppercase tracking-wide">
             Branch
@@ -127,6 +84,85 @@ export function CurrentBranchDropdown() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
+  )
+}
+
+export function CurrentBranchDropdown() {
+  const {state} = useSidebar();
+  //Getting the setBranchId from the context
+  const { branchId} = useBranch();
+  //Calling the QueryClient
+
+  const { data: currentBranch, isLoading: isLoadingCurrent } =
+    useGetCurrentBranch(branchId);
+
+  const { data: branches, isLoading: isLoadingBranches } = useBranchesQuery();
+  const [selectedBranch, setSelectedBranch] = useState(currentBranch);
+
+  if (currentBranch && selectedBranch?.id !== currentBranch.id) {
+    setSelectedBranch(currentBranch);
+  }
+
+ 
+
+  if (isLoadingCurrent || isLoadingBranches) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted w-56">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <div className="flex-1 space-y-1">
+          <Skeleton className="h-4 w-32 rounded-md" />
+          <Skeleton className="h-3 w-24 rounded-md" />
+        </div>
+        <Skeleton className="h-4 w-4 rounded-md" />
+      </div>
+    );
+  }
+
+  if (!selectedBranch) {
+    return <p className="truncate text-muted-foreground">No branch selected</p>;
+  }
+ if (state === "collapsed") {
+    // ICON-ONLY (fits 40×40 button)
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            title={currentBranch?.name}
+          >
+            <ChefHat className="text-primary" />
+          </Button>
+        </DropdownMenuTrigger>
+       <CurrentBranchDropdownContent branches={branches} setSelectedBranch={setSelectedBranch} selectedBranch={selectedBranch}/>
+      </DropdownMenu>
+    );
+  }
+// FULL VERSION (text + chevron)
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div
+          className="
+            flex items-center gap-2 px-3 py-2 rounded-md
+            hover:bg-secondary transition-colors cursor-pointer
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shadow-md
+          "
+        >
+          <div className="flex items-center justify-center rounded-full bg-primary text-primary-foreground h-6 w-6">
+            <ChefHat className="size-5" />
+          </div>
+          <div className="flex-1 flex flex-col text-sm leading-tight">
+            <RestaurantName />
+            <p className="truncate text-muted-foreground">
+              {selectedBranch.name}
+            </p>
+          </div>
+          <ChevronDown className="size-4 text-muted-foreground" />
+        </div>
+      </DropdownMenuTrigger>
+      <CurrentBranchDropdownContent branches={branches} setSelectedBranch={setSelectedBranch} selectedBranch={selectedBranch}/>
     </DropdownMenu>
         
   );
