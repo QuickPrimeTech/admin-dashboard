@@ -56,14 +56,7 @@ export async function getSanitizedPath(): Promise<string> {
     throw new Error("Restaurant not found for this user");
   }
 
-  //Get the current branch of the restaurant
-  const {data: {user}, error: userError} = await supabase.auth.getUser();
-
-  //catching the error
-  if(userError) {
-    throw new Error(userError.message)
-  }
-  const currentBranchId = user?.user_metadata.branch_id;
+  const currentBranchId =await getCurrentBranchId();
 
   if(!currentBranchId) {
     throw new Error("You need to select a branc before starting creating and updating menu items");
