@@ -4,8 +4,8 @@ import "./globals.css";
 import { Toaster } from "@ui/sonner";
 import { ThemeProvider } from "@providers/theme-provider";
 import { QueryProvider } from "@providers/query-provider";
-import { cookies } from "next/headers";
 import { BranchProvider } from "@providers/branch-provider";
+import { getCurrentBranchId } from "@/helpers/common";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +27,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const branchId = (await cookies()).get('app_branch')?.value ?? '';
+  //Getting the current branch in order to pass it to the client
+  const branchId = await getCurrentBranchId() ?? '';
   return (
     <html lang="en" suppressHydrationWarning>
       <body

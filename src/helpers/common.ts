@@ -4,7 +4,12 @@ import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { cloudinary } from "@/utils/cloudinary/server";
 import { UploadResult } from "@/types/cloudinary";
+import { cookies } from "next/headers";
 
+//This function gets the current branch Id from the cookies setting
+export async function getCurrentBranchId() {
+  return (await cookies()).get('app_branch')?.value;
+}
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
 export async function getAuthenticatedUser() {
   const supabase = await createClient();
