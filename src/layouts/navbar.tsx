@@ -36,7 +36,7 @@ export function AppNavbar() {
 
   return (
     <>
-      <header className="flex h-16 sticky top-0 z-50 shrink-0 items-center gap-2 border-b bg-background px-4">
+      <header className="flex h-16 sticky top-0 z-50 shrink-0 items-center gap-2 border-b bg-background/70 backdrop-blur-lg px-4">
         <Tooltip>
           <TooltipTrigger asChild>
             <SidebarTrigger className="-ml-1" />
