@@ -5,7 +5,8 @@ import {
   deleteImageFromCloudinary,
   errorResponse,
   successResponse,
-  getSanitizedPath
+  getSanitizedPath,
+  getCurrentBranchId
 } from "@/helpers/common";
 import { GalleryItemInsert, GalleryItem } from "@/types/gallery";
 import { createClient } from "@/utils/supabase/server";
@@ -98,9 +99,11 @@ export async function GET() {
   const supabase = await createClient();
 
   try {
+  const branchId = await getCurrentBranchId();
+
     const { data, error } = await supabase
       .from("gallery")
-      .select("*")
+      .select("*").eq("branch_id", branchId)
       .order("created_at", { ascending: false });
 
     if (error){
