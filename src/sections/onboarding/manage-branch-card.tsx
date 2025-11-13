@@ -18,10 +18,13 @@ export function ManageBranchCard({ branch }: ManageBranchCardProps) {
       data: { branch_id: branch.id },
     });
 
+
     if (error) {
       toast.error("Failed to select branch: ");
       return;
     }
+
+
     redirect("/dashboard");
   };
 

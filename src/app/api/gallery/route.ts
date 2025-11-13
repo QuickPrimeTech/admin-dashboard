@@ -92,24 +92,20 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 export async function GET() {
   //checking if the user is authenticated
   const supabase = await createClient();
 
-  const {data:{user}} = await supabase.auth.getUser();
-
-  console.log(user);
-const { data, error } = await supabase
-  .rpc('get_user_branch'); // or a SELECT that uses the RLS function
-
-  console.log("rpc data ---->",data, error);
   try {
     const { data, error } = await supabase
       .from("gallery")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) return createResponse(500, "Failed to fetch gallery items");
+    if (error){
+      console.log(error); return createResponse(500, "Failed to fetch gallery items");
+    }
 
     return createResponse(
       200,
