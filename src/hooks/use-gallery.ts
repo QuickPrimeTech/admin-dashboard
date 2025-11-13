@@ -54,13 +54,13 @@ export function useCreateGalleryItemMutation() {
   return useMutation<
     ApiResponse<GalleryItem>, // Success type
     AxiosError<ApiResponse<null>>, // Error type
-    FormData, // Variables
+    {formData: FormData, branchId: string}, // Variables
     { prevGalleryItems?: GalleryItem[] }
   >({
-    mutationFn: async (formData) => {
+    mutationFn: async (data) => {
       const res = await axios.post<ApiResponse<GalleryItem>>(
         "/api/gallery",
-        formData,
+        data.formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
@@ -68,49 +68,58 @@ export function useCreateGalleryItemMutation() {
       return res.data;
     },
     //  Optimistic update: instantly show the new image
-    onMutate: async (newFormData) => {
-      await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
+    onMutate: async (data) => {
+
+      const queryKey = getGalleryKey(data.branchId);
+
+      await queryClient.cancelQueries({ queryKey});
 
       const prevGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY
+        queryKey
       );
 
       // Create a temporary preview item (optimistic)
-      const previewUrl = newFormData.get("file")
-        ? URL.createObjectURL(newFormData.get("file") as File)
+      const previewUrl = data.formData.get("file")
+        ? URL.createObjectURL(data.formData.get("file") as File)
         : "";
       const tempItem: GalleryItem = {
         id: Math.random(), // temporary unique ID
-        title: newFormData.get("title") as string,
-        description: newFormData.get("description") as string,
-        category: newFormData.get("category") as string,
-        is_published: newFormData.get("is_published") === "true",
+        title: data.formData.get("title") as string,
+        description: data.formData.get("description") as string,
+        category: data.formData.get("category") as string,
+        is_published: data.formData.get("is_published") === "true",
         image_url: previewUrl,
         lqip: "aldfjdfad",
       };
 
       //Optimistically updating the temporary item so that the use sees instant results
-      queryClient.setQueryData(GALLERY_ITEMS_QUERY_KEY, [
+      queryClient.setQueryData(queryKey, [
         tempItem,
         ...(prevGalleryItems ?? []),
       ]);
 
       return { prevGalleryItems };
     },
-    onSuccess: (res, _variables, onMutateResult) => {
+    onSuccess: (res,data, onMutateResult) => {
+      const queryKey = getGalleryKey(data.branchId);
+      
       //Gettting the gallery image from the server
       const newItem = res.data;
+
       console.log(newItem);
       if (!newItem) return;
 
       toast.success(res.message || "Gallery image added successfully!");
 
-      queryClient.setQueryData(GALLERY_ITEMS_QUERY_KEY, [
+      queryClient.setQueryData(queryKey, [
         newItem,
         ...(onMutateResult.prevGalleryItems ?? []),
       ]);
     },
-    onError: (err, _variables, onMutateResult) => {
+    onError: (err, data, onMutateResult) => {
+      //Get the key to use for the specific branch
+      const queryKey = getGalleryKey(data.branchId);
+
       const message =
         err.response?.data?.message || "Failed to create gallery image";
       toast.error(message);
@@ -118,7 +127,7 @@ export function useCreateGalleryItemMutation() {
       //Rollback the changes by removing the gallery temporary gallery item from the cache
       if (onMutateResult?.prevGalleryItems) {
         queryClient.setQueryData(
-          GALLERY_ITEMS_QUERY_KEY,
+          queryKey,
           onMutateResult.prevGalleryItems
         );
       }

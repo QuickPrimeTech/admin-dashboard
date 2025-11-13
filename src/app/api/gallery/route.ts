@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     return createResponse(502, userError.message);
   }
 
-  const branch_id = user?.user_metadata.branch_id;
+  const branch_id = await getCurrentBranchId();
 
   if (!branch_id)  return createResponse(502, "You should select a branch first before creating a gallery photo");
 
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     return createResponse<GalleryItem>(
       200,
-      "Image uploaded to successfully",
+      "Your Gallery photo has been created successfully",
       data
     );
   } catch {

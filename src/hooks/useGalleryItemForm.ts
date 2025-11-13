@@ -13,11 +13,15 @@ import {
 } from "./use-gallery";
 import { toast } from "sonner";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
+import { useBranch } from "@providers/branch-provider";
 
 export function useGalleryItemForm(
   item: GalleryItem | null | undefined,
   onOpenChange: (open: boolean) => void
 ) {
+  //Get the branchId from the context
+  const {branchId} = useBranch();
+
   //Mutation function for adding a gallery Item
   const addMutation = useCreateGalleryItemMutation();
   //Mutation function for adding a gallery Item
@@ -109,7 +113,7 @@ export function useGalleryItemForm(
 
       onOpenChange(false);
       //Running the tanstack mutation query
-      addMutation.mutate(formData, {
+      addMutation.mutate({formData, branchId}, {
         onSuccess: () => {
           form.reset(); // clear form
           setSelectedFile(null);
