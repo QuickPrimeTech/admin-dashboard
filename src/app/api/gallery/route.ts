@@ -1,12 +1,11 @@
 import { NextRequest } from "next/server";
 import {
-  getAuthenticatedUser,
   uploadImageToCloudinary,
   uploadAndReplaceImage,
   deleteImageFromCloudinary,
   errorResponse,
   successResponse,
-  getSanitizedPath,
+  getSanitizedPath
 } from "@/helpers/common";
 import { GalleryItemInsert, GalleryItem } from "@/types/gallery";
 import { createClient } from "@/utils/supabase/server";
@@ -14,8 +13,18 @@ import { createResponse } from "@/helpers/api-responses";
 
 export async function POST(req: NextRequest) {
   // checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
+
+  //Get the info of the current logged in user
+  const {data: {user}, error: userError} = await supabase.auth.getUser();
+
+  if(userError) {
+    return createResponse(502, userError.message);
+  }
+
+  const branch_id = user?.user_metadata.branch_id;
+
+  if (!branch_id)  return createResponse(502, "You should select a branch first before creating a gallery photo");
 
   try {
     const formData = await req.formData();
@@ -59,7 +68,7 @@ export async function POST(req: NextRequest) {
       lqip,
       image_url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
-      user_id: user.id,
+      branch_id
     };
 
     //Inserting the item to the database
@@ -83,11 +92,17 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
 export async function GET() {
   //checking if the user is authenticated
   const supabase = await createClient();
 
+  const {data:{user}} = await supabase.auth.getUser();
+
+  console.log(user);
+const { data, error } = await supabase
+  .rpc('get_user_branch'); // or a SELECT that uses the RLS function
+
+  console.log("rpc data ---->",data, error);
   try {
     const { data, error } = await supabase
       .from("gallery")
@@ -110,10 +125,10 @@ export async function GET() {
   }
 }
 
+
 export async function PATCH(req: NextRequest) {
   //checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
 
   //Getting the data from the frontend
   const formData = await req.formData();
@@ -131,7 +146,6 @@ export async function PATCH(req: NextRequest) {
       .from("gallery")
       .select("public_id")
       .eq("id", Number(id))
-      .eq("user_id", user.id)
       .single();
 
     if (error)
@@ -173,7 +187,6 @@ export async function PATCH(req: NextRequest) {
       .from("gallery")
       .update(galleryItem)
       .eq("id", parseInt(id))
-      .eq("user_id", user.id);
 
     if (updateError)
       return errorResponse(
@@ -204,7 +217,7 @@ export async function DELETE(request: NextRequest) {
 
   //If there was an error gettin the data from supabase, I will then throw an error
   if (fetchError || !item) {
-    return errorResponse("Gallery item not found", 404, fetchError?.message);
+    return createResponse(404, fetchError?.message || "Gallery item was not found in the database");
   }
 
   // Delete from Cloudinary first

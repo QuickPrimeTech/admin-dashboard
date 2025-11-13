@@ -23,5 +23,5 @@ export type GalleryItemInsert = {
   category: string;
   public_id: string;
   lqip: string;
-  user_id: string;
+  branch_id: string;
 };
