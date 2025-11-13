@@ -156,20 +156,23 @@ export function useUpdateGalleryItemMutation() {
   return useMutation<
     ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
-    { formData: FormData; updatedItem: GalleryItem },
+    { formData: FormData; updatedItem: GalleryItem, branchId: string },
     { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async ({ formData }) => {
       const res = await axios.patch(`/api/gallery`, formData);
       return res.data;
     },
-    onMutate: async ({ updatedItem }) => {
+    onMutate: async ({ updatedItem, branchId }) => {
+        //Creating the queryKey from the branchId
+  const queryKey = getGalleryKey(branchId);
+
       //Canceling all the query request that are taking place to prevent intefering with the optimistic update
-      await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
       const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY
+        queryKey
       );
 
       //Getting the id from the formData
@@ -177,7 +180,7 @@ export function useUpdateGalleryItemMutation() {
 
       //Updating  the gallery item from the cache for the user to get immediate feedback
       queryClient.setQueryData<GalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY,
+        queryKey,
         (old) => {
           return old?.map((galleryItem) =>
             galleryItem.id === id ? updatedItem : galleryItem
@@ -188,14 +191,16 @@ export function useUpdateGalleryItemMutation() {
       //Returning the previous items for rollback on error
       return { previousGalleryItems };
     },
-    onError: (err, _id, onMutateResult) => {
+    onError: (err, {branchId}, onMutateResult) => {
+  const queryKey = getGalleryKey(branchId);  //Creating the queryKey from the branchId
+
       const message =
         err.response?.data.message ||
         "An error occurred while updating your gallery photo";
       //Rolling back to the previous galleryItems
       if (onMutateResult?.previousGalleryItems) {
         queryClient.setQueryData(
-          GALLERY_ITEMS_QUERY_KEY,
+          queryKey,
           onMutateResult.previousGalleryItems
         );
       }

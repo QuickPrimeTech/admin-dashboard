@@ -4,7 +4,6 @@ import {
   uploadAndReplaceImage,
   deleteImageFromCloudinary,
   errorResponse,
-  successResponse,
   getSanitizedPath,
   getCurrentBranchId
 } from "@/helpers/common";
@@ -128,7 +127,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   //checking if the user is authenticated
   const supabase = await createClient();
-
+  console.log("----------You've reached the updata function---------------")
   //Getting the data from the frontend
   const formData = await req.formData();
   const id = formData.get("id") as string;
@@ -137,6 +136,9 @@ export async function PATCH(req: NextRequest) {
   const description = formData.get("description") as string | null;
   const is_published = formData.get("is_published") === "true";
   const category = formData.get("category") as string | null;
+
+   let uploadedImageUrl = "";
+    let publicId = "";
 
   //If a file exists I want to replace the existing one with the incoming one
   if (file) {
@@ -154,8 +156,7 @@ export async function PATCH(req: NextRequest) {
         error.message
       );
 
-    let uploadedImageUrl = "";
-    let publicId = data.public_id;
+      publicId = data.public_id;
 
     //Getting the restaurant name from the db
     const sanitizedRestaurantName = await getSanitizedPath();
@@ -172,6 +173,8 @@ export async function PATCH(req: NextRequest) {
     uploadedImageUrl = uploadResult.secure_url;
     publicId = uploadResult.public_id;
 
+    }
+    
     //------ I SHOULD LATER PUT A TRY CATCH BLOCK FOR THE CLOUDINARY UPLOAD FUNCTION TO MAKE SURE THE DATA DOESN'T GO TO SUPABASE IF THAT FAILS ----
     const galleryItem = {
       title,
@@ -193,8 +196,8 @@ export async function PATCH(req: NextRequest) {
         500,
         updateError.message
       );
-    return successResponse("Successfully updated your gallery photo.");
-  }
+      
+    return createResponse(200, "Successfully updated your gallery photo.");
 }
 
 export async function DELETE(request: NextRequest) {

@@ -91,7 +91,7 @@ export function useGalleryItemForm(
       onOpenChange(false);
       //Running the tanstack mutation query
       updateMutation.mutate(
-        { formData, updatedItem },
+        { formData, updatedItem, branchId },
         {
           onSuccess: () => {
             form.reset(); // clear form
