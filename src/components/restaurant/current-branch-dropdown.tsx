@@ -22,11 +22,17 @@ import { ChefHat, ChevronDown, Building2, Settings } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Branch } from "@/types/onboarding";
 import { switchBranch } from "@/app/actions/branches";
+import { useBranch } from "@providers/branch-provider";
 
 export function CurrentBranchDropdown() {
+
+  //Getting the setBranchId from the context
+  const {setBranchId, branchId} = useBranch();
+  //Calling the QueryClient
   const queryClient = useQueryClient();
   const { data: currentBranch, isLoading: isLoadingCurrent } =
-    useGetCurrentBranch();
+    useGetCurrentBranch(branchId);
+
   const { data: branches, isLoading: isLoadingBranches } = useBranchesQuery();
   const [selectedBranch, setSelectedBranch] = useState(currentBranch);
 
@@ -38,6 +44,8 @@ export function CurrentBranchDropdown() {
     setSelectedBranch(branch);
     queryClient.setQueryData(["current-branch"], branch); // update cache
     await switchBranch(branch.id);
+    setBranchId(branch.id);
+    
   };
 
   if (isLoadingCurrent || isLoadingBranches) {

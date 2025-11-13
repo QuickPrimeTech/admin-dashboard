@@ -34,7 +34,7 @@ const fetchGalleryItems = async () => {
 };
 
 //Query for getting all the gallery items
-export function useGalleryQuery() {
+export function useGalleryQuery(branch_id: string) {
   return useQuery<GalleryItem[]>({
     queryKey: GALLERY_ITEMS_QUERY_KEY,
     queryFn: fetchGalleryItems,

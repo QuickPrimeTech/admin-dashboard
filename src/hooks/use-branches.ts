@@ -1,12 +1,11 @@
 // @/hooks/use-branches.ts
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/helpers/api-responses";
 import { Branch, Restaurant } from "@/types/onboarding";
 import { toast } from "sonner";
 import { BranchFormValues } from "@/schemas/onboarding";
-import { createClient } from "@/utils/supabase/client";
+
 
 const BRANCHES_QUERY_KEY = ["branches"];
 
@@ -23,7 +22,7 @@ export function useBranchesQuery() {
 }
 
 /* Get current branch for the logged-in user */
-export function useGetCurrentBranch() {
+export function useGetCurrentBranch(branchId: string) {
   const queryClient = useQueryClient();
 
   return useQuery({
@@ -43,21 +42,11 @@ export function useGetCurrentBranch() {
         queryClient.setQueryData(BRANCHES_QUERY_KEY, branches);
       }
 
-      // 3️⃣ Get current user from Supabase
-      const supabase = createClient(); // make sure this is client-side
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      if (error || !user) return null;
-
-      // 4️⃣ Find branch matching the current user
       let currentBranch = null;
       if (branches) {
         currentBranch =
           branches.find(
-            (branch) => branch.id === user.user_metadata.branch_id
+            (branch) => branch.id === branchId
           ) || null;
       }
 

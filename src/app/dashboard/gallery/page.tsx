@@ -10,10 +10,15 @@ import { GallerySkeletonGrid } from "@/sections/gallery/gallery-skeleton-grid";
 
 import { GalleryItem } from "@/types/gallery";
 import { useGalleryQuery } from "@/hooks/use-gallery";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export default function GalleryPage() {
-  // ✅ Fetch data with TanStack Query
-  const { data: response, isError, isPending, refetch } = useGalleryQuery();
+  //using the branchId from the context
+
+  const {branchId} = useBranch()
+  
+  //Fetch data with TanStack Query
+  const { data: response, isError, isPending, refetch } = useGalleryQuery(branchId);
 
   const galleryItems = response ?? [];
 
