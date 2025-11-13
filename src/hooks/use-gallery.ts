@@ -12,6 +12,10 @@ import { toast } from "sonner";
 //This is the name of the key to reuse
 export const GALLERY_ITEMS_QUERY_KEY = ["gallery-items"];
 
+const getGalleryKey = (branchId: string) => {
+  return [...GALLERY_ITEMS_QUERY_KEY, branchId]
+}
+
 //This is the function that runs for the fetch query
 const fetchGalleryItems = async () => {
   try {
@@ -35,8 +39,11 @@ const fetchGalleryItems = async () => {
 
 //Query for getting all the gallery items
 export function useGalleryQuery(branchId: string) {
+  //Creating the queryKey from the branchId
+  const queryKey = getGalleryKey(branchId);
+
   return useQuery<GalleryItem[]>({
-    queryKey: [...GALLERY_ITEMS_QUERY_KEY, branchId],
+    queryKey: queryKey,
     queryFn: fetchGalleryItems,
   });
 }
@@ -200,27 +207,30 @@ export function useDeleteGalleryItemMutation() {
   return useMutation<
     ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
-    number,
+    {id: number, branchId: string},
     { previousGalleryItems?: GalleryItem[] }
   >({
-    mutationFn: async (id) => {
-      const res = await axios.delete(`/api/gallery?id=${id}`);
+    mutationFn: async (data) => {
+      const res = await axios.delete(`/api/gallery?id=${data.id}`);
       return res.data;
     },
-    onMutate: async (id) => {
+    onMutate: async (data) => {
+
+      const queryKey = getGalleryKey(data.branchId);
+
       //Canceling all the query request that are taking place to prevent intefering with the optimistic update
-      await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
       const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY
+        queryKey
       );
 
       //Removing the gallery item from the cache for the user to get immediate feedback
       queryClient.setQueryData<GalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY,
+        queryKey,
         (old) => {
-          return old?.filter((galleryItem) => galleryItem.id !== id);
+          return old?.filter((galleryItem) => galleryItem.id !== data.id);
         }
       );
 
@@ -232,7 +242,10 @@ export function useDeleteGalleryItemMutation() {
       //Returning the previous items for rollback on error
       return { previousGalleryItems };
     },
-    onError: (err, _id, onMutateResult) => {
+    onError: (err, data, onMutateResult) => {
+
+      const queryKey = getGalleryKey(data.branchId);
+
       const message =
         err.response?.data.message ||
         "An error occurred while deleting your gallery photo";
@@ -240,7 +253,7 @@ export function useDeleteGalleryItemMutation() {
       //Rolling back to the previous galleryItems
       if (onMutateResult?.previousGalleryItems) {
         queryClient.setQueryData(
-          GALLERY_ITEMS_QUERY_KEY,
+          queryKey,
           onMutateResult.previousGalleryItems
         );
       }

@@ -34,12 +34,17 @@ import {
   useTogglePublishedMutation,
 } from "@/hooks/use-gallery";
 
+import { useBranch } from "@providers/branch-provider";
+
 interface Props {
   items: GalleryItem[];
   onEdit: (item: GalleryItem) => void;
 }
 
 export function GalleryGrid({ items, onEdit }: Props) {
+
+  //Getting the branchId from the context
+  const {branchId} = useBranch();
   //Delete mutation from TanstackQuery
   const deleteMutation = useDeleteGalleryItemMutation();
 
@@ -158,7 +163,7 @@ export function GalleryGrid({ items, onEdit }: Props) {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => deleteMutation.mutate(item.id)}
+                        onClick={() => deleteMutation.mutate({id: item.id, branchId})}
                         className="bg-destructive text-white hover:bg-destructive/90"
                       >
                         Yes, delete

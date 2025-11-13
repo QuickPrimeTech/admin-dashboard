@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useMemo } from "react";
 
 import { GalleryDialog } from "@/sections/gallery/gallery-dialog";
@@ -14,7 +15,6 @@ import { useBranch } from "@/components/providers/branch-provider";
 
 export default function GalleryPage() {
   //using the branchId from the context
-
   const {branchId} = useBranch()
   
   //Fetch data with TanStack Query
