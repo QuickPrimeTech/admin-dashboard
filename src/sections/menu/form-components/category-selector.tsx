@@ -103,6 +103,11 @@ export function CategorySelect<TFieldValues extends FieldValues>({
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
               autoFocus
+              onKeyDown={(e) => {
+                if(e.key === "Enter") {
+                  handleAddCustom();
+                }
+              }}
             />
           </div>
           <DialogFooter>

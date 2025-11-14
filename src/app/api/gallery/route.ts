@@ -15,13 +15,6 @@ export async function POST(req: NextRequest) {
   // checking if the user is authenticated
   const supabase = await createClient();
 
-  //Get the info of the current logged in user
-  const {data: {user}, error: userError} = await supabase.auth.getUser();
-
-  if(userError) {
-    return createResponse(502, userError.message);
-  }
-
   const branch_id = await getCurrentBranchId();
 
   if (!branch_id)  return createResponse(502, "You should select a branch first before creating a gallery photo");
