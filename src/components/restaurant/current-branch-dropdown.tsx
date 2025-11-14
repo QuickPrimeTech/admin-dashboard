@@ -127,12 +127,12 @@ export function CurrentBranchDropdown() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+          variant={"secondary"}
             size="icon"
             className="h-15.5 w-full"
             title={`${currentBranch?.name} (branch)`}
           >
-            <ChefHat className="text-primary" />
+            <ChefHat />
           </Button>
         </DropdownMenuTrigger>
        <CurrentBranchDropdownContent branches={branches} setSelectedBranch={setSelectedBranch} selectedBranch={selectedBranch}/>
@@ -154,10 +154,10 @@ export function CurrentBranchDropdown() {
           <div className="flex items-center justify-center rounded-full bg-primary text-primary-foreground h-6 w-6">
             <ChefHat className="size-5" />
           </div>
-          <div className="flex-1 flex flex-col text-sm leading-tight">
+          <div className="flex-1 flex flex-col text-sm leading-tight space-y-0.5">
             <RestaurantName />
             <p className="truncate text-muted-foreground">
-              {selectedBranch.name}
+              {selectedBranch.name} (branch)
             </p>
           </div>
           <ChevronDown className="size-4 text-muted-foreground" />
