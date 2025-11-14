@@ -1,9 +1,8 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { SidebarTrigger, useSidebar } from "@ui/sidebar";
-import { Button } from "@ui/button";
+import { Button} from "@ui/button";
 import { Bell, LogOut, Settings, User, UserIcon } from "lucide-react";
 import { Separator } from "@ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@ui/avatar";
@@ -13,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { logout } from "@/app/auth/actions/actions";
@@ -41,7 +40,7 @@ export function AppNavbar() {
           <TooltipTrigger asChild>
             <SidebarTrigger className="-ml-1" />
           </TooltipTrigger>
-          <TooltipContent className="bg-secondary text-secondary-foreground">
+          <TooltipContent>
             {state === "collapsed" ? "Open Sidebar" : "Close Sidebar"}
           </TooltipContent>
         </Tooltip>
