@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
       return createResponse(403, "Anauthorised request");
     }
 
-    const branch_id = getCurrentBranchId();
-    
+    const branch_id = await getCurrentBranchId();
+
     if(!branch_id) {
       return createResponse(403, "You have to select a branch first before creating a menu item");
     }
@@ -144,10 +144,12 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
-  const branchId = getCurrentBranchId();
+  const branchId = await getCurrentBranchId();
+
   if(!branchId){
     return createResponse(403, "You should choose a branch before fetching menu items");
   }
+
   if (id) {
     // Fetch a single item by ID
     const { data, error } = await supabase
@@ -170,6 +172,7 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.log(error)
     return createResponse(502, "Failed to fetch menu items from the database");
   }
 

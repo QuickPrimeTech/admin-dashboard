@@ -9,13 +9,18 @@ import { MenuGrid } from "@/sections/menu/menu-grid";
 import { MenuFiltersSkeleton } from "@/components/skeletons/menu-filter-skeleton";
 import { MenuItemSkeleton } from "@/components/skeletons/menu-item-skeleton";
 import { useDeleteMenuMutation, useMenuQuery } from "@/hooks/use-menu";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export default function MenuManagement() {
+  
+//Get the branchId from the branch context
+  const {branchId} = useBranch();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   // 🚀 useQuery handles loading + error + caching
-  const { data: menuItems = [], isLoading } = useMenuQuery();
+  const { data: menuItems = [], isLoading } = useMenuQuery(branchId);
 
   // CRUD Handlers
   const handleDelete = useDeleteMenuMutation();

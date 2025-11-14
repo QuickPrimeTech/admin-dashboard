@@ -10,6 +10,10 @@ import { toast } from "sonner";
 //This is the name of the key to reuse
 const MENU_ITEMS_QUERY_KEY = ["menu-items"];
 
+const getMenuKey = (branchId: string) => {
+  return [...MENU_ITEMS_QUERY_KEY, branchId];
+}
+
 //This is the fetch function to get all the menu items needed
 async function fetchMenuItems() {
   const res = await fetch("/api/menu-items", { method: "GET" });
@@ -19,9 +23,9 @@ async function fetchMenuItems() {
   return result.data as MenuItem[];
 }
 
-export function useMenuQuery() {
+export function useMenuQuery(branchId: string) {
   return useQuery({
-    queryKey: MENU_ITEMS_QUERY_KEY,
+    queryKey: getMenuKey(branchId),
     queryFn: fetchMenuItems,
   });
 }

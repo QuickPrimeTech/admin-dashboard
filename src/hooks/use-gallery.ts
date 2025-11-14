@@ -8,12 +8,8 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 //This is where all the tanstack queries are stored for the gallery page
-
-//This is the name of the key to reuse
-export const GALLERY_ITEMS_QUERY_KEY = ["gallery-items"];
-
 const getGalleryKey = (branchId: string) => {
-  return [...GALLERY_ITEMS_QUERY_KEY, branchId]
+  return ["gallery-items", branchId]
 }
 
 //This is the function that runs for the fetch query
