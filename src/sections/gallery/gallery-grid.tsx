@@ -97,6 +97,7 @@ export function GalleryGrid({ items, onEdit }: Props) {
                       togglePublishMutation.mutate({
                         id: item.id,
                         is_published: !item.is_published,
+                        branchId
                       })
                     }
                   >

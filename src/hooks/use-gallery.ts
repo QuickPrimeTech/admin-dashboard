@@ -293,7 +293,7 @@ export function useTogglePublishedMutation() {
   return useMutation<
     ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
-    { id: number; is_published: boolean },
+    { id: number; is_published: boolean, branchId: string },
     { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async (updatedItem) => {
@@ -303,22 +303,26 @@ export function useTogglePublishedMutation() {
       );
       return res.data;
     },
-    onMutate: async (updatedItem) => {
+    onMutate: async ({id, is_published, branchId}) => {
+
+      //Query Key to be used
+      const queryKey = getGalleryKey(branchId);
+
       //Canceling all the query request that are taking place to prevent intefering with the optimistic update
-      await queryClient.cancelQueries({ queryKey: GALLERY_ITEMS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
       const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY
+        queryKey
       );
 
       //Updating the is_published to the one passed from the form
       queryClient.setQueryData<GalleryItem[]>(
-        GALLERY_ITEMS_QUERY_KEY,
+        queryKey,
         (old) => {
           return old?.map((galleryItem) =>
-            galleryItem.id === updatedItem.id
-              ? { ...galleryItem, is_published: updatedItem.is_published }
+            galleryItem.id === id
+              ? { ...galleryItem, is_published }
               : galleryItem
           );
         }
@@ -327,14 +331,16 @@ export function useTogglePublishedMutation() {
       //Returning the previous items for rollback on error
       return { previousGalleryItems };
     },
-    onError: (err, _id, onMutateResult) => {
+    onError: (err, {branchId}, onMutateResult) => {
+
+      const queryKey = getGalleryKey(branchId)
       const message =
         err.response?.data.message ||
         "An error occurred while deleting your gallery photo";
       //Rolling back to the previous galleryItems
       if (onMutateResult?.previousGalleryItems) {
         queryClient.setQueryData(
-          GALLERY_ITEMS_QUERY_KEY,
+          queryKey,
           onMutateResult.previousGalleryItems
         );
       }
@@ -342,9 +348,9 @@ export function useTogglePublishedMutation() {
       //Giving the user feedback that the request didn't go through
       toast.error(message);
     },
-    onSuccess: (deletedItem, updatedItem) => {
+    onSuccess: (response, updatedItem) => {
       toast.success(
-        deletedItem.message ||
+        response.message ||
           `Gallery Photo was ${
             updatedItem.is_published ? "published" : "unpublished"
           } successfully`

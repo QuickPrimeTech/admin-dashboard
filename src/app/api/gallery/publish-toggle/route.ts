@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest) {
       return createResponse(500, error.message);
     }
 
-    return createResponse(200, "Publish status updated successfully", data);
+    return createResponse(200, `${data.title ? data.title : "Your gallery photo"} has been ${is_published ? "published": "unpublished"} successfully`, data);
   } catch (err) {
     console.error(err);
     return createResponse(
