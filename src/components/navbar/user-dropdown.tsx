@@ -19,7 +19,6 @@ import { useRestaurantQuery } from "@/hooks/use-restaurant";
 import { createClient } from "@/utils/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@supabase/supabase-js";
-import { RestaurantName } from "../restaurant/restaurant-name";
 
 //  Dynamic random gradient generator
 function generateGradient(seed: string) {
@@ -94,11 +93,12 @@ export function UserDropdown() {
 
           <Button
             variant="ghost"
+            title="account settings"
             className="relative h-10 w-10 rounded-full hover:bg-muted"
           >
               
               <Avatar>
-                <AvatarImage src={"/some-random-url.png"} alt={`${RestaurantName.name} profile`} />
+                <AvatarImage src={"/some-random-url.png"} alt={`${restaurantName} profile`} />
                 <AvatarFallback
                   className={`bg-linear-to-br ${gradient} text-white text-sm font-semibold`}
                 >

@@ -58,7 +58,9 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     const hasOnboarded = user.user_metadata?.has_onboarded;
-    const branch_id = user.user_metadata?.branch_id;
+    //Getting the current branch
+
+    const branchId = request.cookies.get("app_branch")?.value;
     // User logged in but not onboarded
     //Prevent redirection of apis
     if (
@@ -80,7 +82,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
     //if the user has onboarded and he has not chosen a branch;
-    if (hasOnboarded && !branch_id && !pathname.startsWith("/branches") && !pathname.startsWith("/api")) {
+    if (hasOnboarded && !branchId && !pathname.startsWith("/branches") && !pathname.startsWith("/api")) {
        console.log("-------Logged in user has onboarded but has not set his/her user id---------")
       const url = request.nextUrl.clone();
       url.pathname = "/branches";
