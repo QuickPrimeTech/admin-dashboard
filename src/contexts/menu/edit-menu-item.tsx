@@ -1,4 +1,5 @@
 "use client";
+import { useBranch } from "@/components/providers/branch-provider";
 import { useMenuItemQuery } from "@/hooks/use-menu";
 import { ChoiceFormData } from "@/schemas/menu";
 import { EditErrorState } from "@/sections/menu/edit/error-state";
@@ -28,7 +29,8 @@ export function EditMenuItemProvider({
   children: React.ReactNode;
   id: number;
 }) {
-  const { data, status, refetch, isError } = useMenuItemQuery(id);
+  const {branchId} = useBranch();
+  const { data, status, refetch, isError } = useMenuItemQuery(id, branchId);
   const [choices, setChoices] = useState<ChoiceFormData[]>([]);
   const [editingChoice, setEditingChoice] = useState<ChoiceFormData | null>(
     null

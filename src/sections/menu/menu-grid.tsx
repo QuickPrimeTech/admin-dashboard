@@ -30,7 +30,7 @@ import { useBranch } from "@/components/providers/branch-provider";
 
 interface MenuGridProps {
   items: MenuItem[];
-  onDelete:  UseMutationResult<ApiResponse<MenuItem>, AxiosError<ApiResponse<null>, any>, {
+  onDelete:  UseMutationResult<ApiResponse<MenuItem>, AxiosError<ApiResponse<null>>, {
     id: number;
     branchId: string;
 }, {
