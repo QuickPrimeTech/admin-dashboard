@@ -2,7 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/helpers/api-responses";
-import { Branch, Restaurant } from "@/types/onboarding";
+import { Branch} from "@/types/onboarding";
 import { toast } from "sonner";
 import { BranchFormValues } from "@/schemas/onboarding";
 
@@ -55,29 +55,6 @@ export function useGetCurrentBranch(branchId: string) {
   });
 }
 
-//Tanstack function for creating a restaurant name in the restaurant table
-export function useCreateRestaurantMutation() {
-  return useMutation<
-    ApiResponse<Restaurant>,
-    AxiosError<ApiResponse<null>>,
-    string
-  >({
-    mutationFn: async (restaurantName) => {
-      const res = await axios.post<ApiResponse<Restaurant>>(
-        "/api/onboarding/restaurant",
-        restaurantName
-      );
-
-      return res.data;
-    },
-    onError: (err) => {
-      toast.error(err.response?.data.message);
-    },
-    onSuccess: (createdRestaurant) => {
-      toast.success(createdRestaurant.message);
-    },
-  });
-}
 
 export function useCreateBranchMutation() {
   const queryClient = useQueryClient();
