@@ -153,6 +153,7 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (error) {
+      console.log("menu items error ------>",error);
       return createResponse(500, "Failed to fetch menu item", null);
     }
 
