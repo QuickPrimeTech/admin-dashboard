@@ -18,6 +18,8 @@ import { LogOutDialog } from "@/components/logout-dialog";
 import { useRestaurantQuery } from "@/hooks/use-restaurant";
 import { createClient } from "@/utils/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { User } from "@supabase/supabase-js";
+import { RestaurantName } from "../restaurant/restaurant-name";
 
 //  Dynamic random gradient generator
 function generateGradient(seed: string) {
@@ -36,7 +38,7 @@ function generateGradient(seed: string) {
 export function UserDropdown() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // Get restaurant name
   const { data: restaurantName, isLoading: isLoadingRestaurant } =
@@ -59,7 +61,7 @@ export function UserDropdown() {
   // Derive initials from restaurant name
   const initials = useMemo(() => {
     if (!restaurantName) return "R";
-    return restaurantName?.name
+    return restaurantName
       .split(" ")
       .map((w: string) => w[0]?.toUpperCase())
       .join("")
@@ -68,7 +70,7 @@ export function UserDropdown() {
 
   // Dynamic gradient fallback
   const gradient = useMemo(
-    () => generateGradient(restaurantName?.name || ""),
+    () => generateGradient(restaurantName || ""),
     [restaurantName]
   );
 
@@ -96,7 +98,7 @@ export function UserDropdown() {
           >
               
               <Avatar>
-                <AvatarImage src={user?.avatar_url ?? ""} alt={user?.name} />
+                <AvatarImage src={"/some-random-url.png"} alt={`${RestaurantName.name} profile`} />
                 <AvatarFallback
                   className={`bg-linear-to-br ${gradient} text-white text-sm font-semibold`}
                 >
@@ -118,7 +120,7 @@ export function UserDropdown() {
             ) : (
               <div className="flex flex-col space-y-1">
                 <p className="font-medium text-sm leading-none truncate">
-                  {restaurantName?.name}
+                  {restaurantName}
                 </p>
                 <p className="text-muted-foreground text-xs leading-none truncate">
                   {user?.email ?? ""}

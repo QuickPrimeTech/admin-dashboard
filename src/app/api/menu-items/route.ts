@@ -72,12 +72,6 @@ export async function POST(request: NextRequest) {
       uploadedImageUrl = uploadResult.secure_url;
       publicId = uploadResult.public_id;
     }
-    //Getting the authorised user;
-    const {data: {user}, error: userError} = await supabase.auth.getUser();
-
-    if(userError) {
-      return createResponse(403, "Anauthorised request");
-    }
 
     const branch_id = await getCurrentBranchId();
 
