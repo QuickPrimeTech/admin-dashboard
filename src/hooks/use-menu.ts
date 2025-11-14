@@ -268,7 +268,6 @@ export function useMenuItemQuery(id: number, branchId: string) {
   });
 }
 
-
 export function useCategoriesQuery(branchId: string) {
   const queryClient = useQueryClient();
   const menuQueryKey = getMenuKey(branchId);

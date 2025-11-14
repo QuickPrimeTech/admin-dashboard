@@ -1,12 +1,11 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
   SelectTrigger,
   SelectValue,
-  SelectItem,
+  SelectItem
 } from "@ui/select";
 import { FormControl } from "@ui/form";
 import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
@@ -16,13 +15,14 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@ui/dialog";
 import { Input } from "@ui/input";
 import { Button } from "@ui/button";
 import { useCategoriesQuery } from "@/hooks/use-menu";
 import { Skeleton } from "./ui/skeleton";
 import { Plus } from "lucide-react";
+import { useBranch } from "./providers/branch-provider";
 
 type DynamicSelectProps<
   TFieldValues extends FieldValues,
@@ -35,10 +35,15 @@ export function DynamicSelect<
   TFieldValues extends FieldValues,
   TName extends Path<TFieldValues>
 >({ field }: DynamicSelectProps<TFieldValues, TName>) {
-  //Getting the categories using the react query
-  const { data: serverCategories, isPending, isError } = useCategoriesQuery();
 
-  const [categories, setCategories] = useState<string[]>([]);
+  const {branchId} = useBranch();
+  //Getting the categories using the react query
+  const { data: serverCategories, isPending, isError } = useCategoriesQuery(branchId);
+
+  //fallback categories for when the server doesn't fetch the categories
+  const prefilledCat = ["Main Dishes", "Starters","Desserts"];
+
+  const [categories, setCategories] = useState<string[]>(prefilledCat);
   const [open, setOpen] = useState(false);
   const [custom, setCustom] = useState("");
 
@@ -53,14 +58,21 @@ export function DynamicSelect<
 
   useEffect(() => {
     if (serverCategories) {
-      setCategories(serverCategories);
+      if(serverCategories.length < 3) {
+            const uniqueCategories = Array.from(
+    new Set([...categories, ...prefilledCat].map((item) => item).filter(Boolean)));
+
+       setCategories(uniqueCategories);
+      }else {
+        setCategories(serverCategories);
+      }
 
       // Ensure the currently selected value is included
       if (field.value && !serverCategories.includes(field.value)) {
         setCategories((prev) => [...prev, field.value]);
       }
     }
-  }, [serverCategories, field.value]);
+  }, [prefilledCat, serverCategories, field.value]);
 
   console.log("This is the field ---->", field);
   return (
