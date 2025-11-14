@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useCreateMenuItemMutation } from "@/hooks/use-menu";
+import { useBranch } from "@/components/providers/branch-provider";
 
 type MenuItemFormContextType = {
   imageInfo: ImageInfo | null;
@@ -54,6 +55,9 @@ export function AddMenuItemProvider({
 }: {
   children: React.ReactNode;
 }) {
+
+  const {branchId} = useBranch();
+  
   const localStorageKey = "add-menu-item-form-data";
 
   // ✅ Use typed mutation
@@ -169,7 +173,7 @@ export function AddMenuItemProvider({
       });
 
       // ✅ Send via typed mutation
-      mutate(formData, {
+      mutate({formData, branchId}, {
         onSuccess: () => {
           resetFormState();
         },

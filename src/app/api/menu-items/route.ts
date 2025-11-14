@@ -318,6 +318,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+
   // Checking if the user is authenticated
 const supabase = await createClient();
 
@@ -356,7 +357,7 @@ const supabase = await createClient();
     //revalidating the page in the frontend for the menu items to be rendered
     await revalidatePage("/menu");
     //  returning a success message to the frontend
-    return createResponse(200, "Menu item deleted successfully", data);
+    return createResponse(200, `${data.name} deleted successfully from the menu`, data);
   } catch (err) {
     const error = err as Error;
     return createResponse(500, "Server error");
