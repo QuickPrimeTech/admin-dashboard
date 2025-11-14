@@ -79,7 +79,8 @@ export async function POST(request: NextRequest) {
       return createResponse(403, "Anauthorised request");
     }
 
-    const branch_id = user?.user_metadata.branch_id;
+    const branch_id = getCurrentBranchId();
+    
     if(!branch_id) {
       return createResponse(403, "You have to select a branch first before creating a menu item");
     }
