@@ -28,9 +28,14 @@ import { Edit } from "lucide-react";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import { Spinner } from "@ui/spinner";
 import { DynamicSelect } from "@/components/dynamic-select";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export default function BasicInfoSection() {
   const { data: serverData, status } = useMenuItemForm();
+
+   //Get the branch id from the context
+    const {branchId} = useBranch();
+
   //Getting the mutation function that updates the menu item
   const { mutate, isPending } = useUpdateMenuItemMutation();
   const form = useForm<BasicInfoFormData>({
@@ -74,7 +79,7 @@ export default function BasicInfoSection() {
     //Appending the id so that the server can know which image to edit
     formData.append("id", serverData.id);
 
-    mutate({ formData });
+    mutate({ formData, branchId });
   };
 
   // Render actual form when loaded

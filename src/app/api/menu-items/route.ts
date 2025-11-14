@@ -352,8 +352,7 @@ const supabase = await createClient();
     await revalidatePage("/menu");
     //  returning a success message to the frontend
     return createResponse(200, `${data.name} deleted successfully from the menu`, data);
-  } catch (err) {
-    const error = err as Error;
-    return createResponse(500, "Server error");
+  } catch {
+    return createResponse(500, "An error occurred on the server while deleting your menu item");
   }
 }

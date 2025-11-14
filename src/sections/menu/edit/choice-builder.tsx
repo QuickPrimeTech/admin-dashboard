@@ -21,8 +21,12 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ChoiceOptionItem } from "./choice-option-item";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import { Spinner } from "@ui/spinner";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export function ChoiceBuilder() {
+   //Get the branch id from the context
+    const {branchId} = useBranch();
+
   const [isOpen, setIsOpen] = useState(false);
   const [optionLabel, setOptionLabel] = useState("");
   const [optionPrice, setOptionPrice] = useState("");
@@ -99,7 +103,7 @@ export function ChoiceBuilder() {
 
     formData.append("id", serverData.id);
     formData.append("choices", JSON.stringify(combinedChoices));
-    await mutateAsync({ formData });
+    await mutateAsync({ formData, branchId });
 
     //checking if the choice is being edited or added new
     if (editingChoice) {

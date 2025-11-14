@@ -27,13 +27,14 @@ type CategorySelectProps<TFieldValues extends FieldValues> = {
   categories: string[];
 };
 
+const prefilledCat = ["Food", "Interior", "Exterior", "Staff"];
+
 export function CategorySelect<TFieldValues extends FieldValues>({
   field,
   categories,
 }: CategorySelectProps<TFieldValues>) {
 
   //Prefilled values if the user hasn't set any yet
-  const prefilledCat = ["Food", "Interior", "Exterior", "Staff"];
 
   const [localCategories, setLocalCategories] = useState<string[]>(categories);
 
@@ -50,7 +51,7 @@ export function CategorySelect<TFieldValues extends FieldValues>({
       return
     }
     setLocalCategories(categories);
-  }, [categories]);
+  }, [categories, prefilledCat]);
 
   const handleSelectChange = (value: string) => {
     if (value === "__custom") {

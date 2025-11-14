@@ -24,13 +24,24 @@ import Image from "next/image";
 import { MenuItem } from "@/types/menu";
 import Link from "next/link";
 import { UseMutationResult } from "@tanstack/react-query";
+import { ApiResponse } from "@/helpers/api-responses";
+import { AxiosError } from "axios";
+import { useBranch } from "@/components/providers/branch-provider";
 
 interface MenuGridProps {
   items: MenuItem[];
-  onDelete: UseMutationResult<{ id: number }, Error, number, unknown>;
+  onDelete:  UseMutationResult<ApiResponse<MenuItem>, AxiosError<ApiResponse<null>, any>, {
+    id: number;
+    branchId: string;
+}, {
+    previousMenuItems: MenuItem[] | undefined;
+}>;
 }
 
 export function MenuGrid({ items, onDelete }: MenuGridProps) {
+  
+  const {branchId} = useBranch();
+
   if (items.length === 0) {
     return (
       <Card>
@@ -152,7 +163,7 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive hover:bg-destructive/90 text-white"
-                      onClick={() => onDelete.mutate(Number(item.id))}
+                      onClick={() => onDelete.mutate({id: Number(item.id), branchId})}
                     >
                       Yes, delete
                     </AlertDialogAction>

@@ -19,6 +19,7 @@ import {
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import { Spinner } from "@ui/spinner";
+import { useBranch } from "@providers/branch-provider";
 
 interface ChoiceItemProps {
   choice: ChoiceFormData;
@@ -26,6 +27,10 @@ interface ChoiceItemProps {
 }
 
 export default function ChoiceItem({ choice, onEdit }: ChoiceItemProps) {
+
+   //Get the branch id from the context
+    const {branchId} = useBranch();
+
   const [open, setOpen] = useState(false);
   const { choices, setChoices, data: serverData } = useMenuItemForm();
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
@@ -40,7 +45,7 @@ export default function ChoiceItem({ choice, onEdit }: ChoiceItemProps) {
     formData.append("choices", JSON.stringify(updatedChoices));
 
     try {
-      await mutateAsync({ formData });
+      await mutateAsync({ formData, branchId });
       setChoices(updatedChoices);
       setOpen(false); // ✅ close dialog manually after success
     } catch (error) {

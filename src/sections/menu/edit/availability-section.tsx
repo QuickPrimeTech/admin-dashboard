@@ -26,9 +26,12 @@ import { Button } from "@ui/button";
 import { Edit } from "lucide-react";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import { Spinner } from "@ui/spinner";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export default function AvailabilitySection() {
   const { data: serverData, status } = useMenuItemForm();
+  //Get the branch id from the context
+  const {branchId} = useBranch();
   //Getting the mutation function that updates the menu item
   const { mutate, isPending } = useUpdateMenuItemMutation();
 
@@ -76,7 +79,7 @@ export default function AvailabilitySection() {
     if (!serverData?.id) return;
     formData.append("id", serverData.id);
     //Sending data to the backend
-    mutate({ formData });
+    mutate({ formData, branchId });
   };
 
   return (
