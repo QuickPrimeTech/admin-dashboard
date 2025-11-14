@@ -21,36 +21,16 @@ export function useBranchesQuery() {
   });
 }
 
-/* Get current branch for the logged-in user */
 export function useGetCurrentBranch(branchId: string) {
-  const queryClient = useQueryClient();
+  const { data: branches} = useBranchesQuery();
 
   return useQuery({
-    queryKey: ["current-branch"],
-    queryFn: async (): Promise<Branch | null> => {
-      // 1Check if branches are already in cache
-      let branches: Branch[] | undefined =
-        queryClient.getQueryData(BRANCHES_QUERY_KEY);
+    enabled: !!branchId && !!branches, // wait for branches
+    queryKey: ["current-branch", branchId],
+    queryFn: async () => {
+      if (!branches) return null;
 
-      // If not in cache, fetch them
-      if (!branches) {
-        const res = await axios.get<ApiResponse<Branch[]>>(
-          "/api/onboarding/branches"
-        );
-        branches = res.data.data ?? undefined;
-        // populate cache manually
-        queryClient.setQueryData(BRANCHES_QUERY_KEY, branches);
-      }
-
-      let currentBranch = null;
-      if (branches) {
-        currentBranch =
-          branches.find(
-            (branch) => branch.id === branchId
-          ) || null;
-      }
-
-      return currentBranch;
+      return branches.find((b) => b.id === branchId) || null;
     },
   });
 }
