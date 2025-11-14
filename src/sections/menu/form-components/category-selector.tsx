@@ -31,13 +31,27 @@ export function CategorySelect<TFieldValues extends FieldValues>({
   field,
   categories,
 }: CategorySelectProps<TFieldValues>) {
+
+  //Prefilled values if the user hasn't set any yet
+  const prefilledCat = ["Food", "Interior", "Exterior", "Staff"];
+
   const [localCategories, setLocalCategories] = useState<string[]>(categories);
+
   const [openDialog, setOpenDialog] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
+    if(categories.length < 4){
+      
+       const uniqueCategories = Array.from(
+    new Set([...categories, ...prefilledCat].map((item) => item).filter(Boolean))
+  );
+      setLocalCategories(uniqueCategories);
+      return
+    }
     setLocalCategories(categories);
   }, [categories]);
+
   const handleSelectChange = (value: string) => {
     if (value === "__custom") {
       setOpenDialog(true);
