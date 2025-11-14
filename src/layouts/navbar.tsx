@@ -48,13 +48,13 @@ export function AppNavbar() {
         <div className="flex-1" />
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" aria-label="view notifications">
+          <Button variant="ghost" size="icon" aria-label="view notifications" title="See your notifications">
             <Bell />
           </Button>
           <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar>
+              <Avatar title="account settings">
                 <AvatarImage src="/avatar Image" alt="avatar image" />
                 <AvatarFallback>
                   <User className="size-4" />
