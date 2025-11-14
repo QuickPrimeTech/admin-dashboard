@@ -16,7 +16,7 @@ import { CurrentBranchDropdown } from "@/components/restaurant/current-branch-dr
 export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="p-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>

@@ -129,8 +129,8 @@ export function CurrentBranchDropdown() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
-            title={currentBranch?.name}
+            className="h-15.5 w-full"
+            title={`${currentBranch?.name} (branch)`}
           >
             <ChefHat className="text-primary" />
           </Button>
@@ -139,6 +139,7 @@ export function CurrentBranchDropdown() {
       </DropdownMenu>
     );
   }
+
 // FULL VERSION (text + chevron)
   return (
     <DropdownMenu>
