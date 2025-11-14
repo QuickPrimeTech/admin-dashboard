@@ -1,16 +1,14 @@
 // app/api/menu-items/route.ts
 import { NextRequest } from "next/server";
 
-import { cloudinary } from "@/utils/cloudinary/server";
 import {
   getSanitizedPath,
   getAuthenticatedUser,
   uploadImageToCloudinary,
   uploadAndReplaceImage,
   getMenuItemById,
-  errorResponse,
-  successResponse,
   deleteImageFromCloudinary,
+  getCurrentBranchId,
 } from "@/helpers/common";
 import { revalidatePage } from "@/helpers/revalidator";
 import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
@@ -145,12 +143,16 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
+  const branchId = getCurrentBranchId();
+  if(!branchId){
+    return createResponse(403, "You should choose a branch before fetching menu items");
+  }
   if (id) {
     // Fetch a single item by ID
     const { data, error } = await supabase
       .from("menu_items")
       .select("*")
-      .eq("id", id)
+      .eq("id", id).eq("branch_id", branchId)
       .single();
 
     if (error) {
@@ -163,15 +165,15 @@ export async function GET(req: NextRequest) {
   //Otherwise fetch all menu items is not provided and id
   const { data, error } = await supabase
     .from("menu_items")
-    .select("*")
+    .select("*").eq("branch_id", branchId)
     .order("created_at", { ascending: false });
 
   if (error) {
-    return errorResponse("Failed to fetch menu items", 500, error.message);
+    return createResponse(502, "Failed to fetch menu items from the database");
   }
 
   //  data is an array of MenuItem, so cast to MenuItem[]
-  return successResponse("Menu items fetched successfully", data);
+  return createResponse(200, "Menu items fetched successfully", data);
 }
 
 export async function PATCH(request: NextRequest) {
@@ -320,7 +322,7 @@ const supabase = await createClient();
     const id = searchParams.get("id");
 
     if (!id) {
-      return errorResponse("Missing menu item ID", 400);
+      return createResponse(400, "Missing menu item ID");
     }
 
     const { data: item, error: fetchError } = await supabase
@@ -330,31 +332,29 @@ const supabase = await createClient();
       .single();
 
     if (fetchError || !item) {
-      return errorResponse("Menu item not found", 404, fetchError?.message);
+      return createResponse(404, fetchError?.message || "Menu item not found");
     }
 
     if (item.public_id) {
-      await cloudinary.uploader.destroy(item.public_id);
+      await deleteImageFromCloudinary(item.public_id);
     }
 
-    const { error: deleteError } = await supabase
+    const { data, error: deleteError } = await supabase
       .from("menu_items")
       .delete()
-      .eq("id", id)
+      .eq("id", id).select().single();
 
     if (deleteError) {
-      return errorResponse(
+      return createResponse(502,
         "Failed to delete menu item",
-        500,
-        deleteError.message
       );
     }
     //revalidating the page in the frontend for the menu items to be rendered
     await revalidatePage("/menu");
     //  returning a success message to the frontend
-    return successResponse("Menu item deleted successfully");
+    return createResponse(200, "Menu item deleted successfully", data);
   } catch (err) {
     const error = err as Error;
-    return errorResponse("Server error", 500, error.message);
+    return createResponse(500, "Server error");
   }
 }

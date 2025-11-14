@@ -8,7 +8,8 @@ import { cookies } from "next/headers";
 
 //This function gets the current branch Id from the cookies setting
 export async function getCurrentBranchId() {
-  return (await cookies()).get('app_branch')?.value;
+  const currentBranch = (await cookies()).get('app_branch')?.value;
+  return currentBranch;
 }
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
 export async function getAuthenticatedUser() {
