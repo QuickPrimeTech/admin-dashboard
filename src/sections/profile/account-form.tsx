@@ -1,9 +1,13 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@ui/button";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@ui/input-group";
 import {
   Form,
   FormControl,
@@ -12,7 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@ui/form";
-import { KeyRound, Mail, Save, User } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Mail, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -29,7 +33,7 @@ export function AccountForm() {
   const update = useUpdateAccountMutation();
   const [showCurrentPassword, setShowCurrentPassword] =
     useState<boolean>(false);
-  const [showShowPassword, setShowPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
 
@@ -104,12 +108,21 @@ export function AccountForm() {
                   ) : (
                     <InputGroup>
                       <InputGroupInput
-                        type="password"
-                        placeholder="••••••••"
+                        type={showCurrentPassword ? "text" : "password"}
+                        placeholder="••••••••••••"
                         {...field}
                       />
                       <InputGroupAddon>
                         <KeyRound className="h-4 w-4" />
+                      </InputGroupAddon>
+                      <InputGroupAddon align={"inline-end"}>
+                        <InputGroupButton
+                          onClick={() =>
+                            setShowCurrentPassword((prev) => !prev)
+                          }
+                        >
+                          {showCurrentPassword ? <EyeOff /> : <Eye />}
+                        </InputGroupButton>
                       </InputGroupAddon>
                     </InputGroup>
                   )}
@@ -136,12 +149,19 @@ export function AccountForm() {
                   ) : (
                     <InputGroup>
                       <InputGroupInput
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="Min 8 chars, 1 upper, 1 number"
                         {...field}
                       />
                       <InputGroupAddon>
-                        <User className="h-4 w-4" />
+                        <KeyRound className="h-4 w-4" />
+                      </InputGroupAddon>
+                      <InputGroupAddon align={"inline-end"}>
+                        <InputGroupButton
+                          onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                          {showPassword ? <EyeOff /> : <Eye />}
+                        </InputGroupButton>
                       </InputGroupAddon>
                     </InputGroup>
                   )}
@@ -164,12 +184,21 @@ export function AccountForm() {
                   ) : (
                     <InputGroup>
                       <InputGroupInput
-                        type="password"
-                        placeholder="••••••••"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••••••"
                         {...field}
                       />
                       <InputGroupAddon>
                         <KeyRound className="h-4 w-4" />
+                      </InputGroupAddon>
+                      <InputGroupAddon align={"inline-end"}>
+                        <InputGroupButton
+                          onClick={() =>
+                            setShowConfirmPassword((prev) => !prev)
+                          }
+                        >
+                          {showConfirmPassword ? <EyeOff /> : <Eye />}
+                        </InputGroupButton>
                       </InputGroupAddon>
                     </InputGroup>
                   )}
