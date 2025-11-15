@@ -41,8 +41,6 @@ export default function Avatar({
         .from("avatars")
         .createSignedUrl(restaurant.avatar_url, 60 * 60 * 4);
 
-      console.log("Avatar data -------->", avatarData);
-
       setAvatarUrl(avatarData?.signedUrl ?? null);
     };
     setAvatar();
@@ -62,12 +60,7 @@ export default function Avatar({
          1. DELETE OLD FILE IF EXISTS
       ------------------------------------------------------------- */
       if (restaurant?.avatar_url) {
-        console.log("--------Removign avatar image --------------");
-        const { data, error } = await supabase.storage
-          .from("avatars")
-          .remove([restaurant.avatar_url]);
-        console.log("Data from the delete --->", data);
-        console.log("Error from the delete -->", error);
+        await supabase.storage.from("avatars").remove([restaurant.avatar_url]);
       }
 
       /* -------------------------------------------------------------

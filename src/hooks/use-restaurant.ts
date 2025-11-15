@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { Restaurant } from "@/types/onboarding";
 import axios, { AxiosError } from "axios";
@@ -26,6 +26,8 @@ export function useRestaurantQuery() {
 
 //Tanstack function for creating a restaurant name in the restaurant table
 export function useCreateRestaurantMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation<
     ApiResponse<Restaurant>,
     AxiosError<ApiResponse<null>>,
@@ -43,6 +45,8 @@ export function useCreateRestaurantMutation() {
       toast.error(err.response?.data.message);
     },
     onSuccess: (createdRestaurant) => {
+      //Changing the restaurant info to te updated one
+      queryClient.setQueryData(["restaurant"], createdRestaurant.data);
       toast.success(createdRestaurant.message);
     },
   });

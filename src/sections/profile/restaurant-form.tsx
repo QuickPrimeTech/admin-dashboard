@@ -1,7 +1,7 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "@ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import {
@@ -13,29 +13,22 @@ import {
   FormMessage,
 } from "@ui/form";
 import { ChefHat, Save, User } from "lucide-react";
-import { useRestaurantQuery } from "@/hooks/use-restaurant";
-import { useEffect } from "react";
+import {
+  useCreateRestaurantMutation,
+  useRestaurantQuery,
+} from "@/hooks/use-restaurant";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { RestaurantFormData, restaurantFormSchema } from "@/schemas/profile";
 
-/* ------------------------------------------------------------------ */
-/* Zod schema – mirrors the table constraints                         */
-/* ------------------------------------------------------------------ */
-const formSchema = z.object({
-  name: z.string().min(1, "Restaurant name is required"),
-  owner: z.string().max(50, "Max 50 characters").optional().or(z.literal("")),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-/* ------------------------------------------------------------------ */
-/* Component                                                          */
-/* ------------------------------------------------------------------ */
 export function RestaurantForm() {
   const { data: restaurant, isPending } = useRestaurantQuery();
+  const [isLoading, setIsLoading] = useState(false);
+  const updateMutation = useCreateRestaurantMutation();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<RestaurantFormData>({
+    resolver: zodResolver(restaurantFormSchema),
     defaultValues: {
       name: "",
       owner: "",
@@ -48,8 +41,16 @@ export function RestaurantForm() {
     }
   }, [restaurant]);
 
-  const onSubmit = (values: FormValues) => {
-    console.log("You are about to submit this values --->", values);
+  const onSubmit = (values: RestaurantFormData) => {
+    setIsLoading(() => true);
+    updateMutation.mutate(
+      { name: values.name, owner: values.owner || null },
+      {
+        onSettled: () => {
+          setIsLoading(() => false);
+        },
+      }
+    );
   };
   const InputSkeleton = <Skeleton className="h-9" />;
   return (
@@ -111,11 +112,14 @@ export function RestaurantForm() {
           />
         </div>
 
-        <Button type="submit" disabled={!form.formState.isDirty}>
-          {form.formState.isSubmitting ? (
+        <Button
+          type="submit"
+          disabled={!form.formState.isDirty || isLoading || isPending}
+        >
+          {isLoading ? (
             <>
               <Spinner />
-              Saving…
+              Saving restaurant info…
             </>
           ) : (
             <>
