@@ -3,9 +3,9 @@ import { OverviewStats } from "@/types/dashboard";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios"
 
-export function useOverviewStats() {
+export function useOverviewStats(branchId: string) {
   return useQuery<OverviewStats, AxiosError<ApiResponse<null>>>({
-    queryKey: ["overview-stats"],
+    queryKey: ["overview-stats", branchId],
     queryFn: async () => {
   const res = await axios.get("/api/dashboard");
 

@@ -66,6 +66,7 @@ const {setBranchId} = useBranch();
                     checked={branch.id === selectedBranch?.id}
                     onCheckedChange={() => handleSwitchBranch(branch)}
                     className="cursor-pointer"
+                    title={`Switch to ${branch.name} branch`}
                   >
                     {branch.name}
                   </DropdownMenuCheckboxItem>

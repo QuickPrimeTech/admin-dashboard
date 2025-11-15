@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 import { MenuIcon, Calendar, Camera, Users } from "lucide-react";
 import { Skeleton } from "@ui/skeleton";
 import { useOverviewStats } from "@/hooks/use-dashboard";
+import { useBranch } from "@/components/providers/branch-provider";
 
 
 export function StatsOverview() {
-  
-  const {data: statsData, isLoading} = useOverviewStats();
+  //Get the branchId from the context
+  const {branchId} = useBranch();
+  const {data: statsData, isLoading} = useOverviewStats(branchId);
  
   const stats = [
     {
