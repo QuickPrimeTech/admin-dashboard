@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { BasicInfo } from "./basic-info";
+import { RestaurantForm } from "./basic-info";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Avatar = dynamic(() => import("./avatar"));
@@ -26,11 +26,11 @@ export async function ProfilePageContent() {
         </TabsList>
 
         <TabsContent value="basic-info">
-          <BasicInfo />
+          <RestaurantForm />
         </TabsContent>
 
         <TabsContent value="account">
-          <BasicInfo />
+          <RestaurantForm />
         </TabsContent>
       </Tabs>
     </div>
