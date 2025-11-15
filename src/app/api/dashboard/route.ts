@@ -1,6 +1,6 @@
 // /app/api/stats/route.ts
-import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createResponse } from "@/helpers/api-responses";
 
 export async function GET() {
   const supabase = await createClient();
@@ -26,20 +26,16 @@ export async function GET() {
           .select("*", { count: "exact", head: true })
       ]
     );
-
-    return NextResponse.json({
-      success: true,
-      data: {
+const data =  {
         menu: menuRes.count ?? 0,
         reservations: reservationsRes.count ?? 0,
         events: eventsRes.count ?? 0,
         gallery: galleryRes.count ?? 0,
-      },
-    });
+      }
+
+    return createResponse(200, "Successfully fetched all the overview stats", data);
   } catch {
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch stats" },
-      { status: 500 }
+    return createResponse(500, "There was an error fetching the overview statistics"
     );
   }
 }

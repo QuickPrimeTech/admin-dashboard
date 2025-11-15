@@ -1,35 +1,14 @@
 "use client";
-
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 import { MenuIcon, Calendar, Camera, Users } from "lucide-react";
 import { Skeleton } from "@ui/skeleton";
+import { useOverviewStats } from "@/hooks/use-dashboard";
 
-export type StatsOverviewData = {
-  menu: number;
-  gallery: number;
-  reservations: number;
-  events: number;
-};
 
 export function StatsOverview() {
-  const fetchStats = async () => {
-    const res = await fetch("/api/dashboard");
-    const json = await res.json();
-
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || "Failed to fetch stats");
-    }
-
-    return json.data;
-  };
-
-  const { data: statsData, isLoading } = useQuery<StatsOverviewData, Error>({
-    queryKey: ["overview-stats"],
-    queryFn: fetchStats,
-    // onError: () => toast.error("Something went wrong while getting the stats")
-  });
-
+  
+  const {data: statsData, isLoading} = useOverviewStats();
+ 
   const stats = [
     {
       title: "Menu Items",
