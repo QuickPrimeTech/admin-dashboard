@@ -61,3 +61,50 @@ export async function generateBlurDataURL(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+/* ---------- resize image before upload ---------- */
+export async function resizeImage(file: File, maxSize: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) return reject("Canvas error");
+
+      let { width, height } = img;
+
+      // maintain aspect ratio
+      if (width > height) {
+        if (width > maxSize) {
+          height = (height * maxSize) / width;
+          width = maxSize;
+        }
+      } else {
+        if (height > maxSize) {
+          width = (width * maxSize) / height;
+          height = maxSize;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // convert canvas to blob
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject("Blob conversion failed");
+          resolve(blob);
+        },
+        "image/jpeg",
+        1 // compression quality
+      );
+    };
+
+    img.onerror = reject;
+  });
+}

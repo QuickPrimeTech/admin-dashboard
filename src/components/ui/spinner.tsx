@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Loader } from "lucide-react";
+import { Loader, LucideProps } from "lucide-react";
 
-export function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
+export function Spinner({ className, ...props }: React.ComponentProps<"svg"> & LucideProps) {
   return (
     <Loader
       role="status"
