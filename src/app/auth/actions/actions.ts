@@ -5,6 +5,7 @@ import { SignupProps } from "@/types/authentication";
 import { LoginFormData } from "@/schemas/authentication";
 import { cookies } from "next/headers";
 import { switchBranch } from "@/app/actions/branches";
+import { revalidatePath } from "next/cache";
 
 export async function login(loginData: LoginFormData) {
   const supabase = await createClient();
@@ -37,6 +38,8 @@ export async function login(loginData: LoginFormData) {
   // If only one branch exists, set its ID in user_metadata
   if (branches.length === 1) {
     await switchBranch(branches[0].id);
+    console.log("-----revalidating path ---------");
+    revalidatePath("/", "layout");
     redirect("/dashboard");
   }
 

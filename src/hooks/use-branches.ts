@@ -2,10 +2,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/helpers/api-responses";
-import { Branch} from "@/types/onboarding";
+import { Branch } from "@/types/onboarding";
 import { toast } from "sonner";
 import { BranchFormValues } from "@/schemas/onboarding";
-
 
 const BRANCHES_QUERY_KEY = ["branches"];
 
@@ -22,19 +21,19 @@ export function useBranchesQuery() {
 }
 
 export function useGetCurrentBranch(branchId: string) {
-  const { data: branches} = useBranchesQuery();
+  const { data: branches } = useBranchesQuery();
 
   return useQuery({
     enabled: !!branchId && !!branches, // wait for branches
     queryKey: ["current-branch", branchId],
     queryFn: async () => {
+      console.log("BranchId from the query ------->", branchId);
       if (!branches) return null;
 
       return branches.find((b) => b.id === branchId) || null;
     },
   });
 }
-
 
 export function useCreateBranchMutation() {
   const queryClient = useQueryClient();

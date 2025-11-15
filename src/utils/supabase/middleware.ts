@@ -50,7 +50,9 @@ export async function updateSession(request: NextRequest) {
     !pathname.startsWith("/create-link");
 
   if (!user && isProtected) {
-    console.log("-------trying to access protected route without logging in---------")
+    console.log(
+      "-------trying to access protected route without logging in---------"
+    );
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -68,7 +70,9 @@ export async function updateSession(request: NextRequest) {
       !pathname.startsWith("/onboarding") &&
       !pathname.startsWith("/api")
     ) {
-      console.log("-------Logged in user trying to access other pages and hasn't onboarded---------")
+      console.log(
+        "-------Logged in user trying to access other pages and hasn't onboarded---------"
+      );
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);
@@ -76,21 +80,32 @@ export async function updateSession(request: NextRequest) {
 
     // Onboarded user trying to visit onboarding again
     if (hasOnboarded && pathname.startsWith("/onboarding")) {
-       console.log("-------Logged in user trying to onboard while he already did---------")
+      console.log(
+        "-------Logged in user trying to onboard while he already did---------"
+      );
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
     //if the user has onboarded and he has not chosen a branch;
-    if (hasOnboarded && !branchId && !pathname.startsWith("/branches") && !pathname.startsWith("/api")) {
-       console.log("-------Logged in user has onboarded but has not set his/her user id---------")
+    if (
+      hasOnboarded &&
+      !branchId &&
+      !pathname.startsWith("/branches") &&
+      !pathname.startsWith("/api")
+    ) {
+      console.log(
+        "-------Logged in user has onboarded but has not set his/her user id---------"
+      );
       const url = request.nextUrl.clone();
       url.pathname = "/branches";
       return NextResponse.redirect(url);
     }
     // Onboarded user trying to visit login/root
-    if (pathname === "/" || pathname === "/login") {
-      console.log("-------Logged in user is trying to access / or /login while he/she is logged in ---------")
+    if (pathname === "/login") {
+      console.log(
+        "-------Logged in user is trying to access / or /login while he/she is logged in ---------"
+      );
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);

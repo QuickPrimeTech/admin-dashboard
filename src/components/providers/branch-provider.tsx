@@ -1,7 +1,7 @@
 // components/providers/branch-provider.tsx
-'use client';
+"use client";
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from "react";
 
 type BranchCtxValue = {
   branchId: string;
@@ -28,9 +28,7 @@ export function BranchProvider({
 export const useBranch = (): BranchCtxValue => {
   const ctx = useContext(BranchCtx);
   if (!ctx) {
-    throw new Error(
-      'useBranch must be used inside a <BranchProvider> tree.'
-    );
+    throw new Error("useBranch must be used inside a <BranchProvider> tree.");
   }
   return ctx;
 };

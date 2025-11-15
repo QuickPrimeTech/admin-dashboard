@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 
 //This function gets the current branch Id from the cookies setting
 export async function getCurrentBranchId() {
-  const currentBranch = (await cookies()).get('app_branch')?.value;
+  const currentBranch = (await cookies()).get("app_branch")?.value;
   return currentBranch;
 }
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
@@ -57,24 +57,30 @@ export async function getSanitizedPath(): Promise<string> {
     throw new Error("Restaurant not found for this user");
   }
 
-  const currentBranchId =await getCurrentBranchId();
+  const currentBranchId = await getCurrentBranchId();
 
-  if(!currentBranchId) {
-    throw new Error("You need to select a branc before starting creating and updating menu items");
+  if (!currentBranchId) {
+    throw new Error(
+      "You need to select a branc before starting creating and updating menu items"
+    );
   }
 
   //Getting the branchName
 
-  const {data: branchData, error: branchError} = await supabase.from("branch_settings").select('name').eq("id", currentBranchId).single()
+  const { data: branchData, error: branchError } = await supabase
+    .from("branch_settings")
+    .select("name")
+    .eq("id", currentBranchId)
+    .single();
 
   // catching error while fetching the current branch
   if (branchError || !branchData.name) {
-    throw new Error("There was an error getting your current branch")
+    throw new Error("There was an error getting your current branch");
   }
 
   const currentBranchName = branchData.name;
 
-   // Create sanitized path
+  // Create sanitized path
   const sanitizedRestaurant = restaurant.name
     .toLowerCase()
     .replace(/\s+/g, "-")
@@ -85,7 +91,7 @@ export async function getSanitizedPath(): Promise<string> {
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9\-]/g, "");
 
-    return `${sanitizedRestaurant}/${sanitizedBranch}`;
+  return `${sanitizedRestaurant}/${sanitizedBranch}`;
 }
 
 //This is the function that gets the folder path and uploads the image
