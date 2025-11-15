@@ -15,7 +15,7 @@ export function RestaurantName() {
   }
 
   return (
-    <span className="text-base truncate font-semibold">
+    <span className="truncate font-semibold">
       {data}
     </span>
   );

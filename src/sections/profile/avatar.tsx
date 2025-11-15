@@ -1,97 +1,96 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
-import Image from 'next/image'
 
-export default function Avatar({
-  uid,
-  url,
-  size,
-  onUpload,
-}: {
+import { useState, type ChangeEventHandler } from 'react'
+import Image from 'next/image'
+import { Edit2 } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
+
+type Props = {
   uid: string | null
   url: string | null
   size: number
-  onUpload: (url: string) => void
-}) {
+  onUpload: (filePath: string) => void
+}
+
+export default function Avatar({ uid, url, size, onUpload }: Props) {
   const supabase = createClient()
   const [avatarUrl, setAvatarUrl] = useState<string | null>(url)
   const [uploading, setUploading] = useState(false)
 
-  useEffect(() => {
-    async function downloadImage(path: string) {
-      try {
-        const { data, error } = await supabase.storage.from('avatars').download(path)
-        if (error) {
-          throw error
-        }
+  /* ---------- download on mount ---------- */
+  useState(() => {
+    if (!url) return
+    supabase.storage
+      .from('avatars')
+      .download(url)
+      .then(({ data, error }) => {
+        if (error) throw error
+        setAvatarUrl(URL.createObjectURL(data))
+      })
+      .catch(console.error)
+  })
 
-        const url = URL.createObjectURL(data)
-        setAvatarUrl(url)
-      } catch (error) {
-        console.log('Error downloading image: ', error)
-      }
-    }
-
-    if (url) downloadImage(url)
-  }, [url, supabase])
-
-  const uploadAvatar: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
+  /* ---------- upload handler ---------- */
+  const uploadAvatar: ChangeEventHandler<HTMLInputElement> = async (e) => {
     try {
       setUploading(true)
+      const file = e.target.files?.[0]
+      if (!file) return
 
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('You must select an image to upload.')
-      }
+      const ext = file.name.split('.').pop()
+      const path = `${uid}-${Math.random()}.${ext}`
 
-      const file = event.target.files[0]
-      const fileExt = file.name.split('.').pop()
-      const filePath = `${uid}-${Math.random()}.${fileExt}`
+      const { error } = await supabase.storage.from('avatars').upload(path, file)
+      if (error) throw error
 
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file)
-
-      if (uploadError) {
-        throw uploadError
-      }
-
-      onUpload(filePath)
-    } catch (error) {
-      alert('Error uploading avatar!')
+      onUpload(path)          // save path to profiles table
+      setAvatarUrl(URL.createObjectURL(file)) // instant preview
+    } catch {
+      alert('Upload failed')
     } finally {
       setUploading(false)
     }
   }
 
+  /* ---------- render ---------- */
   return (
-    <div>
+    <label
+      htmlFor="avatar-upload"
+      className="relative inline-block rounded-full overflow-hidden cursor-pointer
+                 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+      style={{ width: size, height: size }}
+    >
+      {/* preview image or placeholder */}
       {avatarUrl ? (
         <Image
-          width={size}
-          height={size}
           src={avatarUrl}
-          alt="Avatar"
-          className="avatar image"
-          style={{ height: size, width: size }}
+          alt="Profile picture"
+          fill
+          className="object-cover"
         />
       ) : (
-        <div className="avatar no-image" style={{ height: size, width: size }} />
-      )}
-      <div style={{ width: size }}>
-        <label className="button primary block" htmlFor="single">
-          {uploading ? 'Uploading ...' : 'Upload'}
-        </label>
-        <input
-          style={{
-            visibility: 'hidden',
-            position: 'absolute',
-          }}
-          type="file"
-          id="single"
-          accept="image/*"
-          onChange={uploadAvatar}
-          disabled={uploading}
+        <div
+          className="w-full h-full bg-linear-to-br from-blue-400 to-purple-500"
         />
-      </div>
-    </div>
+      )}
+
+      {/* edit icon overlay */}
+      <span className="absolute inset-0 grid place-content-center
+                       bg-black/40 text-white opacity-0
+                       hover:opacity-100 focus-within:opacity-100
+                       transition-opacity">
+        <Edit2 size={size / 4} aria-hidden />
+      </span>
+
+      {/* hidden but keyboard-accessible file input */}
+      <input
+        id="avatar-upload"
+        type="file"
+        accept="image/*"
+        disabled={uploading}
+        onChange={uploadAvatar}
+        className="sr-only"
+      />
+    </label>
   )
 }

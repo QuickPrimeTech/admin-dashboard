@@ -158,7 +158,7 @@ export function CurrentBranchDropdown() {
           </div>
           <div className="flex-1 flex flex-col text-sm leading-tight space-y-0.5">
             <RestaurantName />
-            <p className="truncate text-muted-foreground">
+            <p className="truncate text-xs text-muted-foreground">
               {selectedBranch.name} (branch)
             </p>
           </div>
