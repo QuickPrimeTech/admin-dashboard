@@ -26,6 +26,7 @@ import {
 } from "@/schemas/authentication";
 import { useUserQuery } from "@/hooks/use-user";
 import { useUpdateAccountMutation } from "@/hooks/use-user";
+import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
 
 export function AccountForm() {
   const { data: user, isPending } = useUserQuery();
@@ -134,43 +135,47 @@ export function AccountForm() {
         </div>
 
         <div className="w-full flex gap-3 flex-col md:flex-row items-start">
-          {/* ----------------- New Password ----------------- */}
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem className="w-full flex-1">
-                <FormLabel>
-                  New password (leave blank to keep current)
-                </FormLabel>
-                <FormControl>
-                  {isPending ? (
-                    InputSkeleton
-                  ) : (
-                    <InputGroup>
-                      <InputGroupInput
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Min 8 chars, 1 upper, 1 number"
-                        {...field}
-                      />
-                      <InputGroupAddon>
-                        <KeyRound className="h-4 w-4" />
-                      </InputGroupAddon>
-                      <InputGroupAddon align={"inline-end"}>
-                        <InputGroupButton
-                          onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                          {showPassword ? <EyeOff /> : <Eye />}
-                        </InputGroupButton>
-                      </InputGroupAddon>
-                    </InputGroup>
-                  )}
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <div className="flex flex-col gap-2 flex-1 w-full">
+            {/* ----------------- New Password ----------------- */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    New password (leave blank to keep current)
+                  </FormLabel>
+                  <FormControl>
+                    {isPending ? (
+                      InputSkeleton
+                    ) : (
+                      <InputGroup>
+                        <InputGroupInput
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Min 8 chars, 1 upper, 1 number"
+                          {...field}
+                        />
+                        <InputGroupAddon>
+                          <KeyRound className="h-4 w-4" />
+                        </InputGroupAddon>
+                        <InputGroupAddon align={"inline-end"}>
+                          <InputGroupButton
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            {showPassword ? <EyeOff /> : <Eye />}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {form.watch("password") && (
+              <PasswordStrengthMeter password={form.watch("password") || ""} />
             )}
-          />
-
+          </div>
           {/* ----------------- Confirm Password ----------------- */}
           <FormField
             control={form.control}

@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Check, CircleDashed } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                            */
@@ -47,6 +48,18 @@ const colors = [
   "bg-green-500",
 ];
 
+/* Text colors for labels */
+const textColors = [
+  "text-gray-400",
+  "text-red-500",
+  "text-orange-500",
+  "text-yellow-500",
+  "text-emerald-700",
+  "text-green-600",
+];
+
+const labels = ["very weak", "weak", "moderate", "strong", "very strong"];
+
 type Props = { password: string };
 
 export function PasswordStrengthMeter({ password }: Props) {
@@ -55,18 +68,23 @@ export function PasswordStrengthMeter({ password }: Props) {
   return (
     <div className="mt-2 space-y-1">
       <Progress value={score * 20} indicatorClassName={colors[score]} />
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-        {need ? (
-          <>
-            <CircleDashed className="h-4 w-4 animate-pulse" />
-            <span>Add {msg[need]}</span>
-          </>
-        ) : (
-          <>
-            <Check className="h-4 w-4 text-emerald-600" />
-            <span>Strong password</span>
-          </>
-        )}
+      <div className="flex justify-between gap-2">
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          {need ? (
+            <>
+              <CircleDashed className="h-4 w-4 animate-pulse" />
+              <span>Add {msg[need]}</span>
+            </>
+          ) : (
+            <>
+              <Check className="h-4 w-4 text-emerald-600" />
+              <span>Strong password</span>
+            </>
+          )}
+        </div>
+        <p className={cn("text-xs text-muted-foreground", textColors[score])}>
+          {labels[score]}
+        </p>
       </div>
     </div>
   );

@@ -27,13 +27,14 @@ export function useUpdateAccountMutation() {
       password,
     }: AccountSettingsData) => {
       const supabase = createClient();
+      //Getting the previous email
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
 
       // 1.  re-authenticate
-      const {
-        data: { user },
-        error: reAuth,
-      } = await supabase.auth.signInWithPassword({
-        email,
+      const { error: reAuth } = await supabase.auth.signInWithPassword({
+        email: currentUser?.email || email,
         password: currentPassword,
       });
 
@@ -42,7 +43,7 @@ export function useUpdateAccountMutation() {
       const toUpdate: { email?: string; password?: string } = {};
 
       // 2. e-mail changed?
-      if (email !== user?.email) toUpdate.email = email;
+      if (email !== currentUser?.email) toUpdate.email = email;
 
       // 3. password requested?
       if (password) toUpdate.password = password;
@@ -54,6 +55,9 @@ export function useUpdateAccountMutation() {
       if (error) throw error;
     },
     onError: (e) => toast.error(e.message),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      toast.success("Your account information was updated successfully!");
+    },
   });
 }
