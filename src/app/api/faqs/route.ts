@@ -4,22 +4,27 @@ import {
   getAuthenticatedUser,
   errorResponse,
   successResponse,
+  getCurrentBranchId,
 } from "@/helpers/common";
 import { revalidatePage } from "@/helpers/revalidator";
+import { createClient } from "@/utils/supabase/server";
+import { createResponse } from "@/helpers/api-responses";
 
 export async function GET() {
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
+
+  const branchId = await getCurrentBranchId();
 
   const { data, error } = await supabase
     .from("faqs")
     .select("*")
-    .eq("user_id", user.id)
-    .order("order_index", { ascending: false });
+    .order("order_index", { ascending: false })
+    .eq("branch_id", branchId);
 
-  if (error) return errorResponse("Failed to fetch FAQs", 500, error.message);
+  if (error)
+    return createResponse(500, error.message || "Failed to fetch FAQs");
 
-  return successResponse("Fetched successfully", data);
+  return createResponse(200, "Fetched all faqs successfully", data);
 }
 
 export async function POST(request: NextRequest) {
