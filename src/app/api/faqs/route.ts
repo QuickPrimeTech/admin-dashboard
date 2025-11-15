@@ -28,8 +28,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
 
   const { question, answer, is_published } = await request.json();
 
@@ -37,10 +36,11 @@ export async function POST(request: NextRequest) {
     return errorResponse("Missing fields", 400);
   }
 
+  const branchId = await getCurrentBranchId();
+
   const { data: maxOrderFaq } = await supabase
     .from("faqs")
     .select("order_index")
-    .eq("user_id", user.id)
     .order("order_index", { ascending: false })
     .limit(1)
     .single();
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       answer,
       is_published: is_published ?? true,
       order_index: newOrderIndex,
-      user_id: user.id,
+      branch_id: branchId,
     },
   ]);
 

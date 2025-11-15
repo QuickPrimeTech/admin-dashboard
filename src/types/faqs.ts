@@ -1,4 +1,4 @@
-export interface FAQ {
+export type FAQ = {
   id: number;
   question: string;
   answer: string;
@@ -6,7 +6,7 @@ export interface FAQ {
   is_published: boolean;
   created_at: string;
   user_id: string;
-}
+};
 
 export type FAQEmptyStateProps = {
   setIsDialogOpen: (open: boolean) => void;

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { FaqFilterDropdown } from "@/sections/faqs/faq-filter-dropdown";
-import { sortFaqs } from "@/helpers/faqsHelper";
 import { Button } from "@ui/button";
 import {
   Dialog,
@@ -21,29 +20,28 @@ import {
   useSensor,
   useSensors,
   closestCenter,
-  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { SortableFAQCard } from "@/components/sortable-faq-card";
 import { FAQ } from "@/types/faqs";
-import { updateFAQOrderInDB } from "@/helpers/faqsHelper";
 import { FAQEmptyState } from "@/sections/faqs/faq-empty-state";
 import { FAQCard } from "@/sections/faqs/faq-card";
+import { useFaqsQuery } from "@/hooks/use-faqs";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export default function FAQsPage() {
-  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const { branchId } = useBranch();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
-  const [loading, setLoading] = useState(true);
   const [filterValue, setFilterValue] = useState("Order");
 
+  const { data: faqs, isPending } = useFaqsQuery(branchId);
+
   //sorting the faqs
-  const filteredFaqs = faqs.length > 0 ? sortFaqs(faqs, filterValue) : [];
-  // creating the sensors for the drag and drop interface
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -62,58 +60,9 @@ export default function FAQsPage() {
     })
   );
 
-  // Inside your component
-  const faqsRef = useRef<FAQ[]>(faqs);
-
-  useEffect(() => {
-    faqsRef.current = faqs;
-  }, [faqs]);
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    // Get current FAQs from ref
-    const oldIndex = faqsRef.current.findIndex((faq) => faq.id === active.id);
-    const newIndex = faqsRef.current.findIndex((faq) => faq.id === over.id);
-
-    // Create the new ordered array
-    const newOrder = arrayMove(faqsRef.current, oldIndex, newIndex);
-
-    // Update order_index for each item
-    const updated = newOrder.map((faq, index) => ({
-      ...faq,
-      order_index: index,
-    }));
-
-    // Update React state once
-    setFaqs(updated);
-
-    // Sync to DB once
-    updateFAQOrderInDB(updated);
-  };
-
   // State for delete confirmation
   const [faqToDelete, setFaqToDelete] = useState<FAQ | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  useEffect(() => {
-    fetchFAQs();
-  }, []);
-
-  const fetchFAQs = async () => {
-    try {
-      const res = await fetch("/api/faqs", { method: "GET" });
-      if (res.ok) {
-        const data = await res.json();
-        setFaqs(data.data);
-      }
-    } catch {
-      toast.error("Failed to fetch FAQs");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const confirmDelete = (faq: FAQ) => {
     setFaqToDelete(faq);
@@ -136,7 +85,6 @@ export default function FAQsPage() {
         throw new Error(result.message || "Failed to delete FAQ");
       }
 
-      setFaqs((prev) => prev.filter((faq) => faq.id !== faqToDelete.id));
       toast.success("FAQ deleted successfully");
     } catch {
       toast.error("Failed to delete FAQ");
@@ -157,7 +105,6 @@ export default function FAQsPage() {
   };
 
   const handleFAQSaved = () => {
-    fetchFAQs();
     handleDialogClose();
   };
 
@@ -174,12 +121,6 @@ export default function FAQsPage() {
       if (!res.ok || !result.success) {
         throw new Error(result.message || "Failed to update status");
       }
-
-      setFaqs((prev) =>
-        prev.map((faq) =>
-          faq.id === id ? { ...faq, is_published: !isPublished } : faq
-        )
-      );
 
       toast.success(
         `FAQ ${!isPublished ? "published" : "unpublished"} successfully`
@@ -202,56 +143,54 @@ export default function FAQsPage() {
         <div className="flex gap-2">
           <FaqFilterDropdown value={filterValue} onChange={setFilterValue} />
           <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus />
             Add FAQ
           </Button>
         </div>
       </div>
 
-      {loading ? (
+      {isPending ? (
         // Skeleton Cards while the data is being fetched
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
             <FaqCardSkeleton key={index} />
           ))}
         </div>
-      ) : faqs.length === 0 ? (
+      ) : faqs && faqs.length === 0 ? (
         <FAQEmptyState setIsDialogOpen={setIsDialogOpen} />
-      ) : filterValue === "Order" ? (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+      ) : faqs && filterValue === "Order" ? (
+        <DndContext sensors={sensors} collisionDetection={closestCenter}>
           <SortableContext
             items={faqs.map((faq) => faq.id)}
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-4">
-              {filteredFaqs.map((faq) => (
-                <SortableFAQCard key={faq.id} id={faq.id}>
-                  <FAQCard
-                    faq={faq}
-                    handleEdit={handleEdit}
-                    confirmDelete={confirmDelete}
-                    togglePublished={togglePublished}
-                  />
-                </SortableFAQCard>
-              ))}
+              {faqs &&
+                faqs.map((faq) => (
+                  <SortableFAQCard key={faq.id} id={faq.id}>
+                    <FAQCard
+                      faq={faq}
+                      handleEdit={handleEdit}
+                      confirmDelete={confirmDelete}
+                      togglePublished={togglePublished}
+                    />
+                  </SortableFAQCard>
+                ))}
             </div>
           </SortableContext>
         </DndContext>
       ) : (
         <div className="space-y-4">
-          {filteredFaqs.map((faq) => (
-            <FAQCard
-              key={faq.id}
-              faq={faq}
-              handleEdit={handleEdit}
-              confirmDelete={confirmDelete}
-              togglePublished={togglePublished}
-            />
-          ))}
+          {faqs &&
+            faqs.map((faq) => (
+              <FAQCard
+                key={faq.id}
+                faq={faq}
+                handleEdit={handleEdit}
+                confirmDelete={confirmDelete}
+                togglePublished={togglePublished}
+              />
+            ))}
         </div>
       )}
 
