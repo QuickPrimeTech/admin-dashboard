@@ -10,7 +10,11 @@ export async function POST(
   const supabase = await createClient();
 
   //  Read restaurant name from request
-  const restaurantName = await req.text();
+  const restaurant = await req.json();
+
+  if (!restaurant) {
+    return createResponse(403, "The restaurant name is required!");
+  }
 
   //  Get current authenticated user
   const {
@@ -26,7 +30,8 @@ export async function POST(
     .from("restaurants")
     .upsert(
       {
-        name: restaurantName,
+        name: restaurant.name,
+        owner: restaurant.owner,
         user_id: user.id, // required for conflict resolution
       },
       {

@@ -29,7 +29,7 @@ export function useCreateRestaurantMutation() {
   return useMutation<
     ApiResponse<Restaurant>,
     AxiosError<ApiResponse<null>>,
-    string
+    { name: string; owner: string | null }
   >({
     mutationFn: async (restaurantName) => {
       const res = await axios.post<ApiResponse<Restaurant>>(

@@ -50,12 +50,15 @@ export function RestaurantInfoStep({
       return;
     }
 
-    await createMutation.mutateAsync(values.name, {
-      onSuccess: () => {
-        celebrateSuccess();
-        onComplete(values, "branches");
-      },
-    });
+    await createMutation.mutateAsync(
+      { name: values.name, owner: null },
+      {
+        onSuccess: () => {
+          celebrateSuccess();
+          onComplete(values, "branches");
+        },
+      }
+    );
   };
 
   return (
