@@ -1,7 +1,7 @@
 // @/hooks/use-gallery.ts
 
 import { ApiResponse } from "@/helpers/api-responses";
-import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
+import { OverviewStats } from "@/types/dashboard";
 import { GalleryItem } from "@/types/gallery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
@@ -245,7 +245,7 @@ export function useDeleteGalleryItemMutation() {
       );
 
       //Updating the overview stats from the homepage to have the reduced value
-      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+      queryClient.setQueryData<OverviewStats>(["overview-stats"], (old) => {
         if (!old) return;
         return { ...old, gallery: old.gallery - 1 };
       });
@@ -268,7 +268,7 @@ export function useDeleteGalleryItemMutation() {
         );
       }
       //Rolling back the overview stats gallery count
-      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+      queryClient.setQueryData<OverviewStats>(["overview-stats"], (old) => {
         if (!old) return;
         return { ...old, gallery: old.gallery + 1 };
       });

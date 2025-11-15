@@ -1,4 +1,4 @@
-export type StatsOverviewData = {
+export type OverviewStats = {
   menu: number;
   gallery: number;
   reservations: number;

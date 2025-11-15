@@ -2,7 +2,7 @@
 
 import { ApiResponse } from "@/helpers/api-responses";
 import { createClient } from "@/utils/supabase/client";
-import { StatsOverviewData } from "@/sections/dashboard/stats-overview";
+import { OverviewStats } from "@/types/dashboard";
 import { MenuItem } from "@/types/menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
@@ -190,7 +190,7 @@ export function useDeleteMenuMutation() {
       });
 
       //Updating the overview stats from the homepage to have the reduced value
-      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+      queryClient.setQueryData<OverviewStats>(["overview-stats"], (old) => {
         if (!old) return;
         return { ...old, menu: old.menu - 1 };
       });
@@ -212,7 +212,7 @@ export function useDeleteMenuMutation() {
       }
 
       //Rolling back the overview stats menu count
-      queryClient.setQueryData<StatsOverviewData>(["overview-stats"], (old) => {
+      queryClient.setQueryData<OverviewStats>(["overview-stats"], (old) => {
         if (!old) return;
         return { ...old, menu: old.menu + 1 };
       });
