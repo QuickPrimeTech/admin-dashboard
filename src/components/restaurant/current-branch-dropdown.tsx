@@ -36,6 +36,7 @@ function CurrentBranchDropdownContent({branches,selectedBranch, setSelectedBranc
 
 const queryClient = useQueryClient();
 const {setBranchId} = useBranch();
+
    const handleSwitchBranch = async (branch: Branch) => {
     setSelectedBranch(branch);
     queryClient.setQueryData(["current-branch"], branch); // update cache

@@ -1,10 +1,8 @@
 "use client";
-
+import { useSwitchBranch } from "@/helpers/branch-helper";
 import { Branch } from "@/types/onboarding";
 import { Card, CardContent } from "@ui/card";
 import { ArrowRight, MapPin } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
-import { toast } from "sonner";
 import { redirect } from "next/navigation";
 
 type ManageBranchCardProps = {
@@ -12,19 +10,11 @@ type ManageBranchCardProps = {
 };
 
 export function ManageBranchCard({ branch }: ManageBranchCardProps) {
+
+   const { switchToBranch } = useSwitchBranch();
+
   const handleSelectBranch = async () => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({
-      data: { branch_id: branch.id },
-    });
-
-
-    if (error) {
-      toast.error("Failed to select branch: ");
-      return;
-    }
-
-
+    await switchToBranch(branch);
     redirect("/dashboard");
   };
 

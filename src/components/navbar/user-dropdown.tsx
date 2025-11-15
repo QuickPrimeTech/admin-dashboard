@@ -141,7 +141,7 @@ export function UserDropdown() {
           <DropdownMenuItem asChild>
             <Link href="/dashboard/settings">
               <Settings />
-              Settings
+             Branch Settings
             </Link>
           </DropdownMenuItem>
 
@@ -151,7 +151,7 @@ export function UserDropdown() {
             onClick={handleLogout}
             className="text-destructive focus:text-destructive"
           >
-            <LogOut />
+            <LogOut className="text-inherit"/>
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
