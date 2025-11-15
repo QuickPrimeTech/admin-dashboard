@@ -1,6 +1,8 @@
 import dynamic from "next/dynamic";
 import { RestaurantForm } from "./restaurant-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AccountForm } from "./account-form";
+import { ImageIcon } from "lucide-react";
 
 const Avatar = dynamic(() => import("./avatar"));
 
@@ -13,16 +15,18 @@ export async function ProfilePageContent() {
             Your account settings
           </h1>
         </div>
-        <Avatar
-          size={90}
-          className="absolute -bottom-12 left-6 border-4 border-background"
-        />
+        <div className="absolute -bottom-12 left-6">
+          <div className="relative border-4 border-background rounded-full aspect-square">
+            <Avatar size={90} />
+            <ImageIcon className="absolute size-4 right-2 bg-background bottom-2 text-foreground" />
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="basic-info">
         <TabsList className="mt-10 bg-none">
-          <TabsTrigger value="basic-info">Basic Info</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="basic-info">Basic Information</TabsTrigger>
+          <TabsTrigger value="account">Account Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic-info">
@@ -30,7 +34,7 @@ export async function ProfilePageContent() {
         </TabsContent>
 
         <TabsContent value="account">
-          <RestaurantForm />
+          <AccountForm />
         </TabsContent>
       </Tabs>
     </div>

@@ -52,3 +52,31 @@ export type ForgotPassworFormData = z.infer<typeof forgotPasswordSchema>;
 export const resetPasswordSchema = signupBaseObject.pick({ password: true });
 
 export type ResetPassworFormData = z.infer<typeof resetPasswordSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Account-settings schema                                            */
+/* ------------------------------------------------------------------ */
+
+export const accountSettingsSchema = signupBaseObject
+  .omit({ terms: true })
+  .extend({
+    currentPassword: z
+      .string()
+      .min(1, "Current password required to save changes"),
+    password: z
+      .string()
+      .optional()
+      .refine((v) => !v || v.length >= 8, {
+        message: "New password must be ≥ 8 characters",
+      })
+      .refine((v) => !v || getPasswordStrength(v).score >= 3, {
+        message: "New password must be at least Moderate strength",
+      }),
+    confirmPassword: z.string().optional(),
+  })
+  .refine((d) => !d.password || d.password === d.confirmPassword, {
+    message: "New passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type AccountSettingsData = z.infer<typeof accountSettingsSchema>;

@@ -1,76 +1,202 @@
-'use client'
+"use client";
 
-import { useCallback, useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
-import { type User } from '@supabase/supabase-js'
-import Avatar from './avatar'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@ui/button";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@ui/form";
+import { KeyRound, Mail, Save, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  accountSettingsSchema,
+  type AccountSettingsData,
+} from "@/schemas/authentication";
+import { useUserQuery } from "@/hooks/use-user";
+import { useUpdateAccountMutation } from "@/hooks/use-user";
 
-export default function AccountForm({ user }: { user: User | null }) {
+export function AccountForm() {
+  const { data: user, isPending } = useUserQuery();
+  const [isLoading, setIsLoading] = useState(false);
+  const update = useUpdateAccountMutation();
+  const [showCurrentPassword, setShowCurrentPassword] =
+    useState<boolean>(false);
+  const [showShowPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
-    const supabase = createClient();
-    
-    const [loading, setLoading] = useState(true)
-    const [avatar_url, setAvatarUrl] = useState<string | null>(null)
+  const form = useForm<AccountSettingsData>({
+    resolver: zodResolver(accountSettingsSchema),
+    defaultValues: {
+      email: "",
+      currentPassword: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    const getProfile = useCallback(async () => {
-        try {
-            setLoading(true)
+  useEffect(() => {
+    if (user?.email)
+      form.reset({
+        email: user.email,
+        currentPassword: "",
+        password: "",
+        confirmPassword: "",
+      });
+  }, [user]);
 
-            const { data, error, status } = await supabase
-                .from('restaurants')
-                .select(`avatar_url`)
-                .single()
+  const onSubmit = (values: AccountSettingsData) => {
+    setIsLoading(true);
+    update.mutate(values, { onSettled: () => setIsLoading(false) });
+  };
 
-            if (error && status !== 406) {
-                console.log(error)
-                throw error
-            }
+  const InputSkeleton = <Skeleton className="h-9 w-full" />;
 
-            if (data) {
-                setAvatarUrl(data.avatar_url)
-            }
-        } catch (error) {
-            alert('Error loading user data!')
-        } finally {
-            setLoading(false)
-        }
-    }, [user, supabase])
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-6">
+        <div className="w-full flex gap-3 flex-col md:flex-row items-start">
+          {/* ----------------- Email ----------------- */}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="w-full flex-1">
+                <FormLabel>Email address</FormLabel>
+                <FormControl>
+                  {isPending ? (
+                    InputSkeleton
+                  ) : (
+                    <InputGroup>
+                      <InputGroupInput
+                        placeholder="you@example.com"
+                        {...field}
+                      />
+                      <InputGroupAddon>
+                        <Mail className="h-4 w-4" />
+                      </InputGroupAddon>
+                    </InputGroup>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-    useEffect(() => {
-        getProfile()
-    }, [user, getProfile])
-
-    async function updateProfile({
-        avatar_url,
-    }: {
-        avatar_url: string | null
-    }) {
-        try {
-            setLoading(true)
-
-            const { error } = await supabase.from('restaurants').upsert({
-                avatar_url,
-            })
-            if (error) throw error
-            alert('Profile updated!')
-        } catch (error) {
-            alert('Error updating the data!')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    return (
-        <div className="form-widget">
-            <Avatar
-                uid={user?.id ?? null}
-                url={avatar_url}
-                size={80}
-                onUpload={(url) => {
-                    setAvatarUrl(url)
-                    updateProfile({avatar_url: url })
-                }}
-            />
+          {/* ----------------- Current Password ----------------- */}
+          <FormField
+            control={form.control}
+            name="currentPassword"
+            render={({ field }) => (
+              <FormItem className="w-full flex-1">
+                <FormLabel>Current password</FormLabel>
+                <FormControl>
+                  {isPending ? (
+                    InputSkeleton
+                  ) : (
+                    <InputGroup>
+                      <InputGroupInput
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                      />
+                      <InputGroupAddon>
+                        <KeyRound className="h-4 w-4" />
+                      </InputGroupAddon>
+                    </InputGroup>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-    )
+
+        <div className="w-full flex gap-3 flex-col md:flex-row items-start">
+          {/* ----------------- New Password ----------------- */}
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem className="w-full flex-1">
+                <FormLabel>
+                  New password (leave blank to keep current)
+                </FormLabel>
+                <FormControl>
+                  {isPending ? (
+                    InputSkeleton
+                  ) : (
+                    <InputGroup>
+                      <InputGroupInput
+                        type="password"
+                        placeholder="Min 8 chars, 1 upper, 1 number"
+                        {...field}
+                      />
+                      <InputGroupAddon>
+                        <User className="h-4 w-4" />
+                      </InputGroupAddon>
+                    </InputGroup>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* ----------------- Confirm Password ----------------- */}
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem className="w-full flex-1">
+                <FormLabel>Confirm new password</FormLabel>
+                <FormControl>
+                  {isPending ? (
+                    InputSkeleton
+                  ) : (
+                    <InputGroup>
+                      <InputGroupInput
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                      />
+                      <InputGroupAddon>
+                        <KeyRound className="h-4 w-4" />
+                      </InputGroupAddon>
+                    </InputGroup>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          disabled={!form.formState.isDirty || isLoading || isPending}
+        >
+          {isLoading ? (
+            <>
+              <Spinner />
+              Saving account info…
+            </>
+          ) : (
+            <>
+              <Save />
+              Save account info
+            </>
+          )}
+        </Button>
+      </form>
+    </Form>
+  );
 }
