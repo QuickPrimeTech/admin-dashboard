@@ -11,12 +11,10 @@ export function RestaurantName() {
   }
 
   if (isError || !data) {
-    return <span className="text-muted-foreground italic">Unnamed Restaurant</span>;
+    return (
+      <span className="text-muted-foreground italic">Unnamed Restaurant</span>
+    );
   }
 
-  return (
-    <span className="truncate font-semibold">
-      {data}
-    </span>
-  );
+  return <span className="truncate font-semibold">{data.name}</span>;
 }

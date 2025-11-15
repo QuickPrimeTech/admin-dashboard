@@ -6,20 +6,20 @@ import { ApiResponse } from "@/helpers/api-responses";
 import { toast } from "sonner";
 
 export function useRestaurantQuery() {
-  return useQuery<string>({
+  return useQuery({
     queryKey: ["restaurant"],
     queryFn: async () => {
       const supabase = createClient();
 
       const { data, error } = await supabase
         .from("restaurants")
-        .select("name")
+        .select("*")
         .single();
 
       if (error) throw new Error(error.message);
 
       // Return the restaurant name directly
-      return data?.name ?? "Restaurant Name";
+      return data;
     },
   });
 }

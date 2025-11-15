@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuItem
+  DropdownMenuItem,
 } from "@ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@ui/avatar";
 import { Button } from "@ui/button";
@@ -40,7 +40,7 @@ export function UserDropdown() {
   const [user, setUser] = useState<User | null>(null);
 
   // Get restaurant name
-  const { data: restaurantName, isLoading: isLoadingRestaurant } =
+  const { data: restaurant, isLoading: isLoadingRestaurant } =
     useRestaurantQuery();
 
   // Supabase client
@@ -49,7 +49,9 @@ export function UserDropdown() {
   // Fetch logged-in user details
   useEffect(() => {
     async function fetchUser() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
     }
     fetchUser();
@@ -59,18 +61,18 @@ export function UserDropdown() {
 
   // Derive initials from restaurant name
   const initials = useMemo(() => {
-    if (!restaurantName) return "R";
-    return restaurantName
+    if (!restaurant) return "R";
+    return restaurant.name
       .split(" ")
       .map((w: string) => w[0]?.toUpperCase())
       .join("")
       .slice(0, 2);
-  }, [restaurantName]);
+  }, [restaurant]);
 
   // Dynamic gradient fallback
   const gradient = useMemo(
-    () => generateGradient(restaurantName || ""),
-    [restaurantName]
+    () => generateGradient(restaurant?.name || ""),
+    [restaurant]
   );
 
   async function handleLogout() {
@@ -87,28 +89,27 @@ export function UserDropdown() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-            {isLoading ? 
-            (
-                <Skeleton className="size-10 rounded-full" />
-            ): (
-
-          <Button
-            variant="ghost"
-            title="account settings"
-            className="relative h-10 w-10 rounded-full hover:bg-muted"
-          >
-              
+          {isLoading ? (
+            <Skeleton className="size-10 rounded-full" />
+          ) : (
+            <Button
+              variant="ghost"
+              title="account settings"
+              className="relative h-10 w-10 rounded-full hover:bg-muted"
+            >
               <Avatar>
-                <AvatarImage src={"/some-random-url.png"} alt={`${restaurantName} profile`} />
+                <AvatarImage
+                  src={"/some-random-url.png"}
+                  alt={`${restaurant} profile`}
+                />
                 <AvatarFallback
                   className={`bg-linear-to-br ${gradient} text-white text-sm font-semibold`}
                 >
                   {initials}
                 </AvatarFallback>
               </Avatar>
-          </Button>
-            )
-        }
+            </Button>
+          )}
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-60">
@@ -121,7 +122,7 @@ export function UserDropdown() {
             ) : (
               <div className="flex flex-col space-y-1">
                 <p className="font-medium text-sm leading-none truncate">
-                  {restaurantName}
+                  {restaurant?.name}
                 </p>
                 <p className="text-muted-foreground text-xs leading-none truncate">
                   {user?.email ?? ""}
@@ -142,7 +143,7 @@ export function UserDropdown() {
           <DropdownMenuItem asChild>
             <Link href="/dashboard/settings">
               <Settings />
-             Branch Settings
+              Branch Settings
             </Link>
           </DropdownMenuItem>
 
@@ -152,7 +153,7 @@ export function UserDropdown() {
             onClick={handleLogout}
             className="text-destructive focus:text-destructive"
           >
-            <LogOut className="text-inherit"/>
+            <LogOut className="text-inherit" />
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
