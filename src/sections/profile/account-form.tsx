@@ -56,7 +56,7 @@ export function AccountForm() {
         password: "",
         confirmPassword: "",
       });
-  }, [user]);
+  }, [user, form]);
 
   const onSubmit = (values: AccountSettingsData) => {
     setIsLoading(true);

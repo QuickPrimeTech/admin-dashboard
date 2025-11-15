@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useMemo, useState, type ChangeEventHandler } from "react";
 import Image from "next/image";
 import { Edit2 } from "lucide-react";
@@ -22,9 +23,9 @@ export default function Avatar({
   const supabase = createClient();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
   // Get restaurant name
-  const { data: restaurant, isLoading: isLoadingRestaurant } =
-    useRestaurantQuery();
+  const { data: restaurant } = useRestaurantQuery();
 
   //Gradient fallback incase the image doesn't exist
   const gradient = useMemo(

@@ -5,7 +5,7 @@ import {
   SelectContent,
   SelectTrigger,
   SelectValue,
-  SelectItem
+  SelectItem,
 } from "@ui/select";
 import { FormControl } from "@ui/form";
 import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
@@ -15,7 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@ui/dialog";
 import { Input } from "@ui/input";
 import { Button } from "@ui/button";
@@ -35,13 +35,16 @@ export function DynamicSelect<
   TFieldValues extends FieldValues,
   TName extends Path<TFieldValues>
 >({ field }: DynamicSelectProps<TFieldValues, TName>) {
-
-  const {branchId} = useBranch();
+  const { branchId } = useBranch();
   //Getting the categories using the react query
-  const { data: serverCategories, isPending, isError } = useCategoriesQuery(branchId);
+  const {
+    data: serverCategories,
+    isPending,
+    isError,
+  } = useCategoriesQuery(branchId);
 
   //fallback categories for when the server doesn't fetch the categories
-  const prefilledCat = ["Main Dishes", "Starters","Desserts"];
+  const prefilledCat = ["Main Dishes", "Starters", "Desserts"];
 
   const [categories, setCategories] = useState<string[]>(prefilledCat);
   const [open, setOpen] = useState(false);
@@ -58,12 +61,15 @@ export function DynamicSelect<
 
   useEffect(() => {
     if (serverCategories) {
-      if(serverCategories.length < 3) {
-            const uniqueCategories = Array.from(
-    new Set([...categories, ...prefilledCat].map((item) => item).filter(Boolean)));
+      if (serverCategories.length < 3) {
+        const uniqueCategories = Array.from(
+          new Set(
+            [...categories, ...prefilledCat].map((item) => item).filter(Boolean)
+          )
+        );
 
-       setCategories(uniqueCategories);
-      }else {
+        setCategories(uniqueCategories);
+      } else {
         setCategories(serverCategories);
       }
 
@@ -72,7 +78,7 @@ export function DynamicSelect<
         setCategories((prev) => [...prev, field.value]);
       }
     }
-  }, [prefilledCat, serverCategories, field.value]);
+  }, [prefilledCat, serverCategories, categories, field.value]);
 
   console.log("This is the field ---->", field);
   return (

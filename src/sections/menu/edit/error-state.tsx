@@ -9,7 +9,6 @@ type EditErrorStateProps = {
 export function EditErrorState({ refetch }: EditErrorStateProps) {
   return (
     <div className="lg:col-span-3 flex flex-col items-center justify-center py-12 px-6 text-center rounded-xl border border-destructive/20 bg-destructive/10">
-      
       {/* Icon Badge */}
       <div className="flex items-center justify-center h-12 w-12 rounded-full bg-destructive/20 mb-4">
         <AlertTriangle className="h-6 w-6 text-destructive" />
@@ -17,12 +16,13 @@ export function EditErrorState({ refetch }: EditErrorStateProps) {
 
       {/* Title */}
       <h3 className="text-lg font-semibold text-destructive mb-2">
-        Couldn’t Load This Menu Item
+        Couldn&apos;t Load This Menu Item
       </h3>
 
       {/* Message */}
       <p className="text-sm text-muted-foreground max-w-xs mb-6">
-        This menu item may not exist in the selected branch. Try again or switch branches to check if it's available.
+        This menu item may not exist in the selected branch. Try again or switch
+        branches to check if it&apos;s available.
       </p>
 
       {/* Actions */}
