@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { SignupProps } from "@/types/authentication";
 import { LoginFormData } from "@/schemas/authentication";
 import { cookies } from "next/headers";
+import { switchBranch } from "@/app/actions/branches";
 
 export async function login(loginData: LoginFormData) {
   const supabase = await createClient();
@@ -19,12 +20,13 @@ export async function login(loginData: LoginFormData) {
     return {
       success: false,
       message: "Your username or password might be wrong",
-    };  
+    };
   }
   //Before redirect check if the user has only one branch and set it on the user_metadata
   const { data: branches, error } = await supabase
     .from("branch_settings")
     .select("*");
+
   if (error) {
     return {
       success: false,
@@ -32,22 +34,12 @@ export async function login(loginData: LoginFormData) {
     };
   }
 
-  console.log(branches);
   // If only one branch exists, set its ID in user_metadata
   if (branches.length === 1) {
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { branch_id: branches[0].id },
-    });
-    if (updateError)
-      return {
-        success: false,
-        message: "There was an error onboarding you to the dashboard",
-      };
-
-     
+    await switchBranch(branches[0].id);
     redirect("/dashboard");
   }
- 
+
   redirect("/branches");
 }
 
@@ -96,8 +88,6 @@ export async function signup({ email, password, token }: SignupProps) {
 
 export async function logout() {
   const supabase = await createClient();
- (await cookies()).delete("app_branch"); 
+  (await cookies()).delete("app_branch");
   await supabase.auth.signOut();
-
-  redirect("/login");
 }

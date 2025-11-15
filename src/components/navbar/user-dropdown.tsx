@@ -19,6 +19,7 @@ import { useRestaurantQuery } from "@/hooks/use-restaurant";
 import { createClient } from "@/utils/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@supabase/supabase-js";
+import { redirect } from "next/navigation";
 
 //  Dynamic random gradient generator
 export function generateGradient(seed: string) {
@@ -76,10 +77,11 @@ export function UserDropdown() {
   );
 
   async function handleLogout() {
-    setUser(null);
-    queryClient.clear();
     setDialogOpen(true);
     await logout();
+    queryClient.clear();
+    setUser(null);
+    redirect("/login");
   }
 
   // Show skeleton if either restaurant or user data is loading
