@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@ui/button";
-import { Input } from "@ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import {
   Form,
   FormControl,
@@ -12,6 +12,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@ui/form";
+import { ChefHat, Save, User } from "lucide-react";
+import { useRestaurantQuery } from "@/hooks/use-restaurant";
+import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 /* ------------------------------------------------------------------ */
 /* Zod schema – mirrors the table constraints                         */
@@ -19,12 +24,6 @@ import {
 const formSchema = z.object({
   name: z.string().min(1, "Restaurant name is required"),
   owner: z.string().max(50, "Max 50 characters").optional().or(z.literal("")),
-  avatar_url: z
-    .string()
-    .url("Must be a valid URL")
-    .optional()
-    .or(z.literal("")),
-  lqip: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -32,102 +31,98 @@ type FormValues = z.infer<typeof formSchema>;
 /* ------------------------------------------------------------------ */
 /* Component                                                          */
 /* ------------------------------------------------------------------ */
-export function RestaurantForm({
-  defaultValues,
-}: {
-  defaultValues?: Partial<FormValues>;
-}) {
+export function RestaurantForm() {
+  const { data: restaurant, isPending } = useRestaurantQuery();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       owner: "",
-      avatar_url: "",
-      lqip: "",
-      ...defaultValues,
     },
   });
+
+  useEffect(() => {
+    if (restaurant) {
+      form.reset({ name: restaurant.name, owner: restaurant.owner ?? "" });
+    }
+  }, [restaurant]);
 
   const onSubmit = (values: FormValues) => {
     console.log("You are about to submit this values --->", values);
   };
-
-  const {
-    handleSubmit,
-    formState: { isSubmitting },
-  } = form;
-
+  const InputSkeleton = <Skeleton className="h-9" />;
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-6">
         {/* Name */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Restaurant name</FormLabel>
-              <FormControl>
-                <Input placeholder="The Burger Joint" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="w-full flex gap-3 flex-col md:flex-row items-start">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="w-full flex-1">
+                <FormLabel>Restaurant name</FormLabel>
+                <FormControl>
+                  {isPending ? (
+                    InputSkeleton
+                  ) : (
+                    <InputGroup>
+                      <InputGroupInput
+                        placeholder="Enter restaurant name here..."
+                        {...field}
+                      />
+                      <InputGroupAddon>
+                        <ChefHat />
+                      </InputGroupAddon>
+                    </InputGroup>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Owner */}
-        <FormField
-          control={form.control}
-          name="owner"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Owner</FormLabel>
-              <FormControl>
-                <Input placeholder="Margaret Villard" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Owner */}
+          <FormField
+            control={form.control}
+            name="owner"
+            render={({ field }) => (
+              <FormItem className="w-full flex-1">
+                <FormLabel>Owner</FormLabel>
+                <FormControl>
+                  {isPending ? (
+                    InputSkeleton
+                  ) : (
+                    <InputGroup>
+                      <InputGroupInput
+                        placeholder="Enter restaurant owner name here..."
+                        {...field}
+                      />
+                      <InputGroupAddon>
+                        <User />
+                      </InputGroupAddon>
+                    </InputGroup>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        {/* Avatar URL */}
-        <FormField
-          control={form.control}
-          name="avatar_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Avatar URL</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="https://example.com/avatar.jpg"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+        <Button type="submit" disabled={!form.formState.isDirty}>
+          {form.formState.isSubmitting ? (
+            <>
+              <Spinner />
+              Saving…
+            </>
+          ) : (
+            <>
+              <Save />
+              Save restaurant info
+            </>
           )}
-        />
-
-        {/* LQIP (blur-up) URL */}
-        <FormField
-          control={form.control}
-          name="lqip"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Blur-up image (LQIP) URL</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="https://example.com/hero-lqip.jpg"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving…" : "Save restaurant"}
         </Button>
       </form>
     </Form>

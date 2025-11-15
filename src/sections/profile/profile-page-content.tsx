@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { RestaurantForm } from "./basic-info";
+import { RestaurantForm } from "./restaurant-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Avatar = dynamic(() => import("./avatar"));
