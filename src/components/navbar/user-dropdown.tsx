@@ -74,6 +74,7 @@ export function UserDropdown() {
   );
 
   async function handleLogout() {
+    setUser(null);
     queryClient.clear();
     setDialogOpen(true);
     await logout();

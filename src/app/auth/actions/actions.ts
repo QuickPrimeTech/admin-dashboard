@@ -1,9 +1,9 @@
 "use server";
 import { redirect } from "next/navigation";
-
 import { createClient } from "@/utils/supabase/server";
 import { SignupProps } from "@/types/authentication";
 import { LoginFormData } from "@/schemas/authentication";
+import { cookies } from "next/headers";
 
 export async function login(loginData: LoginFormData) {
   const supabase = await createClient();
@@ -96,12 +96,7 @@ export async function signup({ email, password, token }: SignupProps) {
 
 export async function logout() {
   const supabase = await createClient();
-  // Clear branch_id metadata first
-  // const { error: updateError } = await supabase.auth.updateUser({
-  //   data: { branch_id: null },
-  // });
-
-  // if (updateError) console.error("Failed to clear branch_id:", updateError);
+ (await cookies()).delete("app_branch"); 
   await supabase.auth.signOut();
 
   redirect("/login");
