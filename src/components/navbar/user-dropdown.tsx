@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@supabase/supabase-js";
 
 //  Dynamic random gradient generator
-function generateGradient(seed: string) {
+export function generateGradient(seed: string) {
   const colors = [
     "from-pink-500 to-rose-500",
     "from-purple-500 to-indigo-500",

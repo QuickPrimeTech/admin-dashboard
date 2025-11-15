@@ -1,25 +1,22 @@
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { BasicInfo } from "./basic-info";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createClient } from '@/utils/supabase/server';
-const Avatar = dynamic(() => import('./avatar'));
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-
-export const title = "Edit Profile";
+const Avatar = dynamic(() => import("./avatar"));
 
 export async function ProfilePageContent() {
-  const supabase = await createClient();
-
-
-
   return (
     <div className="space-y-6">
       <div className="relative">
-
-        <div className="flex justify-center items-center h-40 rounded-t-lg bg-linear-to-r from-orange-400 via-pink-500 to-purple-600">
-          <h1 className='text-4xl font-bold'>Your account settings</h1>
+        <div className="flex justify-center items-center h-45  rounded-t-lg bg-linear-to-r from-orange-400 via-pink-500 to-purple-600">
+          <h1 className="text-2xl md:text-2xl lg:text-4xl font-bold">
+            Your account settings
+          </h1>
         </div>
-<Avatar size={90} className="absolute -bottom-12 left-6 border-4 border-background"/>
+        <Avatar
+          size={90}
+          className="absolute -bottom-12 left-6 border-4 border-background"
+        />
       </div>
 
       <Tabs defaultValue="basic-info">

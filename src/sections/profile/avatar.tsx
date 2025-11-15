@@ -1,12 +1,15 @@
 'use client'
-import { useEffect, useState, type ChangeEventHandler } from 'react'
+import { useMemo, useState, type ChangeEventHandler } from 'react'
 import Image from 'next/image'
 import { Edit2 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { Spinner } from '@/components/ui/spinner'
 import { resizeImage } from '@/helpers/file-helpers'
-import { User } from '@supabase/supabase-js'
+import {  } from '@supabase/supabase-js'
 import { cn } from '@/lib/utils'
+import { useRestaurantQuery } from '@/hooks/use-restaurant'
+import { generateGradient } from '@/components/navbar/user-dropdown'
+import { getInitials } from '@/helpers/text-formatters'
 
 type Props = {
   size: number
@@ -16,16 +19,15 @@ export default function Avatar({size, className}: Props & React.ComponentProps<"
   const supabase = createClient()
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false);
-  const [user, setUser] = useState<User|null>(null);
+// Get restaurant name
+  const { data: restaurantName, isLoading: isLoadingRestaurant } =
+    useRestaurantQuery();
 
-  /* ---------- fetch current user ---------- */
-  useEffect(() => {
-    async function fetchUser() {
-      const { data } = await supabase.auth.getUser()
-      setUser(data.user)
-    }
-    fetchUser()
-  }, [supabase])
+//Gradient fallback incase the image doesn't exist
+   const gradient = useMemo(
+      () => generateGradient(restaurantName || ""),
+      [restaurantName]
+    );
 
   const uploadAvatar: ChangeEventHandler<HTMLInputElement> = async (e) => {
   try {
@@ -38,7 +40,7 @@ export default function Avatar({size, className}: Props & React.ComponentProps<"
     const resizedBlob = await resizeImage(file, size * 2);
 
     const ext = file.name.split('.').pop()
-    const path = `${user?.id}-${Date.now()}.${ext}`;
+    const path = `avatar-${Date.now()}.${ext}`;
 
     const { error } = await supabase.storage
       .from("avatars")
@@ -82,8 +84,10 @@ console.log("signed URL:", avatarData?.signedUrl);
         />
       ) : (
         <div
-          className="w-full h-full bg-linear-to-br from-blue-400 to-purple-500"
-        />
+          className={`flex justify-center items-center text-xl font-bold w-full h-full bg-linear-to-br ${gradient}`}
+        >
+          {getInitials(restaurantName ?? "")}
+        </div>
       )}
 
       {/* edit icon overlay */}
