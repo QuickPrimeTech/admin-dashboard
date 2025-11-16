@@ -61,14 +61,9 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
 
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("faqs")
-    .delete()
-    .eq("id", id)
-    .select()
-    .single();
+  const { error } = await supabase.from("faqs").delete().eq("id", id);
 
   if (error) return createResponse(500, error.message || "Delete failed");
 
-  return createResponse(200, "FAQ deleted successfully", data);
+  return createResponse(200, "FAQ deleted successfully");
 }

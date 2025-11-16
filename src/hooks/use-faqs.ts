@@ -153,7 +153,7 @@ export function useDeleteFaqMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ApiResponse<FAQ>, // because your POST does NOT return FAQ
+    ApiResponse<null>, //Delete does NOT return FAQ
     AxiosError<ApiResponse<null>>,
     { id: number; branchId: string },
     { previousFAQs: FAQ[] }
@@ -163,28 +163,35 @@ export function useDeleteFaqMutation() {
       return res.data;
     },
 
-    // onMutate: async ({ faq, branchId }) => {
-    //   const queryKey = getFaqKey(branchId);
+    onMutate: async ({ id, branchId }) => {
+      const queryKey = getFaqKey(branchId);
 
-    //   await queryClient.cancelQueries({ queryKey });
-    //   //A snapshot of the previous data
-    //   const previousFAQs = queryClient.getQueryData<FAQ[]>(queryKey) ?? [];
+      await queryClient.cancelQueries({ queryKey });
+      //A snapshot of the previous data
+      const previousFAQs = queryClient.getQueryData<FAQ[]>(queryKey) ?? [];
 
-    //   queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
-    //     //If there were no faqs previously I'll just return an array with a single faq inside
-    //     if (!faqs) return [faq];
-    //     return faqs.map((oldFaq) => (oldFaq.id === faq.id ? faq : oldFaq));
-    //   });
+      //Optimistically removing the deleted faq
+      queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
+        //If there were no faqs previously I'll just return an array with a single faq inside
+        if (!faqs) return;
+        return faqs.filter((faq) => faq.id !== id);
+      });
 
-    //   return { previousFAQs };
-    // },
-
-    onError: (error, { branchId }, context) => {
-      toast.error("There was and error deleting your faq!");
+      return { previousFAQs };
     },
 
+    onError: (error, { branchId }, context) => {
+      const queryKey = getFaqKey(branchId);
+
+      //Rollback the changed of deleting faqs
+      if (context?.previousFAQs) {
+        queryClient.setQueryData<FAQ[]>(queryKey, context.previousFAQs);
+      }
+
+      toast.error(error.message || "There was and error deleting your faq!");
+    },
     onSuccess: (res) => {
-      toast.success("Your faq has been deleted successfully");
+      toast.success(res.message || "Your faq has been deleted successfully");
     },
   });
 }
