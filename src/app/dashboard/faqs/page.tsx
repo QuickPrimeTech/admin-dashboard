@@ -7,7 +7,11 @@ import { FAQDialog } from "@/sections/faqs/faq-dialog";
 import { FaqCardSkeleton } from "@/components/skeletons/faq-skeleton";
 import { FAQEmptyState } from "@/sections/faqs/faq-empty-state";
 import { FAQCard } from "@/sections/faqs/faq-card";
-import { useCreateFaqMutation, useFaqsQuery } from "@/hooks/use-faqs";
+import {
+  useCreateFaqMutation,
+  useFaqsQuery,
+  useUpdateFaqMutation,
+} from "@/hooks/use-faqs";
 import { useBranch } from "@/components/providers/branch-provider";
 import { FaqFormData } from "@/schemas/faqs";
 import { FAQ } from "@/types/faqs";
@@ -21,12 +25,23 @@ export default function FAQsPage() {
   const { data: faqs, isPending } = useFaqsQuery(branchId);
   //Adding Mutation
   const addMutation = useCreateFaqMutation();
+  //Update Mutation
+  const updateMutation = useUpdateFaqMutation();
 
   const handleSave = (faq: FaqFormData) => {
     //Close the dialog first for the user to get immediate response
     setIsDialogOpen(() => false);
     if (editingFaq) {
+      const payload = { ...editingFaq, ...faq };
       //Editing mode
+      updateMutation.mutate(
+        { faq: payload, branchId },
+        {
+          onError: () => {
+            setIsDialogOpen(() => true);
+          },
+        }
+      );
       console.log(
         "You are in editing mode and want to edit this faq ----->",
         faq

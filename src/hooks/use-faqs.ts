@@ -80,6 +80,50 @@ export function useCreateFaqMutation() {
   });
 }
 
-export function useUpdateFaqMutation() {}
+export function useUpdateFaqMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<FAQ>, // because your POST does NOT return FAQ
+    AxiosError<ApiResponse<null>>,
+    { faq: FAQ; branchId: string },
+    { previousFAQs: FAQ[] }
+  >({
+    mutationFn: async ({ faq }) => {
+      const res = await axios.patch("/api/faqs", faq);
+      return res.data;
+    },
+
+    onMutate: async ({ faq, branchId }) => {
+      const queryKey = getFaqKey(branchId);
+
+      await queryClient.cancelQueries({ queryKey });
+      //A snapshot of the previous data
+      const previousFAQs = queryClient.getQueryData<FAQ[]>(queryKey) ?? [];
+
+      queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
+        //If there were no faqs previously I'll just return an array with a single faq inside
+        if (!faqs) return [faq];
+        return faqs.map((oldFaq) => (oldFaq.id === faq.id ? faq : oldFaq));
+      });
+
+      return { previousFAQs };
+    },
+
+    onError: (error, { branchId }, context) => {
+      //Rollback to the previous state of the faqs
+      if (context?.previousFAQs) {
+        const queryKey = getFaqKey(branchId);
+        queryClient.setQueryData(queryKey, context.previousFAQs);
+      }
+      const errMessage = error.response?.data.message;
+      toast.error(errMessage || "There was and error updating your faq!");
+    },
+
+    onSuccess: (res) => {
+      toast.success(res.message || "Your faq has been updated successfully");
+    },
+  });
+}
 
 export function useDeleteFaqMutation() {}

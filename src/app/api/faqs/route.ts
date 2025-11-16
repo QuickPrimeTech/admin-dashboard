@@ -18,7 +18,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("faqs")
     .select("*")
-    .order("order_index", { ascending: false })
+    .order("order_index", { ascending: true })
     .eq("branch_id", branchId);
 
   if (error)
@@ -75,7 +75,7 @@ export async function PATCH(request: NextRequest) {
   const { id, question, answer, is_published, order_index } =
     await request.json();
 
-  if (!id) return errorResponse("Missing ID", 400);
+  if (!id) return createResponse(403, "The id for the FAQ has to be supplied!");
 
   //Update the data from the database
   const { data, error } = await supabase
@@ -93,7 +93,7 @@ export async function PATCH(request: NextRequest) {
   /**--------- I WILL INCLUDE THIS REVALIDATION TO CHANGE THE REVALIDATE THE CLIENTS WEBSITE BUT ONLY AFTER THIS BECOMES STABLE --------------**/
   // await revalidatePage("/");
 
-  return createResponse(200, `Successfully created your FAQ`, data);
+  return createResponse(200, "Successfully updated your FAQ", data);
 }
 
 export async function DELETE(request: NextRequest) {
