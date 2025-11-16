@@ -25,16 +25,25 @@ export default function FAQsPage() {
   const handleSave = (faq: FaqFormData) => {
     //Close the dialog first for the user to get immediate response
     setIsDialogOpen(() => false);
-    //Adding the faq to the database
-    addMutation.mutate(
-      { faq, branchId },
-      {
-        onError: () => {
-          setIsDialogOpen(() => true);
-        },
-      }
-    );
+    if (editingFaq) {
+      //Editing mode
+      console.log(
+        "You are in editing mode and want to edit this faq ----->",
+        faq
+      );
+    } else {
+      //Adding the faq to the database
+      addMutation.mutate(
+        { faq, branchId },
+        {
+          onError: () => {
+            setIsDialogOpen(() => true);
+          },
+        }
+      );
+    }
   };
+
   const handleEdit = (faq: FAQ) => {
     setEditingFaq(faq);
     setIsDialogOpen(true);

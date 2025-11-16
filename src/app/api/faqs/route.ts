@@ -70,24 +70,30 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
 
   const { id, question, answer, is_published, order_index } =
     await request.json();
 
   if (!id) return errorResponse("Missing ID", 400);
 
+  //Update the data from the database
   const { data, error } = await supabase
     .from("faqs")
     .update({ question, answer, is_published, order_index })
     .eq("id", id)
-    .eq("user_id", user.id)
     .select();
 
-  if (error) return errorResponse("Update failed", 500, error.message);
-  await revalidatePage("/");
-  return successResponse("Updated", data);
+  if (error)
+    return createResponse(
+      502,
+      error.message || "Failed to update data in the database!"
+    );
+
+  /**--------- I WILL INCLUDE THIS REVALIDATION TO CHANGE THE REVALIDATE THE CLIENTS WEBSITE BUT ONLY AFTER THIS BECOMES STABLE --------------**/
+  // await revalidatePage("/");
+
+  return createResponse(200, `Successfully created your FAQ`, data);
 }
 
 export async function DELETE(request: NextRequest) {
