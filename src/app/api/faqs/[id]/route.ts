@@ -41,7 +41,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     .from("faqs")
     .update({ question, answer, is_published })
     .eq("id", id)
-    .select();
+    .select()
+    .single();
 
   if (error)
     return createResponse(
@@ -56,14 +57,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
-  //Getting id from the route
   const { id } = await params;
 
   const supabase = await createClient();
 
-  const { error } = await supabase.from("faqs").delete().eq("id", id);
+  const { data, error } = await supabase
+    .from("faqs")
+    .delete()
+    .eq("id", id)
+    .select("id"); // 👈 IMPORTANT
 
-  if (error) return createResponse(500, error.message || "Delete failed");
+  // If Supabase blocked delete → 0 rows returned but error = null
+  if (error) return createResponse(500, error.message);
+
+  if (!data || data.length === 0) {
+    return createResponse(403, "Not authorized to delete this FAQ");
+  }
 
   return createResponse(200, "FAQ deleted successfully");
 }

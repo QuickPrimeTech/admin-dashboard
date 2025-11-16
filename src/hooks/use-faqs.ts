@@ -136,6 +136,8 @@ export function useUpdateFaqMutation() {
       const queryKey = getFaqKey(branchId);
       const newFaq = res.data;
       if (newFaq) {
+        console.log("This is the server FAQ -->", newFaq);
+
         queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
           //If there were no faqs previously I'll just return an array with a single faq inside
           if (!faqs) return [newFaq];
@@ -187,8 +189,8 @@ export function useDeleteFaqMutation() {
       if (context?.previousFAQs) {
         queryClient.setQueryData<FAQ[]>(queryKey, context.previousFAQs);
       }
-
-      toast.error(error.message || "There was and error deleting your faq!");
+      const errMessage = error.response?.data.message;
+      toast.error(errMessage || "There was and error deleting your faq!");
     },
     onSuccess: (res) => {
       toast.success(res.message || "Your faq has been deleted successfully");

@@ -41,12 +41,6 @@ export function FAQCard({ faq, handleEdit }: FAQCardProps) {
     });
   };
 
-  // Function to delete faq
-  const deleteFaq = (id: number) => {
-    deleteMutation.mutate({ id, branchId });
-    console.log("You are about to delete this faq ------>", faq);
-  };
-
   return (
     <Card>
       <CardContent>
@@ -100,7 +94,9 @@ export function FAQCard({ faq, handleEdit }: FAQCardProps) {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => deleteFaq(faq.id)}
+                    onClick={() =>
+                      deleteMutation.mutate({ id: faq.id, branchId })
+                    }
                     variant="destructive"
                   >
                     <Trash2 />
