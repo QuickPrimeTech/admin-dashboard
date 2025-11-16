@@ -27,8 +27,12 @@ import { Spinner } from "@ui/spinner";
 import { Edit2, Plus } from "lucide-react";
 import { FaqFormData, faqFormSchema } from "@/schemas/faqs";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export function FAQDialog({ open, onOpenChange, faq }: FAQDialogProps) {
+  //Get the branchId from the context
+  const { branchId } = useBranch();
+  //Mutation for adding faq
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const defaultValues = {

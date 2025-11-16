@@ -21,5 +21,4 @@ export type FAQDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   faq?: FAQ | null;
-  onSaved: () => void;
 };
