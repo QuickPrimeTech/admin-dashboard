@@ -69,10 +69,6 @@ export default function FAQsPage() {
     setEditingFaq(null);
   };
 
-  const confirmDelete = (faq: FAQ) => {
-    console.log("You are about to delete faq --->", faq);
-  };
-
   return (
     <div className="space-y-6">
       {/* ------- header ------- */}
@@ -104,12 +100,7 @@ export default function FAQsPage() {
       ) : (
         <div className="space-y-4">
           {faqs.map((faq) => (
-            <FAQCard
-              key={faq.id}
-              faq={faq}
-              handleEdit={handleEdit}
-              confirmDelete={confirmDelete}
-            />
+            <FAQCard key={faq.id} faq={faq} handleEdit={handleEdit} />
           ))}
         </div>
       )}

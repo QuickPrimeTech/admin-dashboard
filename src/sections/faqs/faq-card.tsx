@@ -3,25 +3,46 @@ import { Button } from "@ui/button";
 import { GripVertical, Trash2, Edit } from "lucide-react";
 import { Switch } from "@ui/switch";
 import { FAQ } from "@/types/faqs";
-import { useUpdateFaqMutation } from "@/hooks/use-faqs";
+import { useDeleteFaqMutation, useUpdateFaqMutation } from "@/hooks/use-faqs";
 import { useBranch } from "@/components/providers/branch-provider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@ui/alert-dialog";
 
 type FAQCardProps = {
   faq: FAQ;
   handleEdit: (faq: FAQ) => void;
-  confirmDelete: (faq: FAQ) => void;
 };
 
-export function FAQCard({ faq, handleEdit, confirmDelete }: FAQCardProps) {
+export function FAQCard({ faq, handleEdit }: FAQCardProps) {
   //Get the branchId from the context
   const { branchId } = useBranch();
+
   //Update Mutation
   const updateMutation = useUpdateFaqMutation();
 
+  //Delete Mutation
+  const deleteMutation = useDeleteFaqMutation();
+
+  //Function to toggle published
   const togglePublished = (is_published: boolean) => {
     const payload = { ...faq, is_published };
     updateMutation.mutate({ faq: payload, branchId });
   };
+
+  // Function to delete faq
+  const deleteFaq = (id: number) => {
+    console.log("You are about to delete this faq ------>", faq);
+  };
+
   return (
     <Card>
       <CardContent>
@@ -49,14 +70,35 @@ export function FAQCard({ faq, handleEdit, confirmDelete }: FAQCardProps) {
               <Edit className="h-4 w-4" />
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => confirmDelete(faq)}
-              className="cursor-pointer text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="cursor-pointer text-destructive hover:text-destructive"
+                >
+                  <Trash2 />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    this faq from your website.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteFaq(faq.id)}
+                    variant="destructive"
+                  >
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
