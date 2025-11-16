@@ -86,25 +86,36 @@ export function useUpdateFaqMutation() {
   return useMutation<
     ApiResponse<FAQ>, // because your POST does NOT return FAQ
     AxiosError<ApiResponse<null>>,
-    { faq: FAQ; branchId: string },
+    { id: number; faq: FaqFormData; branchId: string },
     { previousFAQs: FAQ[] }
   >({
-    mutationFn: async ({ faq }) => {
-      const res = await axios.patch("/api/faqs", faq);
+    mutationFn: async ({ faq, id }) => {
+      const res = await axios.patch(`/api/faqs/${id}`, faq);
       return res.data;
     },
 
-    onMutate: async ({ faq, branchId }) => {
+    onMutate: async ({ faq, id, branchId }) => {
       const queryKey = getFaqKey(branchId);
 
       await queryClient.cancelQueries({ queryKey });
       //A snapshot of the previous data
       const previousFAQs = queryClient.getQueryData<FAQ[]>(queryKey) ?? [];
 
+      // create a temporary optimistic object
+      const tempFaq: FAQ = {
+        id: Math.random(), // temporary ID
+        question: faq.question,
+        answer: faq.answer,
+        is_published: faq.is_published ?? true,
+        order_index: previousFAQs.length, // optimistic guess
+        branch_id: branchId,
+        created_at: new Date().toISOString(),
+      };
+
       queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
         //If there were no faqs previously I'll just return an array with a single faq inside
-        if (!faqs) return [faq];
-        return faqs.map((oldFaq) => (oldFaq.id === faq.id ? faq : oldFaq));
+        if (!faqs) return [tempFaq];
+        return faqs.map((oldFaq) => (oldFaq.id === id ? tempFaq : oldFaq));
       });
 
       return { previousFAQs };
@@ -120,10 +131,60 @@ export function useUpdateFaqMutation() {
       toast.error(errMessage || "There was and error updating your faq!");
     },
 
-    onSuccess: (res) => {
+    onSuccess: (res, { branchId }, { previousFAQs }) => {
+      //Query key
+      const queryKey = getFaqKey(branchId);
+      const newFaq = res.data;
+      if (newFaq) {
+        queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
+          //If there were no faqs previously I'll just return an array with a single faq inside
+          if (!faqs) return [newFaq];
+          return previousFAQs.map((oldFaq) =>
+            oldFaq.id === newFaq.id ? newFaq : oldFaq
+          );
+        });
+      }
       toast.success(res.message || "Your faq has been updated successfully");
     },
   });
 }
 
-export function useDeleteFaqMutation() {}
+export function useDeleteFaqMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<FAQ>, // because your POST does NOT return FAQ
+    AxiosError<ApiResponse<null>>,
+    { id: number; branchId: string },
+    { previousFAQs: FAQ[] }
+  >({
+    mutationFn: async ({ id }) => {
+      const res = await axios.delete(`/api/faqs/${id}`);
+      return res.data;
+    },
+
+    // onMutate: async ({ faq, branchId }) => {
+    //   const queryKey = getFaqKey(branchId);
+
+    //   await queryClient.cancelQueries({ queryKey });
+    //   //A snapshot of the previous data
+    //   const previousFAQs = queryClient.getQueryData<FAQ[]>(queryKey) ?? [];
+
+    //   queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
+    //     //If there were no faqs previously I'll just return an array with a single faq inside
+    //     if (!faqs) return [faq];
+    //     return faqs.map((oldFaq) => (oldFaq.id === faq.id ? faq : oldFaq));
+    //   });
+
+    //   return { previousFAQs };
+    // },
+
+    onError: (error, { branchId }, context) => {
+      toast.error("There was and error deleting your faq!");
+    },
+
+    onSuccess: (res) => {
+      toast.success("Your faq has been deleted successfully");
+    },
+  });
+}

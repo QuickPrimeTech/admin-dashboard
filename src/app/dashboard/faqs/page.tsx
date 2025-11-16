@@ -32,10 +32,9 @@ export default function FAQsPage() {
     //Close the dialog first for the user to get immediate response
     setIsDialogOpen(() => false);
     if (editingFaq) {
-      const payload = { ...editingFaq, ...faq };
       //Editing mode
       updateMutation.mutate(
-        { faq: payload, branchId },
+        { faq, id: editingFaq.id, branchId },
         {
           onError: () => {
             setIsDialogOpen(() => true);

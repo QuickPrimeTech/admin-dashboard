@@ -34,12 +34,16 @@ export function FAQCard({ faq, handleEdit }: FAQCardProps) {
 
   //Function to toggle published
   const togglePublished = (is_published: boolean) => {
-    const payload = { ...faq, is_published };
-    updateMutation.mutate({ faq: payload, branchId });
+    updateMutation.mutate({
+      faq: { ...faq, is_published },
+      branchId,
+      id: faq.id,
+    });
   };
 
   // Function to delete faq
   const deleteFaq = (id: number) => {
+    deleteMutation.mutate({ id, branchId });
     console.log("You are about to delete this faq ------>", faq);
   };
 
@@ -80,21 +84,27 @@ export function FAQCard({ faq, handleEdit }: FAQCardProps) {
                   <Trash2 />
                 </Button>
               </AlertDialogTrigger>
+
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Delete FAQ?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    this faq from your website.
+                    Are you sure you want to delete this FAQ. This action{" "}
+                    <span className="font-bold text-destructive">
+                      cannot be undone
+                    </span>
+                    .
                   </AlertDialogDescription>
                 </AlertDialogHeader>
+
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => deleteFaq(faq.id)}
                     variant="destructive"
                   >
-                    Continue
+                    <Trash2 />
+                    Delete FAQ
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
