@@ -39,9 +39,9 @@ export default async function ConfirmSignupPage() {
               help.
             </p>
             <Button asChild>
-              <a href="mailto:quickprimetech@quickprimetech.com">
+              <Link href="mailto:quickprimetech@quickprimetech.com">
                 Contact Support
-              </a>
+              </Link>
             </Button>
           </>
         )}

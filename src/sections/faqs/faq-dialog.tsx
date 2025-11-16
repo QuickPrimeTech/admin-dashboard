@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -26,14 +25,8 @@ import { Switch } from "@ui/switch";
 import { toast } from "sonner";
 import { FAQDialogProps } from "@/types/faqs";
 import { Spinner } from "@ui/spinner";
-
-const formSchema = z.object({
-  question: z.string().min(1, "Question is required"),
-  answer: z.string().min(1, "Answer is required"),
-  is_published: z.boolean(),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { Edit2 } from "lucide-react";
+import { FaqFormData, faqFormSchema } from "@/schemas/faqs";
 
 export function FAQDialog({
   open,
@@ -43,13 +36,15 @@ export function FAQDialog({
 }: FAQDialogProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      question: "",
-      answer: "",
-      is_published: true,
-    },
+  const defaultValues = {
+    question: "",
+    answer: "",
+    is_published: true,
+  };
+
+  const form = useForm<FaqFormData>({
+    resolver: zodResolver(faqFormSchema),
+    defaultValues,
   });
 
   useEffect(() => {
@@ -60,15 +55,11 @@ export function FAQDialog({
         is_published: faq.is_published,
       });
     } else {
-      form.reset({
-        question: "",
-        answer: "",
-        is_published: true,
-      });
+      form.reset(defaultValues);
     }
   }, [faq, form]);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FaqFormData) => {
     setIsLoading(true);
     const payload = {
       ...data,
@@ -207,7 +198,17 @@ export function FAQDialog({
                     {faq ? "Updating" : "Creating"} FAQ
                   </>
                 ) : (
-                  <>{faq ? "Update" : "Create"} FAQ</>
+                  <>
+                    {faq ? (
+                      <>
+                        <Edit2 />
+                        Update
+                      </>
+                    ) : (
+                      <>Create</>
+                    )}{" "}
+                    FAQ
+                  </>
                 )}
               </Button>
             </DialogFooter>
