@@ -22,18 +22,13 @@ import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
 import { Button } from "@ui/button";
 import { Switch } from "@ui/switch";
-import { toast } from "sonner";
 import { FAQDialogProps } from "@/types/faqs";
 import { Spinner } from "@ui/spinner";
-import { Edit2 } from "lucide-react";
+import { Edit2, Plus } from "lucide-react";
 import { FaqFormData, faqFormSchema } from "@/schemas/faqs";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
-export function FAQDialog({
-  open,
-  onOpenChange,
-  faq,
-  onSaved,
-}: FAQDialogProps) {
+export function FAQDialog({ open, onOpenChange, faq }: FAQDialogProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const defaultValues = {
@@ -60,65 +55,16 @@ export function FAQDialog({
   }, [faq, form]);
 
   const onSubmit = async (data: FaqFormData) => {
-    setIsLoading(true);
-    const payload = {
-      ...data,
-      id: faq?.id,
-    };
-
-    try {
-      if (faq) {
-        // PATCH request to update FAQ
-        const res = await fetch("/api/faqs", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const result = await res.json();
-
-        if (!res.ok || !result.success) {
-          setIsLoading(false);
-          toast.error(result.message || "Failed to update FAQ");
-        }
-        setIsLoading(false);
-        toast.success("FAQ updated successfully");
-      } else {
-        // POST request to create new FAQ
-        const res = await fetch("/api/faqs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const result = await res.json();
-
-        if (!res.ok || !result.success) {
-          setIsLoading(false);
-          toast.error(result.message || "Failed to create FAQ");
-        }
-        setIsLoading(false);
-        toast.success("FAQ created successfully");
-      }
-      form.reset({
-        question: "",
-        answer: "",
-        is_published: true,
-      });
-      onSaved();
-    } catch (error) {
-      setIsLoading(false);
-      toast.error(
-        `Failed to ${faq ? "update" : "create"} FAQ: ${
-          error instanceof Error ? error.message : ""
-        }`
-      );
-    }
+    console.log(
+      "You are about to submit the following form values ---->",
+      data
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[90vh] flex flex-col">
+        {/* ------ fixed header ------ */}
         <DialogHeader>
           <DialogTitle>{faq ? "Edit FAQ" : "Add New FAQ"}</DialogTitle>
           <DialogDescription>
@@ -128,62 +74,75 @@ export function FAQDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {/* ------ scrollable body ------ */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="question"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Question</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter the question..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col flex-1 min-h-0 space-y-4"
+          >
+            {/* Radix ScrollArea + your fields */}
+            <ScrollArea className="flex-1 h-full rounded-md border p-4">
+              <div className="space-y-4">
+                {/* ----- question ----- */}
+                <FormField
+                  control={form.control}
+                  name="question"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Question</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter the question..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="answer"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Answer</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter the answer..."
-                      className="resize-none min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* ----- answer ----- */}
+                <FormField
+                  control={form.control}
+                  name="answer"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Answer</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter the answer..."
+                          className="resize-none min-h-[120px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="is_published"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Published</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      Make this FAQ visible to customers
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                {/* ----- published switch ----- */}
+                <FormField
+                  control={form.control}
+                  name="is_published"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Published</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Make this FAQ visible to customers
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </ScrollArea>
 
-            <DialogFooter>
+            {/* ------ fixed footer ------ */}
+            <DialogFooter className="justify-end flex flex-row">
               <Button
                 type="button"
                 variant="outline"
@@ -199,15 +158,8 @@ export function FAQDialog({
                   </>
                 ) : (
                   <>
-                    {faq ? (
-                      <>
-                        <Edit2 />
-                        Update
-                      </>
-                    ) : (
-                      <>Create</>
-                    )}{" "}
-                    FAQ
+                    {faq ? <Edit2 /> : <Plus />}
+                    {faq ? "Update" : "Create"} FAQ
                   </>
                 )}
               </Button>
