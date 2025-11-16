@@ -30,7 +30,7 @@ import {
   useUpdateBranchMutation,
 } from "@/hooks/use-branches";
 import { celebrateSuccess } from "@/components/confetti-effect";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
 
 type BranchFormDialogProps = {
   open: boolean;

@@ -21,12 +21,12 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "@/components/ui/input-group";
+} from "@ui/input-group";
 import {
   resetPasswordSchema,
   ResetPassworFormData,
 } from "@/schemas/authentication";
-import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
+import { PasswordStrengthMeter } from "@ui/password-strength-meter";
 
 export function ResetPasswordForm() {
   const router = useRouter();

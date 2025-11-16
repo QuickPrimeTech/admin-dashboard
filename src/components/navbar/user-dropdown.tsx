@@ -17,7 +17,7 @@ import { logout } from "@/app/auth/actions/actions";
 import { LogOutDialog } from "@/components/logout-dialog";
 import { useRestaurantQuery } from "@/hooks/use-restaurant";
 import { createClient } from "@/utils/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@ui/skeleton";
 import { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 

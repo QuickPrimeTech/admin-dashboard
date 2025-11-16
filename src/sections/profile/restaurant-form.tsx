@@ -18,8 +18,8 @@ import {
   useRestaurantQuery,
 } from "@/hooks/use-restaurant";
 import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@ui/skeleton";
+import { Spinner } from "@ui/spinner";
 import { RestaurantFormData, restaurantFormSchema } from "@/schemas/profile";
 
 export function RestaurantForm() {

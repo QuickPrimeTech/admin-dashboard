@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@ui/progress";
 import { Check, CircleDashed } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -18,15 +18,15 @@ import {
 } from "@ui/form";
 import { Eye, EyeOff, KeyRound, Mail, Save } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@ui/skeleton";
+import { Spinner } from "@ui/spinner";
 import {
   accountSettingsSchema,
   type AccountSettingsData,
 } from "@/schemas/authentication";
 import { useUserQuery } from "@/hooks/use-user";
 import { useUpdateAccountMutation } from "@/hooks/use-user";
-import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
+import { PasswordStrengthMeter } from "@ui/password-strength-meter";
 
 export function AccountForm() {
   const { data: user, isPending } = useUserQuery();

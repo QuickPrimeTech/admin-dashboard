@@ -27,7 +27,7 @@ import {
   InputGroupInput,
 } from "@ui/input-group";
 import { Spinner } from "@ui/spinner";
-import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter";
+import { PasswordStrengthMeter } from "@ui/password-strength-meter";
 
 export function InviteSignupForm() {
   const whatsappMessage =

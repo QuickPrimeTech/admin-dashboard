@@ -17,7 +17,7 @@ import { Store } from "lucide-react";
 import { celebrateSuccess } from "@/components/confetti-effect";
 import { RestaurantFormValues, restaurantSchema } from "@/schemas/onboarding";
 import { useCreateRestaurantMutation } from "@/hooks/use-restaurant";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
 import { OnboardingStep, RestaurantInfo } from "@/types/onboarding";
 
 type RestaurantInfoStepProps = {

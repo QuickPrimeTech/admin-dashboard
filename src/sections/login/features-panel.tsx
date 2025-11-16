@@ -1,4 +1,4 @@
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@ui/scroll-area";
 import { Card } from "@ui/card";
 import { ChefHat, Users, Calendar, Star } from "lucide-react";
 

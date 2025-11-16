@@ -2,7 +2,7 @@
 
 import { Building2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { useBranchesQuery } from "@/hooks/use-branches";
 import { BranchCardError } from "@/sections/onboarding/error/branch-card-error";
 import { BranchesBackgroundPattern } from "@/components/background-patterns/branches-pattern";

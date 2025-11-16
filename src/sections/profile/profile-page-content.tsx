@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { RestaurantForm } from "./restaurant-form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
 import { AccountForm } from "./account-form";
 import { ImageIcon } from "lucide-react";
 

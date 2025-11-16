@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEventHandler } from "react";
 import Image from "next/image";
 import { Edit2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
 import { generateBlurDataURL, resizeImage } from "@/helpers/file-helpers";
 import { cn } from "@/lib/utils";
 import { useRestaurantQuery } from "@/hooks/use-restaurant";
