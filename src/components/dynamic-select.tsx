@@ -80,7 +80,6 @@ export function DynamicSelect<
     }
   }, [prefilledCat, serverCategories, categories, field.value]);
 
-  console.log("This is the field ---->", field);
   return (
     <>
       <Select

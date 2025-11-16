@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,14 +27,23 @@ import { FAQDialogProps } from "@/types/faqs";
 import { Edit, Plus } from "lucide-react";
 import { FaqFormData, faqFormSchema } from "@/schemas/faqs";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { useCreateFaqMutation, useUpdateFaqMutation } from "@/hooks/use-faqs";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export function FAQDialog({
+  setIsDialogOpen,
   open,
   onOpenChange,
   faq,
-  handleSave,
 }: FAQDialogProps) {
-  //Mutation for adding faq
+  //Get branchId from the context
+  const { branchId } = useBranch();
+
+  //Adding Mutation
+  const addMutation = useCreateFaqMutation();
+
+  //Update Mutation
+  const updateMutation = useUpdateFaqMutation();
 
   const defaultValues = {
     question: "",
@@ -57,6 +67,35 @@ export function FAQDialog({
       form.reset(defaultValues);
     }
   }, [faq, form]);
+
+  const handleSave = (newFaq: FaqFormData) => {
+    //Close the dialog first for the user to get immediate response
+    setIsDialogOpen(() => false);
+    if (faq) {
+      //Editing mode
+      updateMutation.mutate(
+        { faq: newFaq, branchId, id: faq.id },
+        {
+          onError: () => {
+            setIsDialogOpen(() => true);
+          },
+        }
+      );
+    } else {
+      //Adding the faq to the database
+      addMutation.mutate(
+        { faq: newFaq, branchId },
+        {
+          onSuccess: () => {
+            form.reset(defaultValues);
+          },
+          onError: () => {
+            setIsDialogOpen(() => true);
+          },
+        }
+      );
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

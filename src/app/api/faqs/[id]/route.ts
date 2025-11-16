@@ -9,19 +9,16 @@ type Params = {
   }>;
 };
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_req: NextRequest, { params }: Params) {
   const supabase = await createClient();
-  const id = Number(params.id);
+  const { id } = await params;
 
   const branchId = getCurrentBranchId();
 
   const { data, error } = await supabase
     .from("faqs")
     .select("*")
-    .eq("id", id)
+    .eq("id", Number(id))
     .eq("branch_id", branchId)
     .single();
 

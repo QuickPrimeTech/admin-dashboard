@@ -1,4 +1,4 @@
-import { FaqFormData } from "@/schemas/faqs";
+import { Dispatch, SetStateAction } from "react";
 
 export type FAQ = {
   id: number;
@@ -16,7 +16,7 @@ export type FAQEmptyStateProps = {
 
 export type FAQDialogProps = {
   open: boolean;
-  handleSave: (faq: FaqFormData) => void;
   onOpenChange: (open: boolean) => void;
-  faq?: FAQ | null;
+  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
+  faq: FAQ | null;
 };
