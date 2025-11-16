@@ -26,7 +26,7 @@ import { Switch } from "@ui/switch";
 import { FAQDialogProps } from "@/types/faqs";
 import { Edit, Plus } from "lucide-react";
 import { FaqFormData, faqFormSchema } from "@/schemas/faqs";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { ScrollArea, ScrollBar } from "@ui/scroll-area";
 import { useCreateFaqMutation, useUpdateFaqMutation } from "@/hooks/use-faqs";
 import { useBranch } from "@/components/providers/branch-provider";
 
@@ -99,7 +99,7 @@ export function FAQDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[600px] flex flex-col max-h-[95vh]">
         {/* ------ fixed header ------ */}
         <DialogHeader>
           <DialogTitle>{faq ? "Edit FAQ" : "Add New FAQ"}</DialogTitle>
@@ -117,7 +117,7 @@ export function FAQDialog({
             className="flex flex-col flex-1 min-h-0 space-y-4"
           >
             {/* Radix ScrollArea + your fields */}
-            <ScrollArea className="flex-1 h-full rounded-md border p-4">
+            <ScrollArea className="flex-1 min-h-0 rounded-md border p-4">
               <div className="space-y-4">
                 {/* ----- question ----- */}
                 <FormField
@@ -175,6 +175,7 @@ export function FAQDialog({
                   )}
                 />
               </div>
+              <ScrollBar orientation="vertical" />
             </ScrollArea>
 
             {/* ------ fixed footer ------ */}

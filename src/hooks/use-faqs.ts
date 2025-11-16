@@ -136,8 +136,6 @@ export function useUpdateFaqMutation() {
       const queryKey = getFaqKey(branchId);
       const newFaq = res.data;
       if (newFaq) {
-        console.log("This is the server FAQ -->", newFaq);
-
         queryClient.setQueryData<FAQ[]>(queryKey, (faqs) => {
           //If there were no faqs previously I'll just return an array with a single faq inside
           if (!faqs) return [newFaq];
