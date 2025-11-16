@@ -3,9 +3,8 @@ import {
   uploadImageToCloudinary,
   uploadAndReplaceImage,
   deleteImageFromCloudinary,
-  errorResponse,
   getSanitizedPath,
-  getCurrentBranchId
+  getCurrentBranchId,
 } from "@/helpers/common";
 import { GalleryItemInsert, GalleryItem } from "@/types/gallery";
 import { createClient } from "@/utils/supabase/server";
@@ -17,7 +16,11 @@ export async function POST(req: NextRequest) {
 
   const branch_id = await getCurrentBranchId();
 
-  if (!branch_id)  return createResponse(502, "You should select a branch first before creating a gallery photo");
+  if (!branch_id)
+    return createResponse(
+      502,
+      "You should select a branch first before creating a gallery photo"
+    );
 
   try {
     const formData = await req.formData();
@@ -61,7 +64,7 @@ export async function POST(req: NextRequest) {
       lqip,
       image_url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
-      branch_id
+      branch_id,
     };
 
     //Inserting the item to the database
@@ -91,15 +94,17 @@ export async function GET() {
   const supabase = await createClient();
 
   try {
-  const branchId = await getCurrentBranchId();
+    const branchId = await getCurrentBranchId();
 
     const { data, error } = await supabase
       .from("gallery")
-      .select("*").eq("branch_id", branchId)
+      .select("*")
+      .eq("branch_id", branchId)
       .order("created_at", { ascending: false });
 
-    if (error){
-      console.log(error); return createResponse(500, "Failed to fetch gallery items");
+    if (error) {
+      console.log(error);
+      return createResponse(500, "Failed to fetch gallery items");
     }
 
     return createResponse(
@@ -116,11 +121,9 @@ export async function GET() {
   }
 }
 
-
 export async function PATCH(req: NextRequest) {
   //checking if the user is authenticated
   const supabase = await createClient();
-  console.log("----------You've reached the updata function---------------")
   //Getting the data from the frontend
   const formData = await req.formData();
   const id = formData.get("id") as string;
@@ -130,8 +133,8 @@ export async function PATCH(req: NextRequest) {
   const is_published = formData.get("is_published") === "true";
   const category = formData.get("category") as string | null;
 
-   let uploadedImageUrl = "";
-    let publicId = "";
+  let uploadedImageUrl = "";
+  let publicId = "";
 
   //If a file exists I want to replace the existing one with the incoming one
   if (file) {
@@ -142,14 +145,14 @@ export async function PATCH(req: NextRequest) {
       .eq("id", Number(id))
       .single();
 
-    if (error)
-      return errorResponse(
-        "Item not found or unauthorized",
+    if (error) {
+      return createResponse(
         404,
-        error.message
+        error.message || "Item not found or unauthorized"
       );
+    }
 
-      publicId = data.public_id;
+    publicId = data.public_id;
 
     //Getting the restaurant name from the db
     const sanitizedRestaurantName = await getSanitizedPath();
@@ -165,32 +168,31 @@ export async function PATCH(req: NextRequest) {
     //Updating the variables if the cloudinary succeeded
     uploadedImageUrl = uploadResult.secure_url;
     publicId = uploadResult.public_id;
+  }
 
-    }
-    
-    //------ I SHOULD LATER PUT A TRY CATCH BLOCK FOR THE CLOUDINARY UPLOAD FUNCTION TO MAKE SURE THE DATA DOESN'T GO TO SUPABASE IF THAT FAILS ----
-    const galleryItem = {
-      title,
-      description,
-      is_published,
-      category,
-      ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
-      ...(publicId && { public_id: publicId }),
-    };
+  //------ I SHOULD LATER PUT A TRY CATCH BLOCK FOR THE CLOUDINARY UPLOAD FUNCTION TO MAKE SURE THE DATA DOESN'T GO TO SUPABASE IF THAT FAILS ----
+  const galleryItem = {
+    title,
+    description,
+    is_published,
+    category,
+    ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
+    ...(publicId && { public_id: publicId }),
+  };
 
-    const { error: updateError } = await supabase
-      .from("gallery")
-      .update(galleryItem)
-      .eq("id", parseInt(id))
+  const { error: updateError } = await supabase
+    .from("gallery")
+    .update(galleryItem)
+    .eq("id", parseInt(id));
 
-    if (updateError)
-      return errorResponse(
-        "Failed to update gallery item",
-        500,
-        updateError.message
-      );
-      
-    return createResponse(200, "Successfully updated your gallery photo.");
+  if (updateError) {
+    return createResponse(
+      500,
+      updateError.message || "Failed to update gallery item"
+    );
+  }
+
+  return createResponse(200, "Successfully updated your gallery photo.");
 }
 
 export async function DELETE(request: NextRequest) {
@@ -200,7 +202,7 @@ export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  if (!id) return errorResponse("Missing gallery item ID", 400);
+  if (!id) return createResponse(403, "Missing gallery item ID");
 
   //Getting the public id for cloudinary to delete the image
   const { data: item, error: fetchError } = await supabase
@@ -212,7 +214,10 @@ export async function DELETE(request: NextRequest) {
 
   //If there was an error gettin the data from supabase, I will then throw an error
   if (fetchError || !item) {
-    return createResponse(404, fetchError?.message || "Gallery item was not found in the database");
+    return createResponse(
+      404,
+      fetchError?.message || "Gallery item was not found in the database"
+    );
   }
 
   // Delete from Cloudinary first
