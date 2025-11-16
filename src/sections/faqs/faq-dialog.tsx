@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -23,17 +23,17 @@ import { Textarea } from "@ui/textarea";
 import { Button } from "@ui/button";
 import { Switch } from "@ui/switch";
 import { FAQDialogProps } from "@/types/faqs";
-import { Spinner } from "@ui/spinner";
-import { Edit2, Plus } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import { FaqFormData, faqFormSchema } from "@/schemas/faqs";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useBranch } from "@/components/providers/branch-provider";
 
-export function FAQDialog({ open, onOpenChange, faq }: FAQDialogProps) {
-  //Get the branchId from the context
-  const { branchId } = useBranch();
+export function FAQDialog({
+  open,
+  onOpenChange,
+  faq,
+  handleSave,
+}: FAQDialogProps) {
   //Mutation for adding faq
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const defaultValues = {
     question: "",
@@ -58,13 +58,6 @@ export function FAQDialog({ open, onOpenChange, faq }: FAQDialogProps) {
     }
   }, [faq, form]);
 
-  const onSubmit = async (data: FaqFormData) => {
-    console.log(
-      "You are about to submit the following form values ---->",
-      data
-    );
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] h-[90vh] flex flex-col">
@@ -81,7 +74,7 @@ export function FAQDialog({ open, onOpenChange, faq }: FAQDialogProps) {
         {/* ------ scrollable body ------ */}
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(handleSave)}
             className="flex flex-col flex-1 min-h-0 space-y-4"
           >
             {/* Radix ScrollArea + your fields */}
@@ -154,18 +147,9 @@ export function FAQDialog({ open, onOpenChange, faq }: FAQDialogProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Spinner />
-                    {faq ? "Updating" : "Creating"} FAQ
-                  </>
-                ) : (
-                  <>
-                    {faq ? <Edit2 /> : <Plus />}
-                    {faq ? "Update" : "Create"} FAQ
-                  </>
-                )}
+              <Button type="submit" disabled={!form.formState.isDirty}>
+                {faq ? <Edit /> : <Plus />}
+                {faq ? "Update" : "Create"} FAQ
               </Button>
             </DialogFooter>
           </form>

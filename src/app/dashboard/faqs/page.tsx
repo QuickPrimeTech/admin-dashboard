@@ -1,26 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { FaqFilterDropdown } from "@/sections/faqs/faq-filter-dropdown";
 import { Button } from "@ui/button";
 import { Plus } from "lucide-react";
 import { FAQDialog } from "@/sections/faqs/faq-dialog";
 import { FaqCardSkeleton } from "@/components/skeletons/faq-skeleton";
-import { FAQ } from "@/types/faqs";
 import { FAQEmptyState } from "@/sections/faqs/faq-empty-state";
 import { FAQCard } from "@/sections/faqs/faq-card";
-import { useFaqsQuery } from "@/hooks/use-faqs";
+import { useCreateFaqMutation, useFaqsQuery } from "@/hooks/use-faqs";
 import { useBranch } from "@/components/providers/branch-provider";
+import { FaqFormData } from "@/schemas/faqs";
+import { FAQ } from "@/types/faqs";
 
 export default function FAQsPage() {
   const { branchId } = useBranch();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
-  const [filterValue, setFilterValue] = useState("Order");
   //Fetching query
   const { data: faqs, isPending } = useFaqsQuery(branchId);
+  //Adding Mutation
+  const addMutation = useCreateFaqMutation();
 
+  const handleSave = (faq: FaqFormData) => {
+    //Close the dialog first for the user to get immediate response
+    setIsDialogOpen(() => false);
+    //Adding the faq to the database
+    addMutation.mutate(
+      { faq, branchId },
+      {
+        onError: () => {
+          setIsDialogOpen(() => true);
+        },
+      }
+    );
+  };
   const handleEdit = (faq: FAQ) => {
     setEditingFaq(faq);
     setIsDialogOpen(true);
@@ -51,7 +65,6 @@ export default function FAQsPage() {
         </div>
 
         <div className="flex gap-2">
-          <FaqFilterDropdown value={filterValue} onChange={setFilterValue} />
           <Button onClick={() => setIsDialogOpen(true)}>
             <Plus />
             Add FAQ
@@ -87,6 +100,8 @@ export default function FAQsPage() {
         open={isDialogOpen}
         onOpenChange={handleDialogClose}
         faq={editingFaq}
+        // form={form}
+        handleSave={handleSave}
       />
     </div>
   );

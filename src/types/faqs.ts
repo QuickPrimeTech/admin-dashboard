@@ -1,3 +1,5 @@
+import { FaqFormData } from "@/schemas/faqs";
+
 export type FAQ = {
   id: number;
   question: string;
@@ -8,17 +10,13 @@ export type FAQ = {
   branch_id: string;
 };
 
-export type CreateFaqInput = Omit<
-  FAQ,
-  "id" | "order_index" | "created_at" | "branch_id"
->;
-
 export type FAQEmptyStateProps = {
   setIsDialogOpen: (open: boolean) => void;
 };
 
 export type FAQDialogProps = {
   open: boolean;
+  handleSave: (faq: FaqFormData) => void;
   onOpenChange: (open: boolean) => void;
   faq?: FAQ | null;
 };

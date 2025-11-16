@@ -1,8 +1,9 @@
-import { CreateFaqInput, FAQ } from "@/types/faqs";
+import { FAQ } from "@/types/faqs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiResponse } from "@/helpers/api-responses";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
+import { FaqFormData } from "@/schemas/faqs";
 
 function getFaqKey(branchId: string) {
   return ["faqs", branchId];
@@ -24,7 +25,7 @@ export function useCreateFaqMutation() {
   return useMutation<
     ApiResponse<FAQ>, // because your POST does NOT return FAQ
     AxiosError<ApiResponse<null>>,
-    { faq: CreateFaqInput; branchId: string },
+    { faq: FaqFormData; branchId: string },
     { previousFAQs: FAQ[] }
   >({
     mutationFn: async ({ faq }) => {
