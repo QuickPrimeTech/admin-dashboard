@@ -69,10 +69,6 @@ export default function FAQsPage() {
     setEditingFaq(null);
   };
 
-  const togglePublished = async (id: number, isPublished: boolean) => {
-    console.log(`You are about to toggle publish`);
-  };
-
   const confirmDelete = (faq: FAQ) => {
     console.log("You are about to delete faq --->", faq);
   };
@@ -113,7 +109,6 @@ export default function FAQsPage() {
               faq={faq}
               handleEdit={handleEdit}
               confirmDelete={confirmDelete}
-              togglePublished={togglePublished}
             />
           ))}
         </div>
