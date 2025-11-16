@@ -5,8 +5,13 @@ export type FAQ = {
   order_index: number;
   is_published: boolean;
   created_at: string;
-  user_id: string;
+  branch_id: string;
 };
+
+export type CreateFaqInput = Omit<
+  FAQ,
+  "id" | "order_index" | "created_at" | "branch_id"
+>;
 
 export type FAQEmptyStateProps = {
   setIsDialogOpen: (open: boolean) => void;

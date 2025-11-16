@@ -29,7 +29,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
-
   const { question, answer, is_published } = await request.json();
 
   if (!question || !answer) {
@@ -38,9 +37,11 @@ export async function POST(request: NextRequest) {
 
   const branchId = await getCurrentBranchId();
 
+  // FIXED: Only look at FAQs for this branch
   const { data: maxOrderFaq } = await supabase
     .from("faqs")
     .select("order_index")
+    .eq("branch_id", branchId)
     .order("order_index", { ascending: false })
     .limit(1)
     .single();
@@ -48,19 +49,24 @@ export async function POST(request: NextRequest) {
   const newOrderIndex =
     maxOrderFaq?.order_index != null ? maxOrderFaq.order_index + 1 : 0;
 
-  const { error } = await supabase.from("faqs").insert([
-    {
-      question,
-      answer,
-      is_published: is_published ?? true,
-      order_index: newOrderIndex,
-      branch_id: branchId,
-    },
-  ]);
+  const { data, error } = await supabase
+    .from("faqs")
+    .insert([
+      {
+        question,
+        answer,
+        is_published: is_published ?? true,
+        order_index: newOrderIndex,
+        branch_id: branchId,
+      },
+    ])
+    .select()
+    .single();
 
-  if (error) return errorResponse("Insert failed", 500, error.message);
-  await revalidatePage("/");
-  return successResponse("The Faq was successfully created");
+  if (error) return createResponse(502, error.message || "Insert failed");
+
+  // await revalidatePage("/");
+  return createResponse(200, "The Faq was successfully created", data);
 }
 
 export async function PATCH(request: NextRequest) {
