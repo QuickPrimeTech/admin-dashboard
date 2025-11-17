@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as SwitchPrimitive from "@radix-ui/react-switch"
+import * as React from "react";
+import * as SwitchPrimitive from "@radix-ui/react-switch";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import { Skeleton } from "./skeleton";
 
 function Switch({
   className,
@@ -25,7 +26,15 @@ function Switch({
         )}
       />
     </SwitchPrimitive.Root>
-  )
+  );
 }
 
-export { Switch }
+type SkeletonProps = React.ComponentProps<typeof Skeleton>;
+
+function SwitchSkeleton({ className, ...props }: SkeletonProps) {
+  return (
+    <Skeleton className={cn("w-12 h-6 rounded-full", className)} {...props} />
+  );
+}
+
+export { Switch, SwitchSkeleton };

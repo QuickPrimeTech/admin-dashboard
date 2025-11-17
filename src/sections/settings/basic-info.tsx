@@ -7,7 +7,8 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardDescription
+  CardDescription,
+  CardFooter,
 } from "@ui/card";
 import {
   Form,
@@ -15,16 +16,33 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage
+  FormMessage,
 } from "@ui/form";
-import { Input } from "@ui/input";
-import { Textarea } from "@ui/textarea";
-import { Switch } from "@ui/switch";
+import { Textarea, TextareaSkeleton } from "@ui/textarea";
+import { Switch, SwitchSkeleton } from "@ui/switch";
+import { Button } from "@/components/ui/button";
+import { Save, Store } from "lucide-react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { useGetCurrentBranch } from "@/hooks/use-branches";
+import { useBranch } from "@/components/providers/branch-provider";
+import { useEffect } from "react";
+import { InputSkeleton } from "@/components/ui/input";
 
 export function BasicInfoForm() {
+  //Get the branc Id from the context
+  const { branchId } = useBranch();
+
+  //Get the current branch Info
+  const { data: branch, isPending } = useGetCurrentBranch(branchId);
+
   const defaultValues: BasicInfoData = {
     name: "",
     is_open: true,
+    opening_hours: "",
   };
 
   const form = useForm<BasicInfoData>({
@@ -32,12 +50,22 @@ export function BasicInfoForm() {
     defaultValues,
   });
 
+  useEffect(() => {
+    if (!branch) return;
+    form.reset({
+      name: branch.name,
+      is_open: branch.is_open,
+      opening_hours: branch.opening_hours,
+    });
+  }, [branch]);
+
   const onSubmit = (values: BasicInfoData) => {
     console.log(
       "You are about to submit the following values ---------->",
       values
     );
   };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -57,7 +85,19 @@ export function BasicInfoForm() {
                   <FormItem>
                     <FormLabel>Branch Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter branch name" {...field} />
+                      {isPending ? (
+                        <InputSkeleton />
+                      ) : (
+                        <InputGroup>
+                          <InputGroupInput
+                            placeholder="Enter branch name"
+                            {...field}
+                          />
+                          <InputGroupAddon>
+                            <Store />
+                          </InputGroupAddon>
+                        </InputGroup>
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -78,10 +118,14 @@ export function BasicInfoForm() {
                       </div>
                     </div>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      {isPending ? (
+                        <SwitchSkeleton />
+                      ) : (
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      )}
                     </FormControl>
                   </FormItem>
                 )}
@@ -95,17 +139,26 @@ export function BasicInfoForm() {
                 <FormItem>
                   <FormLabel>Opening Hours</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Mon-Fri: 11:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
-                      className="resize-none"
-                      {...field}
-                    />
+                    {isPending ? (
+                      <TextareaSkeleton />
+                    ) : (
+                      <Textarea
+                        placeholder="Mon-Fri: 11:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
+                        className="resize-none"
+                        {...field}
+                      />
+                    )}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
+          <CardFooter className="justify-end">
+            <Button disabled={!form.formState.isDirty}>
+              <Save /> Save Changes
+            </Button>
+          </CardFooter>
         </Card>
       </form>
     </Form>

@@ -1,6 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BasicInfoForm } from "@/sections/settings/basic-info";
-import { Info } from "lucide-react";
+import { ContactInfoForm } from "@/sections/settings/contact-info";
+import { SocialMediaForm } from "@/sections/settings/social-media";
+import { Info, Phone, Send } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -19,19 +21,29 @@ export default function SettingsPage() {
         </p>
       </div>
       <Tabs defaultValue="basic-info">
-        <TabsList>
+        <TabsList className="mb-4">
           <TabsTrigger value="basic-info">
             <Info /> Basic Information
           </TabsTrigger>
-          <TabsTrigger value="account">Account Settings</TabsTrigger>
+          <TabsTrigger value="contact-info">
+            <Phone />
+            Contact Info
+          </TabsTrigger>
+          <TabsTrigger value="socials">
+            <Send />
+            Social Media Links
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic-info">
           <BasicInfoForm />
         </TabsContent>
 
-        <TabsContent value="account">
-          <BasicInfoForm />
+        <TabsContent value="contact-info">
+          <ContactInfoForm />
+        </TabsContent>
+        <TabsContent value="socials">
+          <SocialMediaForm />
         </TabsContent>
       </Tabs>
     </div>
