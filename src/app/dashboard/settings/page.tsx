@@ -1,3 +1,4 @@
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BasicInfoForm } from "@/sections/settings/basic-info";
 import { ContactInfoForm } from "@/sections/settings/contact-info";
@@ -21,19 +22,22 @@ export default function SettingsPage() {
         </p>
       </div>
       <Tabs defaultValue="basic-info">
-        <TabsList className="mb-4">
-          <TabsTrigger value="basic-info">
-            <Info /> Basic Information
-          </TabsTrigger>
-          <TabsTrigger value="contact-info">
-            <Phone />
-            Contact Info
-          </TabsTrigger>
-          <TabsTrigger value="socials">
-            <Send />
-            Social Media Links
-          </TabsTrigger>
-        </TabsList>
+        <ScrollArea className="rounded-lg">
+          <TabsList className="mb-4">
+            <TabsTrigger value="basic-info">
+              <Info /> Basic Information
+            </TabsTrigger>
+            <TabsTrigger value="contact-info">
+              <Phone />
+              Contact Info
+            </TabsTrigger>
+            <TabsTrigger value="socials">
+              <Send />
+              Social Media Links
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
         <TabsContent value="basic-info">
           <BasicInfoForm />

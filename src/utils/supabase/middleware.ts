@@ -47,7 +47,8 @@ export async function updateSession(request: NextRequest) {
     !pathname.startsWith("/auth") &&
     !pathname.startsWith("/invite-user") &&
     !pathname.startsWith("/api/invite-token/create") &&
-    !pathname.startsWith("/create-link");
+    !pathname.startsWith("/create-link") &&
+    pathname.startsWith("/");
 
   if (!user && isProtected) {
     console.log(
