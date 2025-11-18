@@ -7,12 +7,10 @@ import { MenuItem } from "@/types/menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-//This is the name of the key to reuse
-const MENU_ITEMS_QUERY_KEY = ["menu-items"];
 
 const getMenuKey = (branchId: string) => {
-  return [...MENU_ITEMS_QUERY_KEY, branchId];
-}
+  return ["menu-items", branchId];
+};
 
 //This is the fetch function to get all the menu items needed
 async function fetchMenuItems() {
@@ -30,16 +28,15 @@ export function useMenuQuery(branchId: string) {
   });
 }
 
-
 export function useCreateMenuItemMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<
     ApiResponse<MenuItem>, // Success type
     AxiosError<ApiResponse<null>>, // Error type
-    {formData: FormData, branchId: string} // Variables
+    { formData: FormData; branchId: string } // Variables
   >({
-    mutationFn: async ({formData}) => {
+    mutationFn: async ({ formData }) => {
       const res = await axios.post<ApiResponse<MenuItem>>(
         "/api/menu-items",
         formData,
@@ -49,12 +46,12 @@ export function useCreateMenuItemMutation() {
       );
       return res.data;
     },
-    onSuccess: (res, {branchId}) => {
+    onSuccess: (res, { branchId }) => {
       const newItem = res.data;
       if (!newItem) return;
-      
+
       //Get queryKey for menu items
-      const queryKey = getMenuKey(branchId)
+      const queryKey = getMenuKey(branchId);
 
       toast.success(res.message || "Menu item added successfully!");
 
@@ -71,7 +68,6 @@ export function useCreateMenuItemMutation() {
       ]);
     },
     onError: (err) => {
-
       const message =
         err.response?.data?.message || "Failed to create menu item";
 
@@ -94,7 +90,6 @@ export function useCreateMenuItemMutation() {
   });
 }
 
-
 export function useUpdateMenuItemMutation() {
   //Gettin the context
   const queryClient = useQueryClient();
@@ -102,7 +97,7 @@ export function useUpdateMenuItemMutation() {
   return useMutation<
     ApiResponse<MenuItem>,
     AxiosError<ApiResponse<null>>,
-    { formData: FormData, branchId: string }
+    { formData: FormData; branchId: string }
   >({
     mutationFn: async ({ formData }) => {
       const { data } = await axios.patch<ApiResponse<MenuItem>>(
@@ -111,7 +106,7 @@ export function useUpdateMenuItemMutation() {
       );
       return data;
     },
-    onSuccess: (data, {branchId}) => {
+    onSuccess: (data, { branchId }) => {
       //Get queryKey
       const queryKey = getMenuKey(branchId);
 
@@ -130,14 +125,12 @@ export function useUpdateMenuItemMutation() {
           Number(item.id) === id ? updatedItem : item
         );
 
-        queryClient.setQueryData<MenuItem[]>(
-         queryKey,
-          newMenuItems
-        );
+        queryClient.setQueryData<MenuItem[]>(queryKey, newMenuItems);
       }
 
       // ✅ Also update the single [menu-item, id] cache if it exists
-      const cachedMenuItem = queryClient.getQueryData<MenuItem>([...queryKey,
+      const cachedMenuItem = queryClient.getQueryData<MenuItem>([
+        ...queryKey,
         id,
       ]);
 
@@ -168,13 +161,17 @@ export function useUpdateMenuItemMutation() {
 export function useDeleteMenuMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<ApiResponse<MenuItem>, AxiosError<ApiResponse<null>>, {id: number, branchId: string}, {previousMenuItems: MenuItem[] | undefined}>({
-    mutationFn: async ({id}) => {
+  return useMutation<
+    ApiResponse<MenuItem>,
+    AxiosError<ApiResponse<null>>,
+    { id: number; branchId: string },
+    { previousMenuItems: MenuItem[] | undefined }
+  >({
+    mutationFn: async ({ id }) => {
       const res = await axios.delete(`/api/menu-items?id=${id}`);
       return res.data;
     },
-    onMutate: async ({id, branchId}) => {
-
+    onMutate: async ({ id, branchId }) => {
       //Get queryKey
       const queryKey = getMenuKey(branchId);
 
@@ -198,17 +195,13 @@ export function useDeleteMenuMutation() {
       //Returning the previous items for rollback on error
       return { previousMenuItems };
     },
-    onError: (res, {branchId}, onMutateResult) => {
-
+    onError: (res, { branchId }, onMutateResult) => {
       //Get queryKey
       const queryKey = getMenuKey(branchId);
 
       //Rolling back to the previous menuItems
       if (onMutateResult?.previousMenuItems) {
-        queryClient.setQueryData(
-         queryKey,
-          onMutateResult.previousMenuItems
-        );
+        queryClient.setQueryData(queryKey, onMutateResult.previousMenuItems);
       }
 
       //Rolling back the overview stats menu count
@@ -218,7 +211,10 @@ export function useDeleteMenuMutation() {
       });
 
       //Giving the user feedback that the request didn't go through
-      toast.error(res.response?.data.message || "There was an error deleting your menu item");
+      toast.error(
+        res.response?.data.message ||
+          "There was an error deleting your menu item"
+      );
     },
     onSuccess: (response) => {
       toast.success(response.message || "Menu Item was deleted successfully");
@@ -245,7 +241,6 @@ export function useMenuItemQuery(id: number, branchId: string) {
 
       // Step 2: If cache exists, find the specific item
       if (cachedMenuItems && cachedMenuItems.length > 0) {
-
         const cachedItem = cachedMenuItems.find(
           (item) => Number(item.id) === Number(id)
         );
@@ -275,7 +270,6 @@ export function useCategoriesQuery(branchId: string) {
   return useQuery<string[]>({
     queryKey: ["categories", branchId],
     queryFn: async (): Promise<string[]> => {
-
       const supabase = createClient();
 
       //Try to get cached menu items
@@ -293,7 +287,8 @@ export function useCategoriesQuery(branchId: string) {
       // Otherwise, fall back to fetching from Supabase
       const { data, error } = await supabase
         .from("menu_items")
-        .select("category").eq("branch_id", branchId);
+        .select("category")
+        .eq("branch_id", branchId);
 
       if (error) throw error;
 
