@@ -35,6 +35,8 @@ import {
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { useCreateOfferMutation } from "@/hooks/use-offers";
+import { useBranch } from "@providers/branch-provider";
 
 interface OfferFormProps {
   onPreviewUpdate: (offer: Partial<Offer>, mediaPreview?: string) => void;
@@ -52,6 +54,11 @@ const DAYS_OF_WEEK = [
 ];
 
 export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
+  //Fetch the branchId from the context
+  const { branchId } = useBranch();
+  //Mutation for creating offer can be added here
+  const createOfferMutation = useCreateOfferMutation();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaPreview, setMediaPreview] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
@@ -67,6 +74,7 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
       startDate: new Date(),
       endDate: undefined,
       daysOfWeek: [],
+      image: undefined,
     },
   });
 
@@ -76,6 +84,7 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
     const file = e.target.files?.[0];
     if (file) {
       setFileName(file.name);
+
       const reader = new FileReader();
       reader.onload = (event) => {
         const preview = event.target?.result as string;
@@ -104,6 +113,8 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
 
   const onSubmit = (values: OfferFormValues) => {
     console.log("Submit offer:", values);
+
+    createOfferMutation.mutate({ formData: values, branchId: branchId });
   };
 
   form.watch((data) => {
@@ -141,12 +152,27 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                 </p>
               </div>
 
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleMediaUpload}
-                className="hidden"
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          field.onChange(file); // 👈 register File object into RHF
+                          handleMediaUpload(e); // keep your preview logic
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
               {mediaPreview && (

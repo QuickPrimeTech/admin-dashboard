@@ -29,10 +29,25 @@ export const offerSchema = z.object({
 
   // Recurring Days (unchanged)
   daysOfWeek: z.array(z.number()).optional(),
+
+  // Current Zod Schema:
+  image: z
+    .instanceof(File)
+    .nullable() // Allows null
+    .optional(), // Allows undefined (for default values)
 });
 
 // --- REFINEMENT LOGIC ---
 export const refinedOfferSchema = offerSchema.superRefine((data, ctx) => {
+  // 1. Check if the image is present and is a File object (MAKING IT MANDATORY)
+  if (!(data.image instanceof File)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Offer image is required.", // This is the required message
+      path: ["image"],
+    });
+  }
+
   // 1. If the offer IS recurring, check if daysOfWeek are selected
   if (data.isRecurring) {
     if (!data.daysOfWeek || data.daysOfWeek.length === 0) {
@@ -46,7 +61,7 @@ export const refinedOfferSchema = offerSchema.superRefine((data, ctx) => {
 
   // 2. If the offer is NOT recurring, check if a start date is provided
   if (!data.isRecurring) {
-    // ⚠️ CORRECTED: Check for undefined/null/invalid Date presence
+    //  CORRECTED: Check for undefined/null/invalid Date presence
     if (!data.startDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
