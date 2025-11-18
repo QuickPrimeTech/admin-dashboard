@@ -2,11 +2,11 @@ import z from "zod";
 
 // --- CORE SCHEMA ---
 export const offerSchema = z.object({
-  // Offer Details
+  // Offer Details (unchanged)
   title: z.string().min(1, "The Offer Title is required."),
   description: z.string().min(1, "The Offer Description is required."),
 
-  // Timing Details (Required for all offers)
+  // Timing Details (unchanged)
   startTime: z
     .string()
     .regex(
@@ -20,15 +20,15 @@ export const offerSchema = z.object({
       "Must be a valid time (HH:MM)."
     ), // e.g., "19:00"
 
-  // Schedule Type
+  // Schedule Type (unchanged)
   isRecurring: z.boolean(),
 
-  // Date Range (Only used if NOT recurring)
-  startDate: z.string().optional(), // Date input returns string "YYYY-MM-DD"
-  endDate: z.string().optional(), // Date input returns string "YYYY-MM-DD"
+  // ⚠️ CORRECTED: Now expects Date objects or undefined
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
 
-  // Recurring Days (Only used if IS recurring)
-  daysOfWeek: z.array(z.number()).optional(), // Array of day indices (0=Sun, 1=Mon...)
+  // Recurring Days (unchanged)
+  daysOfWeek: z.array(z.number()).optional(),
 });
 
 // --- REFINEMENT LOGIC ---
@@ -46,16 +46,26 @@ export const refinedOfferSchema = offerSchema.superRefine((data, ctx) => {
 
   // 2. If the offer is NOT recurring, check if a start date is provided
   if (!data.isRecurring) {
-    if (!data.startDate || data.startDate === "") {
+    // ⚠️ CORRECTED: Check for undefined/null/invalid Date presence
+    if (!data.startDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Start Date is required for a one-time offer.",
         path: ["startDate"],
       });
     }
+
+    // 2b. Check if endDate is before startDate (using Date object comparison)
+    if (data.startDate && data.endDate && data.endDate < data.startDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End Date cannot be before the Start Date.",
+        path: ["endDate"],
+      });
+    }
   }
 
-  // 3. Simple Check: Ensure end time is after start time
+  // 3. Simple Check: Ensure end time is after start time (unchanged)
   if (data.startTime && data.endTime && data.startTime >= data.endTime) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,

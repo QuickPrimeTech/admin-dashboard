@@ -19,12 +19,22 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
+  // Removed redundant @ui imports for Popover/Calendar/cn/format
 } from "@ui/form";
-import { Upload, X, Image, FileText, Clock } from "lucide-react"; // Imported Image, FileText, and Clock
+import { Upload, X, Image, FileText, Clock, CalendarIcon } from "lucide-react";
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
 import { Checkbox } from "@ui/checkbox";
 import { OfferFormValues, refinedOfferSchema } from "@/schemas/offers";
+// Updated component imports to reflect your local structure:
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 interface OfferFormProps {
   onPreviewUpdate: (offer: Partial<Offer>, mediaPreview?: string) => void;
@@ -54,8 +64,8 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
       startTime: "18:00",
       endTime: "21:00",
       isRecurring: false,
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: "",
+      startDate: new Date(),
+      endDate: undefined,
       daysOfWeek: [],
     },
   });
@@ -151,7 +161,7 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                     updatePreview(form.getValues());
                   }}
                 >
-                  <X className="w-4 h-4 mr-2" />
+                  <X className="mr-2" />
                   Clear Image
                 </Button>
               )}
@@ -262,9 +272,13 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                         onCheckedChange={(checked) => {
                           field.onChange(checked);
                           if (checked) {
-                            form.setValue("startDate", "");
-                            form.setValue("endDate", "");
+                            // ⚠️ CORRECTED: Set to undefined when recurring (clearing one-time dates)
+                            form.setValue("startDate", undefined);
+                            form.setValue("endDate", undefined);
                           } else {
+                            // ⚠️ CORRECTED: Set default date when switching back
+                            form.setValue("startDate", new Date());
+                            form.setValue("endDate", undefined);
                             form.setValue("daysOfWeek", []);
                           }
                         }}
@@ -283,36 +297,99 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
 
               {/* Conditional Date Fields (Visible if NOT recurring) */}
               {!isRecurring && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Start Date Picker */}
                   <FormField
                     control={form.control}
                     name="startDate"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>Start Date *</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {field.value ? (
+                                  // format() works correctly with Date objects
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a start date</span>
+                                )}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              // Disabled dates logic works correctly with Date objects
+                              disabled={(date: Date) =>
+                                date < new Date(new Date().setHours(0, 0, 0, 0))
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {/* End Date Picker */}
                   <FormField
                     control={form.control}
                     name="endDate"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>End Date (Optional)</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick an end date</span>
+                                )}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              // ⚠️ CORRECTED: End date logic checks against the Date object from getValues()
+                              disabled={(date: Date) => {
+                                const startDate = form.getValues("startDate");
+                                // Disable dates before the selected start date
+                                return !!startDate && date < startDate;
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
               )}
-
               {/* Conditional Days of Week Checkboxes (Visible if IS recurring) */}
               {isRecurring && (
                 <FormField
@@ -321,7 +398,7 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                   render={() => (
                     <FormItem>
                       <FormLabel>Select Days *</FormLabel>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 border p-4 rounded-md">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border p-4 rounded-md">
                         {DAYS_OF_WEEK.map((day) => (
                           <FormItem
                             key={day.value}
