@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Offer } from "./offers-data";
+import { Offer } from "@/types/offers";
 import {
   Card,
   CardContent,
@@ -18,25 +18,19 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@ui/form";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Image, FileText, Clock } from "lucide-react"; // Imported Image, FileText, and Clock
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
 import { Checkbox } from "@ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@ui/select";
-import { OfferFormValues, offerSchema } from "@/schemas/offers";
+import { OfferFormValues, refinedOfferSchema } from "@/schemas/offers";
 
 interface OfferFormProps {
   onPreviewUpdate: (offer: Partial<Offer>, mediaPreview?: string) => void;
 }
 
+// Map the day indices to a practical label (0=Sunday, 1=Monday...)
 const DAYS_OF_WEEK = [
   { value: 1, label: "Monday" },
   { value: 2, label: "Tuesday" },
@@ -49,24 +43,24 @@ const DAYS_OF_WEEK = [
 
 export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [mediaType, setMediaType] = useState<"image" | "video">("image");
   const [mediaPreview, setMediaPreview] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
 
   const form = useForm<OfferFormValues>({
-    resolver: zodResolver(offerSchema),
+    resolver: zodResolver(refinedOfferSchema),
     defaultValues: {
       title: "",
       description: "",
-      discount: "",
-      cta: "Order Now",
-      status: "active",
-      customName: "",
+      startTime: "18:00",
+      endTime: "21:00",
+      isRecurring: false,
       startDate: new Date().toISOString().split("T")[0],
       endDate: "",
       daysOfWeek: [],
     },
   });
+
+  const isRecurring = form.watch("isRecurring");
 
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,17 +70,10 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
       reader.onload = (event) => {
         const preview = event.target?.result as string;
         setMediaPreview(preview);
-        updatePreview(form.getValues(), mediaType === "video");
+        updatePreview(form.getValues());
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleMediaTypeChange = (type: "image" | "video") => {
-    setMediaType(type);
-    setMediaPreview("");
-    setFileName("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleDayToggle = (day: number) => {
@@ -94,13 +81,13 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
     const updatedDays = days.includes(day)
       ? days.filter((d) => d !== day)
       : [...days, day];
-    form.setValue("daysOfWeek", updatedDays);
+    form.setValue("daysOfWeek", updatedDays, { shouldValidate: true });
     updatePreview({ ...form.getValues(), daysOfWeek: updatedDays });
   };
 
-  const updatePreview = (data: any, isVideo?: boolean) => {
+  const updatePreview = (data: Partial<OfferFormValues>) => {
     onPreviewUpdate(
-      { ...data, isVideo: isVideo ?? mediaType === "video" },
+      { ...data, isVideo: false } as Partial<Offer>,
       mediaPreview
     );
   };
@@ -109,55 +96,45 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
     console.log("Submit offer:", values);
   };
 
+  form.watch((data) => {
+    const { daysOfWeek, ...otherData } = data;
+    updatePreview(otherData);
+  });
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col md:flex-row gap-6"
       >
-        {/* Left: Media Upload */}
-        <div className="md:w-1/3 shrink-0 sticky top-6">
-          <Card className="lg:sticky lg:top-28">
+        {/* Left: 1. Image Card */}
+        <div className="md:w-1/3 shrink-0 space-y-6">
+          <Card className="md:sticky md:top-28">
             <CardHeader>
-              <CardTitle>Media</CardTitle>
+              <CardTitle>
+                <Image className="inline mr-2 h-5 w-5" />
+                Offer Image
+              </CardTitle>
               <CardDescription>
-                Upload an image or video for your offer
+                Upload an eye-catching **image** for your offer.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <RadioGroup
-                value={mediaType}
-                onValueChange={(val) =>
-                  handleMediaTypeChange(val as "image" | "video")
-                }
-              >
-                <div className="flex gap-4">
-                  {(["image", "video"] as const).map((type) => (
-                    <FormItem key={type} className="flex items-center gap-2">
-                      <FormControl>
-                        <RadioGroupItem value={type} />
-                      </FormControl>
-                      <FormLabel className="capitalize">{type}</FormLabel>
-                    </FormItem>
-                  ))}
-                </div>
-              </RadioGroup>
-
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
               >
                 <Upload className="w-8 h-8 mx-auto mb-2 text-foreground-muted" />
-                <p>Click to upload {mediaType}</p>
+                <p>Click to upload image</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {fileName || `Choose a ${mediaType}`}
+                  {fileName || `Choose an image (JPG, PNG)`}
                 </p>
               </div>
 
               <Input
                 ref={fileInputRef}
                 type="file"
-                accept={mediaType === "image" ? "image/*" : "video/*"}
+                accept="image/*"
                 onChange={handleMediaUpload}
                 className="hidden"
               />
@@ -171,23 +148,27 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                     setMediaPreview("");
                     setFileName("");
                     if (fileInputRef.current) fileInputRef.current.value = "";
+                    updatePreview(form.getValues());
                   }}
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Clear Media
+                  Clear Image
                 </Button>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Right: Form Fields */}
+        {/* Right: 2. Offer Details & 3. Offer Timing */}
         <div className="md:w-2/3 grow space-y-6">
-          {/* Content Card */}
+          {/* 2. Offer Details Card (Title & Description) */}
           <Card>
             <CardHeader>
-              <CardTitle>Content</CardTitle>
-              <CardDescription>Offer details and messaging</CardDescription>
+              <CardTitle>
+                <FileText className="inline mr-2 h-5 w-5" />
+                Offer Details
+              </CardTitle>
+              <CardDescription>Title and Description</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
@@ -197,7 +178,10 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                   <FormItem>
                     <FormLabel>Offer Title *</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g., Summer Special" />
+                      <Input
+                        {...field}
+                        placeholder="e.g., Buy One Get One Pizza"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -213,52 +197,8 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                     <FormControl>
                       <Textarea
                         {...field}
-                        placeholder="Describe your offer..."
+                        placeholder="e.g., Enjoy two pizzas for the price of one every Tuesday."
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="discount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Discount Badge</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., 30% OFF" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cta"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Button Text</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., Order Now" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="customName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Custom Name (Optional)</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="e.g., Wine Wednesday" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -267,63 +207,89 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
             </CardContent>
           </Card>
 
-          {/* Offer Type & Scheduling */}
+          {/* 3. Offer Timing Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Offer Type & Scheduling</CardTitle>
+              <CardTitle>
+                <Clock className="inline mr-2 h-5 w-5" />
+                Offer Timing
+              </CardTitle>
               <CardDescription>
-                Configure when this offer is available
+                Set the schedule for this offer.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Start Time / End Time (Always visible) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Time *</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Time *</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Recurring Checkbox */}
               <FormField
                 control={form.control}
-                name="status"
+                name="isRecurring"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Offer Type</FormLabel>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
                     <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">
-                            Active (Specific Date Range)
-                          </SelectItem>
-                          <SelectItem value="upcoming">
-                            Upcoming (Future Date Range)
-                          </SelectItem>
-                          <SelectItem value="expired">
-                            Expired (Past Offer)
-                          </SelectItem>
-                          <SelectItem value="recurring">
-                            Recurring (Weekly Pattern)
-                          </SelectItem>
-                          <SelectItem value="scheduled">
-                            Scheduled (Regular Weekly Day)
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          if (checked) {
+                            form.setValue("startDate", "");
+                            form.setValue("endDate", "");
+                          } else {
+                            form.setValue("daysOfWeek", []);
+                          }
+                        }}
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Repeat Weekly (e.g., Happy Hour)</FormLabel>
+                      <FormDescription>
+                        Check this for offers that repeat every week. Uncheck
+                        for a one-time offer.
+                      </FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />
 
-              {["active", "upcoming", "expired"].includes(
-                form.getValues("status")
-              ) && (
-                <>
+              {/* Conditional Date Fields (Visible if NOT recurring) */}
+              {!isRecurring && (
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="startDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Start Date</FormLabel>
+                        <FormLabel>Start Date *</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -344,23 +310,22 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                       </FormItem>
                     )}
                   />
-                </>
+                </div>
               )}
 
-              {["recurring", "scheduled"].includes(
-                form.getValues("status")
-              ) && (
+              {/* Conditional Days of Week Checkboxes (Visible if IS recurring) */}
+              {isRecurring && (
                 <FormField
                   control={form.control}
                   name="daysOfWeek"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Days of Week</FormLabel>
-                      <div className="grid grid-cols-2 gap-2">
+                      <FormLabel>Select Days *</FormLabel>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 border p-4 rounded-md">
                         {DAYS_OF_WEEK.map((day) => (
                           <FormItem
                             key={day.value}
-                            className="flex items-center gap-2"
+                            className="flex items-center space-x-2"
                           >
                             <FormControl>
                               <Checkbox
@@ -372,10 +337,13 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                                 }
                               />
                             </FormControl>
-                            <FormLabel>{day.label}</FormLabel>
+                            <FormLabel className="font-normal cursor-pointer">
+                              {day.label}
+                            </FormLabel>
                           </FormItem>
                         ))}
                       </div>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

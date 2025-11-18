@@ -1,72 +1,56 @@
-"use client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ShoppingBag } from "lucide-react";
+import Image from "next/image";
+import { Offer } from "@/types/offers";
 
-import { Offer } from "./offers-data";
-
-interface OfferPreviewProps {
-  offer: Partial<Offer>;
-  mediaPreview?: string;
-}
-
-export function OfferPreview({ offer, mediaPreview }: OfferPreviewProps) {
-  const isVideo = offer.isVideo;
-
+type OfferPreviewProps = {
+  offer: Offer;
+};
+export function OfferPreview({ offer }: OfferPreviewProps) {
   return (
-    <div className="rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900">
-      {/* Media Container */}
-      <div className="relative h-64 bg-neutral-800 flex items-center justify-center overflow-hidden group">
-        {mediaPreview ? (
-          <>
-            {isVideo ? (
-              <>
-                <video
-                  src={mediaPreview}
-                  className="w-full h-full object-cover"
-                  controls
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-              </>
-            ) : (
-              <img
-                src={mediaPreview || "/placeholder.svg"}
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-            )}
-          </>
-        ) : (
-          <div className="text-center text-neutral-500">
-            <div className="text-4xl mb-2">📸</div>
-            <p className="text-sm">Upload image or video</p>
+    <Card
+      key={offer.id}
+      className="py-0 group overflow-hidden border hover:shadow-xl transition-all duration-300"
+    >
+      <CardContent className="p-0 relative">
+        <div className="relative aspect-4/3 w-full overflow-hidden">
+          {/* NEXT IMAGE WITH FILL */}
+          <Image
+            src={offer.image}
+            alt={offer.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
+
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity" />
+
+          {/* Badge */}
+          {/* {offer.badge && (
+            <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground font-semibold">
+              {offer.badge}
+            </Badge>
+          )} *
+
+          {/* Text Content */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+            <h3 className="text-2xl font-bold mb-2 transition-transform group-hover:-translate-y-1">
+              {offer.title}
+            </h3>
+
+            <p className="text-sm text-white/90 mb-4">{offer.description}</p>
+
+            {/* BUTTON WITH ICON TRANSITION */}
+            <Button size={"sm"} className="relative overflow-hidden">
+              Order Now
+              {/* Default Icon (Bag) */}
+              <ShoppingBag />
+            </Button>
           </div>
-        )}
-      </div>
-
-      {/* Overlay Content */}
-      <div className="relative h-64 bg-gradient-to-t from-black/80 to-black/20 p-6 flex flex-col justify-end">
-        {mediaPreview && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
-        )}
-
-        <div className="relative z-10">
-          <h2 className="text-2xl font-serif font-bold text-white mb-2 line-clamp-2">
-            {offer.title || "Offer Title"}
-          </h2>
-
-          <p className="text-sm text-neutral-300 mb-4 line-clamp-2">
-            {offer.description || "Your offer description will appear here"}
-          </p>
-
-          {offer.discount && (
-            <div className="inline-block bg-amber-600 text-white px-4 py-2 rounded-full font-semibold mb-4">
-              {offer.discount}
-            </div>
-          )}
-
-          <button className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg font-semibold transition-colors">
-            {offer.cta || "Call to Action"}
-          </button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

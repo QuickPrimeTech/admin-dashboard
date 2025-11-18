@@ -1,8 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Offer } from "./offers-data";
+import { Offer } from "@/types/offers";
 import { OfferForm } from "./offer-form";
-import { AdminOfferPreview } from "./admin-offer-preview";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
 
@@ -10,8 +9,6 @@ export function OffersPageContent() {
   const [previewOffer, setPreviewOffer] = useState<Partial<Offer>>({
     title: "",
     description: "",
-    discount: "",
-    cta: "Order Now",
   });
   const [mediaPreview, setMediaPreview] = useState<string>("");
 
@@ -21,7 +18,7 @@ export function OffersPageContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto py-8">
       <Tabs defaultValue="form" className="space-y-6">
         <TabsList className="sticky top-17 z-50">
           <TabsTrigger value="form">Form</TabsTrigger>
@@ -43,10 +40,7 @@ export function OffersPageContent() {
               </p>
             </CardHeader>
             <CardContent>
-              <AdminOfferPreview
-                offer={previewOffer}
-                mediaPreview={mediaPreview}
-              />
+              {/* <OfferPreview offer={previewOffer} mediaPreview={mediaPreview} /> */}
             </CardContent>
           </Card>
         </TabsContent>
