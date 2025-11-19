@@ -31,7 +31,7 @@ import { useBranch } from "@/components/providers/branch-provider";
 export default function AvailabilitySection() {
   const { data: serverData, status } = useMenuItemForm();
   //Get the branch id from the context
-  const {branchId} = useBranch();
+  const { branchId } = useBranch();
   //Getting the mutation function that updates the menu item
   const { mutate, isPending } = useUpdateMenuItemMutation();
 
@@ -70,10 +70,7 @@ export default function AvailabilitySection() {
 
     Object.keys(form.formState.dirtyFields).forEach((key) => {
       const value = data[key as keyof AvailabilityFormData];
-      formData.append(
-        key,
-        typeof value === "object" ? JSON.stringify(value) : String(value)
-      );
+      formData.append(key, String(value));
     });
     //Appending the id so that the server can know which image to edit
     if (!serverData?.id) return;

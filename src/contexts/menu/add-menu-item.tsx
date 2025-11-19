@@ -199,7 +199,6 @@ export function AddMenuItemProvider({
 
   const addChoice = (choice: ChoiceFormData) => {
     const newChoice = { id: crypto.randomUUID(), ...choice };
-    console.log("Adding/updating choice:", newChoice);
     setChoices((prev) => [...prev, newChoice]);
   };
 

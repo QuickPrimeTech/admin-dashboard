@@ -33,8 +33,8 @@ import { useBranch } from "@/components/providers/branch-provider";
 export default function BasicInfoSection() {
   const { data: serverData, status } = useMenuItemForm();
 
-   //Get the branch id from the context
-    const {branchId} = useBranch();
+  //Get the branch id from the context
+  const { branchId } = useBranch();
 
   //Getting the mutation function that updates the menu item
   const { mutate, isPending } = useUpdateMenuItemMutation();
@@ -48,7 +48,6 @@ export default function BasicInfoSection() {
     },
   });
 
-  console.log("Server data for updated menu item ------->", serverData);
   useEffect(() => {
     if (serverData) {
       form.reset({

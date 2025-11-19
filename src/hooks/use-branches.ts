@@ -27,7 +27,6 @@ export function useGetCurrentBranch(branchId: string) {
     enabled: !!branchId && !!branches, // wait for branches
     queryKey: ["current-branch", branchId],
     queryFn: async () => {
-      console.log("BranchId from the query ------->", branchId);
       if (!branches) return null;
 
       return branches.find((b) => b.id === branchId) || null;

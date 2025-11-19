@@ -20,7 +20,7 @@ export function useGalleryItemForm(
   onOpenChange: (open: boolean) => void
 ) {
   //Get the branchId from the context
-  const {branchId} = useBranch();
+  const { branchId } = useBranch();
 
   //Mutation function for adding a gallery Item
   const addMutation = useCreateGalleryItemMutation();
@@ -66,7 +66,6 @@ export function useGalleryItemForm(
   }, [item, form]);
   const onSubmit = async (data: FormDataProps) => {
     if (item) {
-      console.log(selectedFile);
       //Creating a lqip if the image changed
       let lqip;
       if (selectedFile) {
@@ -83,9 +82,6 @@ export function useGalleryItemForm(
         { id: item.id, ...data },
         selectedFile
       );
-
-      console.log("formData from update--->", formData);
-      console.log("Incoming data --->", data);
 
       //close the edit diaog
       onOpenChange(false);
@@ -107,22 +103,23 @@ export function useGalleryItemForm(
         return;
       }
 
-      console.log("Adding new gallery item...");
       const formData = await buildGalleryFormData(data, selectedFile, true);
-      console.log("formData from create--->", formData);
 
       onOpenChange(false);
       //Running the tanstack mutation query
-      addMutation.mutate({formData, branchId}, {
-        onSuccess: () => {
-          form.reset(); // clear form
-          setSelectedFile(null);
-          setExistingImageUrl(null);
-        },
-        onError: () => {
-          onOpenChange(true);
-        },
-      });
+      addMutation.mutate(
+        { formData, branchId },
+        {
+          onSuccess: () => {
+            form.reset(); // clear form
+            setSelectedFile(null);
+            setExistingImageUrl(null);
+          },
+          onError: () => {
+            onOpenChange(true);
+          },
+        }
+      );
     }
   };
 

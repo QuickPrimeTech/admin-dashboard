@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (branchError) {
-    console.log(branchError);
     return createResponse<null>(
       500,
       "Error while creating restaurant branch",

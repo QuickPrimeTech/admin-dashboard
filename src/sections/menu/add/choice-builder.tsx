@@ -81,7 +81,6 @@ export function ChoiceBuilder() {
       setOptionError("You must add at least one option");
       return;
     }
-    console.log("Submitting choice:", data);
 
     //checking if the choice is being edited or added new
     if (editingChoice) {

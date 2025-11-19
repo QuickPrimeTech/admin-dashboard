@@ -43,6 +43,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   const supabase = await createClient();
   try {
     const formData = await request.formData();
+
     const { id } = await params;
 
     // Fetch existing item
@@ -91,7 +92,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         formData.get("end_time") ??
         (existingItem.end_time ? existingItem.end_time.slice(0, 5) : null),
 
-      choices: choices.length ? choices : existingItem.choices,
+      choices: formData.has("choices") ? choices : existingItem.choices,
     };
 
     // Validate
@@ -109,7 +110,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     let uploadedImageUrl = existingItem.image_url;
     let publicId = existingItem.public_id;
 
-    // 🧩 Case 1: Upload new image
+    // Case 1: Upload new image
     if (imageFile && imageFile.size > 0) {
       const sanitizedRestaurantName = await getSanitizedPath();
       const uploadResult = await uploadAndReplaceImage(

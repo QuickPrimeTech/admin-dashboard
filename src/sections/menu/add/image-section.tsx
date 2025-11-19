@@ -51,7 +51,6 @@ export function ImageSection() {
     if (!imageFile && imageInfo?.base64) {
       if (!previewUrl) {
         setPreviewUrl(imageInfo.base64); // base64 works as preview source
-        console.log("Checked no previewUrl", previewUrl);
       }
 
       if (!imageFile) {

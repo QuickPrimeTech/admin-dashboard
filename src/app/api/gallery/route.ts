@@ -103,7 +103,6 @@ export async function GET() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.log(error);
       return createResponse(500, "Failed to fetch gallery items");
     }
 

@@ -9,8 +9,8 @@ import { toast } from "sonner";
 
 //This is where all the tanstack queries are stored for the gallery page
 const getGalleryKey = (branchId: string) => {
-  return ["gallery-items", branchId]
-}
+  return ["gallery-items", branchId];
+};
 
 //This is the function that runs for the fetch query
 const fetchGalleryItems = async () => {
@@ -50,7 +50,7 @@ export function useCreateGalleryItemMutation() {
   return useMutation<
     ApiResponse<GalleryItem>, // Success type
     AxiosError<ApiResponse<null>>, // Error type
-    {formData: FormData, branchId: string}, // Variables
+    { formData: FormData; branchId: string }, // Variables
     { prevGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async (data) => {
@@ -65,14 +65,12 @@ export function useCreateGalleryItemMutation() {
     },
     //  Optimistic update: instantly show the new image
     onMutate: async (data) => {
-
       const queryKey = getGalleryKey(data.branchId);
 
-      await queryClient.cancelQueries({ queryKey});
+      await queryClient.cancelQueries({ queryKey });
 
-      const prevGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        queryKey
-      );
+      const prevGalleryItems =
+        queryClient.getQueryData<GalleryItem[]>(queryKey);
 
       // Create a temporary preview item (optimistic)
       const previewUrl = data.formData.get("file")
@@ -96,13 +94,12 @@ export function useCreateGalleryItemMutation() {
 
       return { prevGalleryItems };
     },
-    onSuccess: (res,data, onMutateResult) => {
+    onSuccess: (res, data, onMutateResult) => {
       const queryKey = getGalleryKey(data.branchId);
-      
+
       //Gettting the gallery image from the server
       const newItem = res.data;
 
-      console.log(newItem);
       if (!newItem) return;
 
       toast.success(res.message || "Gallery image added successfully!");
@@ -122,10 +119,7 @@ export function useCreateGalleryItemMutation() {
 
       //Rollback the changes by removing the gallery temporary gallery item from the cache
       if (onMutateResult?.prevGalleryItems) {
-        queryClient.setQueryData(
-          queryKey,
-          onMutateResult.prevGalleryItems
-        );
+        queryClient.setQueryData(queryKey, onMutateResult.prevGalleryItems);
       }
 
       const errors = err.response?.data?.data;
@@ -152,7 +146,7 @@ export function useUpdateGalleryItemMutation() {
   return useMutation<
     ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
-    { formData: FormData; updatedItem: GalleryItem, branchId: string },
+    { formData: FormData; updatedItem: GalleryItem; branchId: string },
     { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async ({ formData }) => {
@@ -160,45 +154,38 @@ export function useUpdateGalleryItemMutation() {
       return res.data;
     },
     onMutate: async ({ updatedItem, branchId }) => {
-        //Creating the queryKey from the branchId
-  const queryKey = getGalleryKey(branchId);
+      //Creating the queryKey from the branchId
+      const queryKey = getGalleryKey(branchId);
 
       //Canceling all the query request that are taking place to prevent intefering with the optimistic update
       await queryClient.cancelQueries({ queryKey });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
-      const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        queryKey
-      );
+      const previousGalleryItems =
+        queryClient.getQueryData<GalleryItem[]>(queryKey);
 
       //Getting the id from the formData
       const id = updatedItem.id;
 
       //Updating  the gallery item from the cache for the user to get immediate feedback
-      queryClient.setQueryData<GalleryItem[]>(
-        queryKey,
-        (old) => {
-          return old?.map((galleryItem) =>
-            galleryItem.id === id ? updatedItem : galleryItem
-          );
-        }
-      );
+      queryClient.setQueryData<GalleryItem[]>(queryKey, (old) => {
+        return old?.map((galleryItem) =>
+          galleryItem.id === id ? updatedItem : galleryItem
+        );
+      });
 
       //Returning the previous items for rollback on error
       return { previousGalleryItems };
     },
-    onError: (err, {branchId}, onMutateResult) => {
-  const queryKey = getGalleryKey(branchId);  //Creating the queryKey from the branchId
+    onError: (err, { branchId }, onMutateResult) => {
+      const queryKey = getGalleryKey(branchId); //Creating the queryKey from the branchId
 
       const message =
         err.response?.data.message ||
         "An error occurred while updating your gallery photo";
       //Rolling back to the previous galleryItems
       if (onMutateResult?.previousGalleryItems) {
-        queryClient.setQueryData(
-          queryKey,
-          onMutateResult.previousGalleryItems
-        );
+        queryClient.setQueryData(queryKey, onMutateResult.previousGalleryItems);
       }
       //Giving the user feedback that the request didn't go through
       toast.error(message);
@@ -217,7 +204,7 @@ export function useDeleteGalleryItemMutation() {
   return useMutation<
     ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
-    {id: number, branchId: string},
+    { id: number; branchId: string },
     { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async (data) => {
@@ -225,24 +212,19 @@ export function useDeleteGalleryItemMutation() {
       return res.data;
     },
     onMutate: async (data) => {
-
       const queryKey = getGalleryKey(data.branchId);
 
       //Canceling all the query request that are taking place to prevent intefering with the optimistic update
       await queryClient.cancelQueries({ queryKey });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
-      const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        queryKey
-      );
+      const previousGalleryItems =
+        queryClient.getQueryData<GalleryItem[]>(queryKey);
 
       //Removing the gallery item from the cache for the user to get immediate feedback
-      queryClient.setQueryData<GalleryItem[]>(
-        queryKey,
-        (old) => {
-          return old?.filter((galleryItem) => galleryItem.id !== data.id);
-        }
-      );
+      queryClient.setQueryData<GalleryItem[]>(queryKey, (old) => {
+        return old?.filter((galleryItem) => galleryItem.id !== data.id);
+      });
 
       //Updating the overview stats from the homepage to have the reduced value
       queryClient.setQueryData<OverviewStats>(["overview-stats"], (old) => {
@@ -253,19 +235,14 @@ export function useDeleteGalleryItemMutation() {
       return { previousGalleryItems };
     },
     onError: (err, data, onMutateResult) => {
-
       const queryKey = getGalleryKey(data.branchId);
 
       const message =
         err.response?.data.message ||
         "An error occurred while deleting your gallery photo";
-      console.log(err);
       //Rolling back to the previous galleryItems
       if (onMutateResult?.previousGalleryItems) {
-        queryClient.setQueryData(
-          queryKey,
-          onMutateResult.previousGalleryItems
-        );
+        queryClient.setQueryData(queryKey, onMutateResult.previousGalleryItems);
       }
       //Rolling back the overview stats gallery count
       queryClient.setQueryData<OverviewStats>(["overview-stats"], (old) => {
@@ -289,7 +266,7 @@ export function useTogglePublishedMutation() {
   return useMutation<
     ApiResponse<GalleryItem>,
     AxiosError<ApiResponse<null>>,
-    { id: number; is_published: boolean, branchId: string },
+    { id: number; is_published: boolean; branchId: string },
     { previousGalleryItems?: GalleryItem[] }
   >({
     mutationFn: async (updatedItem) => {
@@ -299,8 +276,7 @@ export function useTogglePublishedMutation() {
       );
       return res.data;
     },
-    onMutate: async ({id, is_published, branchId}) => {
-
+    onMutate: async ({ id, is_published, branchId }) => {
       //Query Key to be used
       const queryKey = getGalleryKey(branchId);
 
@@ -308,37 +284,27 @@ export function useTogglePublishedMutation() {
       await queryClient.cancelQueries({ queryKey });
 
       //Taking a snapshot of the previous gallery items in order to have a smooth rollback
-      const previousGalleryItems = queryClient.getQueryData<GalleryItem[]>(
-        queryKey
-      );
+      const previousGalleryItems =
+        queryClient.getQueryData<GalleryItem[]>(queryKey);
 
       //Updating the is_published to the one passed from the form
-      queryClient.setQueryData<GalleryItem[]>(
-        queryKey,
-        (old) => {
-          return old?.map((galleryItem) =>
-            galleryItem.id === id
-              ? { ...galleryItem, is_published }
-              : galleryItem
-          );
-        }
-      );
+      queryClient.setQueryData<GalleryItem[]>(queryKey, (old) => {
+        return old?.map((galleryItem) =>
+          galleryItem.id === id ? { ...galleryItem, is_published } : galleryItem
+        );
+      });
 
       //Returning the previous items for rollback on error
       return { previousGalleryItems };
     },
-    onError: (err, {branchId}, onMutateResult) => {
-
-      const queryKey = getGalleryKey(branchId)
+    onError: (err, { branchId }, onMutateResult) => {
+      const queryKey = getGalleryKey(branchId);
       const message =
         err.response?.data.message ||
         "An error occurred while deleting your gallery photo";
       //Rolling back to the previous galleryItems
       if (onMutateResult?.previousGalleryItems) {
-        queryClient.setQueryData(
-          queryKey,
-          onMutateResult.previousGalleryItems
-        );
+        queryClient.setQueryData(queryKey, onMutateResult.previousGalleryItems);
       }
 
       //Giving the user feedback that the request didn't go through

@@ -116,7 +116,6 @@ export function useUpdateMenuItemMutation() {
       const queryKey = getMenuKey(branchId);
 
       const updatedItem = data.data;
-      console.log("updated item --->", updatedItem);
       if (!updatedItem) return;
 
       const id = Number(updatedItem.id);

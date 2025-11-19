@@ -4,7 +4,7 @@ import {
   getSanitizedPath,
   getAuthenticatedUser,
   uploadImageToCloudinary,
-  getCurrentBranchId
+  getCurrentBranchId,
 } from "@/helpers/common";
 import { menuItemSchema } from "@/schemas/menu";
 import { createResponse } from "@/helpers/api-responses";
@@ -40,8 +40,6 @@ export async function POST(request: NextRequest) {
       end_time: formData.get("end_time"),
       choices,
     };
-
-    console.log("Received menu item data choices:", data.choices);
 
     // Validate
     const parsedData = menuItemSchema.safeParse(data);
@@ -157,7 +155,6 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (error) {
-      console.log("menu items error ------>", error);
       return createResponse(500, "Failed to fetch menu item", null);
     }
 
@@ -172,7 +169,6 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.log(error);
     return createResponse(502, "Failed to fetch menu items from the database");
   }
 

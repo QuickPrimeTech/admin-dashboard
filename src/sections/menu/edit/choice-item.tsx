@@ -35,13 +35,9 @@ export default function ChoiceItem({ choice, onEdit }: ChoiceItemProps) {
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
 
   const handleDelete = async () => {
-    console.log("Deleting choice...", choice);
-    console.log("Current choices:", choices);
     if (!serverData?.id) return;
 
     const updatedChoices = choices.filter((c) => c.id !== choice.id);
-
-    console.log("Updated choices after deletion:", updatedChoices);
 
     const formData = new FormData();
     formData.append("id", serverData.id);
