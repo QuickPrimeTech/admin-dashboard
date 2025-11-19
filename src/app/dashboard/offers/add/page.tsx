@@ -1,4 +1,11 @@
-import { OffersPageContent } from "@/sections/offers/offer-page-content";
+import { OffersPageContent } from "@/sections/offers/add/offer-page-content";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Add Offers & Promos",
+  description:
+    "Start adding offers and promos and watch them change instantly on your website.",
+};
 
 export default function OffersPage() {
   return (

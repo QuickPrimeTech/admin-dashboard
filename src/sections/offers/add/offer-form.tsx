@@ -33,29 +33,15 @@ import { Textarea } from "@ui/textarea";
 import { Checkbox } from "@ui/checkbox";
 import { OfferFormValues, refinedOfferSchema } from "@/schemas/offers";
 // Updated component imports to reflect your local structure:
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@ui/calendar";
 import { cn } from "@/lib/utils";
 import { useCreateOfferMutation } from "@/hooks/use-offers";
 import { useBranch } from "@providers/branch-provider";
 import Image from "next/image";
-import { Spinner } from "@/components/ui/spinner";
-
-// Map the day indices to a practical label (0=Sunday, 1=Monday...)
-const DAYS_OF_WEEK = [
-  { value: 1, label: "Monday" },
-  { value: 2, label: "Tuesday" },
-  { value: 3, label: "Wednesday" },
-  { value: 4, label: "Thursday" },
-  { value: 5, label: "Friday" },
-  { value: 6, label: "Saturday" },
-  { value: 0, label: "Sunday" },
-];
+import { Spinner } from "@ui/spinner";
+import { DAYS_OF_WEEK } from "@/constants/offers";
 
 export function OfferForm() {
   //Fetch the branchId from the context

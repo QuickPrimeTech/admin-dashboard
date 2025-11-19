@@ -1,18 +1,15 @@
-export type OfferStatus =
-  | "active"
-  | "upcoming"
-  | "expired"
-  | "scheduled"
-  | "recurring";
-
 export type Offer = {
   id: string;
   title: string;
   description: string;
-  image: string; // This now strictly refers to an image
-  status: OfferStatus;
-  startDate: Date;
-  endDate?: Date;
-  daysOfWeek?: number[]; // 0-6 for Mon-Sun (for recurring)
-  customName?: string; // e.g., "Monday Special", "New Year Deal"
+  image_url: string;
+  start_time: string;
+  end_time: string;
+  is_recurring: boolean;
+  start_date: string | null;
+  end_date: string | null;
+  days_of_week: string[];
+  branch_id: string;
+  created_at: Date;
+  public_id: string;
 };

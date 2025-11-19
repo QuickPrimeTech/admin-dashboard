@@ -7,11 +7,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl } from "@ui/form";
 import { Button } from "@ui/button";
 import { IoLogoTiktok } from "react-icons/io5";
 import { FaXTwitter } from "react-icons/fa6";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import { Instagram, Facebook, Youtube, Save } from "lucide-react";
 
 export function SocialMediaForm() {

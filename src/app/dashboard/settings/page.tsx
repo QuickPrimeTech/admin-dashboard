@@ -1,5 +1,5 @@
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea, ScrollBar } from "@ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
 import { BasicInfoForm } from "@/sections/settings/basic-info";
 import { ContactInfoForm } from "@/sections/settings/contact-info";
 import { SocialMediaForm } from "@/sections/settings/social-media";

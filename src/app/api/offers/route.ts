@@ -21,6 +21,31 @@ type OfferFormData = {
   branch_id: string;
 };
 
+export async function GET() {
+  const supabase = await createClient();
+  //Get the current branch id
+  const branchId = await getCurrentBranchId();
+
+  //If no branch id, return error
+  if (!branchId) {
+    return createResponse(
+      502,
+      "You need to select a branch before viewing any offers"
+    );
+  }
+
+  //Fetch offers for the branch
+  const { data: offers, error } = await supabase
+    .from("offers")
+    .select("*")
+    .eq("branch_id", branchId);
+
+  if (error) {
+    return createResponse(502, "Failed to fetch offers. Please try again.");
+  }
+
+  return createResponse(200, "Offers endpoint is working", offers);
+}
 export async function POST(request: Request) {
   const formValues = await request.formData();
   const supabase = await createClient();

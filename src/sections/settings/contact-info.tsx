@@ -7,11 +7,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl } from "@ui/form";
 import { Textarea } from "@ui/textarea";
 import { Button } from "@ui/button";
 import { Mail, Phone, Save } from "lucide-react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 
 export function ContactInfoForm() {
   const defaultValues = {};

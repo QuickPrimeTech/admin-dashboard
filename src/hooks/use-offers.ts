@@ -1,5 +1,6 @@
 import { ApiResponse } from "@/helpers/api-responses";
 import { OfferFormValues } from "@/schemas/offers";
+import { Offer } from "@/types/offers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -9,14 +10,11 @@ function getOfferKey(branchId: string) {
 }
 
 export function useOffersQuery(branchId: string) {
-  return useQuery<
-    ApiResponse<OfferFormValues[]>,
-    AxiosError<ApiResponse<null>>
-  >({
+  return useQuery<Offer[], AxiosError<ApiResponse<null>>>({
     queryKey: getOfferKey(branchId),
     queryFn: async () => {
-      const res = await axios.get<ApiResponse<OfferFormValues[]>>(`api/offers`);
-      return res.data;
+      const res = await axios.get<ApiResponse<Offer[]>>(`/api/offers`);
+      return res.data.data || [];
     },
   });
 }

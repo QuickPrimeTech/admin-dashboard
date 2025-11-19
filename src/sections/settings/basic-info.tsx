@@ -20,17 +20,13 @@ import {
 } from "@ui/form";
 import { Textarea, TextareaSkeleton } from "@ui/textarea";
 import { Switch, SwitchSkeleton } from "@ui/switch";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { Save, Store } from "lucide-react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import { useGetCurrentBranch } from "@/hooks/use-branches";
 import { useBranch } from "@/components/providers/branch-provider";
 import { useEffect } from "react";
-import { InputSkeleton } from "@/components/ui/input";
+import { InputSkeleton } from "@ui/input";
 
 export function BasicInfoForm() {
   //Get the branc Id from the context
