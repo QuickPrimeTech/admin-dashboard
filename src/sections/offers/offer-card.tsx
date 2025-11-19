@@ -24,30 +24,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@ui/alert-dialog";
+import { formatDate, formatTime } from "@/helpers/time-formatters";
 
 export function OfferCard({ offer }: { offer: Offer }) {
-  const formatTime = (time: string) => {
-    if (!time) return "";
-    const [hours, minutes] = time.split(":");
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
-
-  const formatDate = (date: string) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const onEdit = (id: string) => {
-    console.log("Edit offer with ID:", id);
-  };
-
   const onDelete = (id: string) => {
     console.log("Delete offer with ID:", id);
   };
@@ -66,7 +45,7 @@ export function OfferCard({ offer }: { offer: Offer }) {
           />
         </div>
         <div className="px-4 py-4 space-y-2">
-          <CardTitle className="drop-shadow-lg">{offer.title}</CardTitle>
+          <CardTitle>{offer.title}</CardTitle>
           <CardDescription className="line-clamp-2">
             {offer.description}
           </CardDescription>
