@@ -78,7 +78,7 @@ export function DynamicSelect<
         setCategories((prev) => [...prev, field.value]);
       }
     }
-  }, [prefilledCat, serverCategories, categories, field.value]);
+  }, [serverCategories, field.value]);
 
   return (
     <>
