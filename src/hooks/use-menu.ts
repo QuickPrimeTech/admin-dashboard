@@ -255,7 +255,7 @@ export function useMenuItemQuery(id: number, branchId: string) {
       }
 
       // Step 3: Otherwise, fetch from API
-      const res = await axios.get(`/api/menu-items`, { params: { id } });
+      const res = await axios.get(`/api/menu-items/${id}`);
       const result = res.data;
 
       if (!result.success) throw new Error(result.message || "Server error");

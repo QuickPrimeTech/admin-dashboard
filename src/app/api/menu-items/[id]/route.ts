@@ -1,6 +1,7 @@
 import { createResponse } from "@/helpers/api-responses";
 import {
   deleteImageFromCloudinary,
+  getCurrentBranchId,
   getMenuItemById,
   getSanitizedPath,
   uploadAndReplaceImage,
@@ -10,15 +11,39 @@ import { Params } from "@/types/api";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest } from "next/server";
 
+export async function GET(_req: NextRequest, { params }: Params) {
+  const supabase = await createClient();
+  const branchId = await getCurrentBranchId();
+
+  const { id } = await params;
+
+  if (!branchId) {
+    return createResponse(
+      403,
+      "You should choose a branch before fetching menu items"
+    );
+  }
+
+  // Fetch a single item by ID
+  const { data, error } = await supabase
+    .from("menu_items")
+    .select("*")
+    .eq("id", id)
+    .eq("branch_id", branchId)
+    .single();
+
+  if (error) {
+    return createResponse(500, "Failed to fetch menu item", null);
+  }
+
+  return createResponse(200, "Menu item fetched successfully", data);
+}
+
 export async function PATCH(request: NextRequest, { params }: Params) {
   const supabase = await createClient();
   try {
     const formData = await request.formData();
     const { id } = await params;
-
-    if (!id) {
-      return createResponse(400, "Missing menu item ID", null, false);
-    }
 
     // Fetch existing item
     const { data: existingItem, error: fetchError } = await getMenuItemById(id);
@@ -151,10 +176,6 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
 
   try {
     const { id } = await params;
-
-    if (!id) {
-      return createResponse(400, "Missing menu item ID");
-    }
 
     const { data: item, error: fetchError } = await supabase
       .from("menu_items")
