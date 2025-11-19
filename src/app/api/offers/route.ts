@@ -19,6 +19,7 @@ type OfferFormData = {
   image_url: File | string | null;
   public_id?: string;
   branch_id: string;
+  lqip: string | null;
 };
 
 export async function GET() {
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
         ? JSON.parse(formValues.get("daysOfWeek") as string)
         : [],
       image_url: formValues.get("image") as File,
+      lqip: formValues.get("lqip") as string,
       branch_id: branchId,
     };
 
@@ -85,6 +87,7 @@ export async function POST(request: Request) {
 
     //Get the folder path for the offer images
     const folderPath = await getSanitizedPath();
+
     //Handle Image upload to cloudinary
     const uploadResult = await uploadImageToCloudinary(
       data.image_url as File,

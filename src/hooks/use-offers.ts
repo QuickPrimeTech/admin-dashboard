@@ -1,4 +1,5 @@
 import { ApiResponse } from "@/helpers/api-responses";
+import { generateBlurDataURL } from "@/helpers/file-helpers";
 import { OfferFormValues } from "@/schemas/offers";
 import { Offer } from "@/types/offers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -42,6 +43,10 @@ export function useCreateOfferMutation() {
         JSON.stringify(formData.daysOfWeek || [])
       );
       formDataObj.append("image", formData.image as File);
+      formDataObj.append(
+        "lqip",
+        await generateBlurDataURL(formData.image as File)
+      );
 
       const res = await axios.post<ApiResponse<OfferFormValues>>(
         "/api/offers",

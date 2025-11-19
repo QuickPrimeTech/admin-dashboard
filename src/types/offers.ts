@@ -10,6 +10,6 @@ export type Offer = {
   end_date: string | null;
   days_of_week: string[];
   branch_id: string;
-  created_at: Date;
   public_id: string;
+  lqip: string | null;
 };
