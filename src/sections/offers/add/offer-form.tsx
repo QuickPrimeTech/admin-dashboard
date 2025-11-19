@@ -18,7 +18,6 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
-  // Removed redundant @ui imports for Popover/Calendar/cn/format
 } from "@ui/form";
 import {
   Upload,
@@ -32,7 +31,6 @@ import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
 import { Checkbox } from "@ui/checkbox";
 import { OfferFormValues, refinedOfferSchema } from "@/schemas/offers";
-// Updated component imports to reflect your local structure:
 import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "@ui/calendar";
@@ -78,8 +76,14 @@ export function OfferForm() {
   };
 
   const onSubmit = (values: OfferFormValues) => {
-    console.log("Submit offer:", values);
-    createOfferMutation.mutate({ formData: values, branchId: branchId });
+    createOfferMutation.mutate(
+      { formData: values, branchId: branchId },
+      {
+        onSuccess: () => {
+          form.reset();
+        },
+      }
+    );
   };
 
   return (
