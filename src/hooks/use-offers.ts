@@ -81,3 +81,54 @@ export function useCreateOfferMutation() {
     },
   });
 }
+
+export function useDeleteOfferMutation() {
+  //Get the query client
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ApiResponse<null>,
+    AxiosError<ApiResponse<null>>,
+    { id: string; branchId: string },
+    { previousOffers: Offer[] | undefined }
+  >({
+    mutationFn: async ({ id }) => {
+      const res = await axios.delete<ApiResponse<null>>(`/api/offers/${id}`);
+      return res.data;
+    },
+    onMutate: async ({ id, branchId }) => {
+      //Get the query key
+      const queryKey = getOfferKey(branchId);
+      //Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+
+      //Get the previous offers
+      const previousOffers = queryClient.getQueryData<Offer[]>(queryKey);
+
+      //Optimistically update the cache
+      queryClient.setQueryData<Offer[]>(queryKey, (oldOffers) =>
+        oldOffers ? oldOffers.filter((offer) => offer.id !== id) : []
+      );
+
+      return { previousOffers };
+    },
+    onError: (err, { branchId }, context) => {
+      const message =
+        err.response?.data?.message ||
+        `An error occurred while deleting the offer.`;
+
+      //Rollback to previous offers
+      const queryKey = getOfferKey(branchId);
+
+      if (context?.previousOffers) {
+        queryClient.setQueryData<Offer[]>(queryKey, context.previousOffers);
+      }
+      toast.error(message);
+    },
+    onSuccess: (res) => {
+      const message = res.message || `Offer deleted successfully.`;
+
+      toast.success(message);
+    },
+  });
+}

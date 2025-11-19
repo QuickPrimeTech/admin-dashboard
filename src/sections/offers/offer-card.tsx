@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -25,14 +27,17 @@ import {
   AlertDialogTrigger,
 } from "@ui/alert-dialog";
 import { formatDate, formatTime } from "@/helpers/time-formatters";
+import { useDeleteOfferMutation } from "@/hooks/use-offers";
+import { useBranch } from "@providers/branch-provider";
 
 export function OfferCard({ offer }: { offer: Offer }) {
-  const onDelete = (id: string) => {
-    console.log("Delete offer with ID:", id);
-  };
+  //Get the branchId from the context
+  const { branchId } = useBranch();
+
+  const deleteOfferMutation = useDeleteOfferMutation();
 
   return (
-    <Card className="relative py-0 gap-0 group overflow-hidden">
+    <Card className="relati ve py-0 gap-0 group overflow-hidden">
       {/* HEADER TEXT OVER IMAGE */}
       <CardHeader className="px-0 mb-0">
         <div className="relative aspect-3/2 overflow-hidden">
@@ -98,7 +103,6 @@ export function OfferCard({ offer }: { offer: Offer }) {
             </div>
           )}
         </div>
-        {/* <Separator className="mt-4" /> */}
         {/* ACTION BUTTONS */}
         <CardFooter className="flex justify-end bg-muted gap-2 items-center mt-2 p-2 rounded-sm">
           <Button variant="outline" size="sm" aria-label="Edit offer" asChild>
@@ -130,8 +134,11 @@ export function OfferCard({ offer }: { offer: Offer }) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
-                  onClick={() => onDelete(offer.id)}
+                  onClick={() =>
+                    deleteOfferMutation.mutate({ id: offer.id, branchId })
+                  }
                 >
+                  <Trash2 />
                   Delete Offer
                 </AlertDialogAction>
               </AlertDialogFooter>
