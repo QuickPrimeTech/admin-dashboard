@@ -1,22 +1,8 @@
-"use client";
-import { useState } from "react";
-import { Offer } from "@/types/offers";
 import { OfferForm } from "./offer-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
 
 export function OffersPageContent() {
-  const [previewOffer, setPreviewOffer] = useState<Partial<Offer>>({
-    title: "",
-    description: "",
-  });
-  const [mediaPreview, setMediaPreview] = useState<string>("");
-
-  const handlePreviewUpdate = (offer: Partial<Offer>, media?: string) => {
-    setPreviewOffer(offer);
-    if (media) setMediaPreview(media);
-  };
-
   return (
     <div className="max-w-7xl mx-auto py-8">
       <Tabs defaultValue="form" className="space-y-6">
@@ -27,7 +13,7 @@ export function OffersPageContent() {
 
         {/* Form Tab */}
         <TabsContent value="form">
-          <OfferForm onPreviewUpdate={handlePreviewUpdate} />
+          <OfferForm />
         </TabsContent>
 
         {/* Preview Tab */}

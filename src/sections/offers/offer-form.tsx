@@ -2,7 +2,6 @@
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Offer } from "@/types/offers";
 import {
   Card,
   CardContent,
@@ -21,7 +20,14 @@ import {
   FormDescription,
   // Removed redundant @ui imports for Popover/Calendar/cn/format
 } from "@ui/form";
-import { Upload, X, Image, FileText, Clock, CalendarIcon } from "lucide-react";
+import {
+  Upload,
+  X,
+  FileText,
+  Clock,
+  CalendarIcon,
+  ImageIcon,
+} from "lucide-react";
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
 import { Checkbox } from "@ui/checkbox";
@@ -37,10 +43,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useCreateOfferMutation } from "@/hooks/use-offers";
 import { useBranch } from "@providers/branch-provider";
-
-interface OfferFormProps {
-  onPreviewUpdate: (offer: Partial<Offer>, mediaPreview?: string) => void;
-}
+import Image from "next/image";
 
 // Map the day indices to a practical label (0=Sunday, 1=Monday...)
 const DAYS_OF_WEEK = [
@@ -53,15 +56,14 @@ const DAYS_OF_WEEK = [
   { value: 0, label: "Sunday" },
 ];
 
-export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
+export function OfferForm() {
   //Fetch the branchId from the context
   const { branchId } = useBranch();
   //Mutation for creating offer can be added here
   const createOfferMutation = useCreateOfferMutation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [mediaPreview, setMediaPreview] = useState<string>("");
-  const [fileName, setFileName] = useState<string>("");
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
   const form = useForm<OfferFormValues>({
     resolver: zodResolver(refinedOfferSchema),
@@ -80,35 +82,12 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
 
   const isRecurring = form.watch("isRecurring");
 
-  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFileName(file.name);
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const preview = event.target?.result as string;
-        setMediaPreview(preview);
-        updatePreview(form.getValues());
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleDayToggle = (day: number) => {
     const days = form.getValues("daysOfWeek") || [];
     const updatedDays = days.includes(day)
       ? days.filter((d) => d !== day)
       : [...days, day];
     form.setValue("daysOfWeek", updatedDays, { shouldValidate: true });
-    updatePreview({ ...form.getValues(), daysOfWeek: updatedDays });
-  };
-
-  const updatePreview = (data: Partial<OfferFormValues>) => {
-    onPreviewUpdate(
-      { ...data, isVideo: false } as Partial<Offer>,
-      mediaPreview
-    );
   };
 
   const onSubmit = (values: OfferFormValues) => {
@@ -116,11 +95,6 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
 
     createOfferMutation.mutate({ formData: values, branchId: branchId });
   };
-
-  form.watch((data) => {
-    const { daysOfWeek, ...otherData } = data;
-    updatePreview(otherData);
-  });
 
   return (
     <Form {...form}>
@@ -133,24 +107,33 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
           <Card className="md:sticky md:top-28">
             <CardHeader>
               <CardTitle>
-                <Image className="inline mr-2 h-5 w-5" />
+                <ImageIcon className="inline mr-2 h-5 w-5" />
                 Offer Image
               </CardTitle>
               <CardDescription>
                 Upload an eye-catching **image** for your offer.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
-              >
-                <Upload className="w-8 h-8 mx-auto mb-2 text-foreground-muted" />
-                <p>Click to upload image</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {fileName || `Choose an image (JPG, PNG)`}
-                </p>
-              </div>
+            <CardContent className="space-y-4 aspect-3/2 relative">
+              {mediaPreview ? (
+                <Image
+                  src={mediaPreview}
+                  fill
+                  alt="Media Preview"
+                  className="rounded-md mb-4"
+                />
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                >
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-foreground-muted" />
+                  <p>Click to upload image</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {`Choose an image (JPG, PNG)`}
+                  </p>
+                </div>
+              )}
 
               <FormField
                 control={form.control}
@@ -165,8 +148,10 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          field.onChange(file); // 👈 register File object into RHF
-                          handleMediaUpload(e); // keep your preview logic
+                          if (file) {
+                            setMediaPreview(URL.createObjectURL(file));
+                          }
+                          field.onChange(file); //  register File object into RHF
                         }}
                       />
                     </FormControl>
@@ -181,13 +166,11 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                   type="button"
                   className="w-full"
                   onClick={() => {
-                    setMediaPreview("");
-                    setFileName("");
+                    setMediaPreview(null);
                     if (fileInputRef.current) fileInputRef.current.value = "";
-                    updatePreview(form.getValues());
                   }}
                 >
-                  <X className="mr-2" />
+                  <X />
                   Clear Image
                 </Button>
               )}
@@ -298,11 +281,11 @@ export function OfferForm({ onPreviewUpdate }: OfferFormProps) {
                         onCheckedChange={(checked) => {
                           field.onChange(checked);
                           if (checked) {
-                            // ⚠️ CORRECTED: Set to undefined when recurring (clearing one-time dates)
+                            //  CORRECTED: Set to undefined when recurring (clearing one-time dates)
                             form.setValue("startDate", undefined);
                             form.setValue("endDate", undefined);
                           } else {
-                            // ⚠️ CORRECTED: Set default date when switching back
+                            // CORRECTED: Set default date when switching back
                             form.setValue("startDate", new Date());
                             form.setValue("endDate", undefined);
                             form.setValue("daysOfWeek", []);

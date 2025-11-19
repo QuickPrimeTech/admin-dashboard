@@ -61,7 +61,7 @@ export async function getSanitizedPath(): Promise<string> {
 
   if (!currentBranchId) {
     throw new Error(
-      "You need to select a branc before starting creating and updating menu items"
+      "You need to select a branch before starting creating and updating data"
     );
   }
 
