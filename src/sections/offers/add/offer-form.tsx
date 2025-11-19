@@ -146,7 +146,7 @@ export function OfferForm() {
                         }}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="absolute bottom-2 left-1/2 text-center z-20 -translate-x-1/2" />
                   </FormItem>
                 )}
               />
