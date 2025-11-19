@@ -100,8 +100,10 @@ export function useUpdateMenuItemMutation() {
     { formData: FormData; branchId: string }
   >({
     mutationFn: async ({ formData }) => {
+      const id = formData.get("id");
+      if (!id) throw new Error("Menu item ID is required for update");
       const { data } = await axios.patch<ApiResponse<MenuItem>>(
-        "/api/menu-items",
+        `/api/menu-items/${id}`,
         formData
       );
       return data;
@@ -169,7 +171,7 @@ export function useDeleteMenuMutation() {
     { previousMenuItems: MenuItem[] | undefined }
   >({
     mutationFn: async ({ id }) => {
-      const res = await axios.delete(`/api/menu-items?id=${id}`);
+      const res = await axios.delete(`/api/menu-items/${id}`);
       return res.data;
     },
     onMutate: async ({ id, branchId }) => {
