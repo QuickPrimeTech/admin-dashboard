@@ -20,7 +20,7 @@ export default function NotFound() {
   const isOldAdminPath = pathname === "/admin";
 
   return (
-    <div className="h-[100vh] flex justify-center items-center px-4">
+    <div className="h-screen flex justify-center items-center px-4">
       <Empty className="border border-border max-w-lg">
         <EmptyHeader>
           <EmptyMedia variant="icon">
@@ -44,14 +44,14 @@ export default function NotFound() {
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => router.back()}>
+              Go Back
+            </Button>
             <Button asChild>
               <Link href="/dashboard">
                 <ChevronLeft />
                 Go to Dashboard
               </Link>
-            </Button>
-            <Button variant="outline" onClick={() => router.back()}>
-              Go Back
             </Button>
           </div>
         </EmptyContent>
