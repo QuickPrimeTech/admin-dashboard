@@ -44,8 +44,10 @@ export function OfferCard({ offer }: { offer: Offer }) {
           <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
           <Image
             src={offer.image_url}
-            alt={offer.title}
+            alt={`${offer.title} image`}
             fill
+            placeholder={offer.lqip ? "blur" : "empty"}
+            blurDataURL={offer.lqip || undefined}
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>
@@ -76,15 +78,15 @@ export function OfferCard({ offer }: { offer: Offer }) {
           </div>
 
           {/* NON-RECURRING DATE RANGE */}
-          {!offer.is_recurring && offer.start_date && offer.end_date && (
+          {!offer.is_recurring && offer.start_date && (
             <div className="flex gap-2 items-center text-sm">
               <Calendar className="size-5" />
-              <span className="text-gray-800">
+              <span className="text-muted-foreground font-medium">
                 {offer.start_date === offer.end_date
                   ? formatDate(offer.start_date)
-                  : `${formatDate(offer.start_date)} – ${formatDate(
-                      offer.end_date
-                    )}`}
+                  : `${formatDate(offer.start_date)} – ${
+                      offer.end_date ? formatDate(offer.end_date) : "Ongoing"
+                    }`}
               </span>
             </div>
           )}
