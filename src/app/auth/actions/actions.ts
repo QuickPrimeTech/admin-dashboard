@@ -22,17 +22,6 @@ export async function login(loginData: LoginFormData) {
       message: "Your username or password might be wrong",
     };
   }
-  //Before redirect check if the user has only one branch and set it on the user_metadata
-  const { data: branches, error } = await supabase
-    .from("branch_settings")
-    .select("*");
-
-  if (error) {
-    return {
-      success: false,
-      message: "There was an error fetching your restaurant data",
-    };
-  }
 
   redirect("/branches");
 }

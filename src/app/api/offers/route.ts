@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     //Create the data object
-    let data: OfferFormData = {
+    const data: OfferFormData = {
       title: formValues.get("title") as string,
       description: formValues.get("description") as string,
       start_time: formValues.get("startTime") as string,

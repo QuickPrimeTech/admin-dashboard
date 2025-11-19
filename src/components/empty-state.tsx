@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@ui/card";
 import { cn } from "@/lib/utils";
 
-interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {}
+type EmptyStateProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function EmptyState({ className, children, ...props }: EmptyStateProps) {
   return (
@@ -31,9 +31,6 @@ export function EmptyStateDescription({
   );
 }
 
-export function EmptyStateAction({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function EmptyStateAction({ className, ...props }: EmptyStateProps) {
   return <div className={cn("mt-4", className)} {...props} />;
 }

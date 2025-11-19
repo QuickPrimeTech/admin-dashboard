@@ -36,8 +36,8 @@ export function MenuFilters({
       </div>
 
       {/* Scrollable categories */}
-      <ScrollArea className="rounded-lg flex-1 w-full">
-        <div className="flex gap-2 py-2 px-4 bg-accent/40">
+      <ScrollArea className="rounded-lg flex-1 max-sm:w-full w-0">
+        <div className="flex gap-2 py-2 px-4 bg-accent">
           {categories.map((category) => (
             <Button
               key={category}
