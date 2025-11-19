@@ -1,16 +1,14 @@
 "use client";
 import { SidebarTrigger, useSidebar } from "@ui/sidebar";
-import { Button} from "@ui/button";
-import { Bell} from "lucide-react";
+import { Button } from "@ui/button";
+import { Bell } from "lucide-react";
 import { Separator } from "@ui/separator";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@ui/tooltip";
 import { UserDropdown } from "@/components/navbar/user-dropdown";
 
 export function AppNavbar() {
- 
   const { state } = useSidebar();
-
 
   return (
     <>
@@ -27,7 +25,12 @@ export function AppNavbar() {
         <div className="flex-1" />
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" aria-label="view notifications" title="See your notifications">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="view notifications"
+            title="See your notifications"
+          >
             <Bell />
           </Button>
           <ModeToggle />

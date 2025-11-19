@@ -14,7 +14,7 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@ui/dropdown-menu";
 import Link from "next/link";
 import { RestaurantName } from "./restaurant-name";
@@ -27,72 +27,74 @@ import { Button } from "../ui/button";
 import { useSidebar } from "../ui/sidebar";
 
 type CurrentBranchDropdownContent = {
-  branches:  Branch[] | null | undefined;
+  branches: Branch[] | null | undefined;
   selectedBranch: Branch | null | undefined;
-  setSelectedBranch:  Dispatch<SetStateAction<Branch | null | undefined>>;
-}
+  setSelectedBranch: Dispatch<SetStateAction<Branch | null | undefined>>;
+};
 
-function CurrentBranchDropdownContent({branches,selectedBranch, setSelectedBranch}: CurrentBranchDropdownContent) {
+function CurrentBranchDropdownContent({
+  branches,
+  selectedBranch,
+  setSelectedBranch,
+}: CurrentBranchDropdownContent) {
+  const queryClient = useQueryClient();
+  const { setBranchId } = useBranch();
 
-const queryClient = useQueryClient();
-const {setBranchId} = useBranch();
-
-   const handleSwitchBranch = async (branch: Branch) => {
+  const handleSwitchBranch = async (branch: Branch) => {
     setSelectedBranch(branch);
     queryClient.setQueryData(["current-branch"], branch); // update cache
     await switchBranch(branch.id);
     setBranchId(branch.id);
-    
   };
-  
+
   return (
-     <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs uppercase tracking-wide">
-            Branch
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+    <DropdownMenuContent align="start" className="w-56">
+      <DropdownMenuGroup>
+        <DropdownMenuLabel className="text-xs uppercase tracking-wide">
+          Branch
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
 
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Building2 className="mr-2 size-4 text-muted-foreground" />
-              Switch Branch
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                {branches?.map((branch) => (
-                  <DropdownMenuCheckboxItem
-                    key={branch.id}
-                    checked={branch.id === selectedBranch?.id}
-                    onCheckedChange={() => handleSwitchBranch(branch)}
-                    className="cursor-pointer"
-                    title={`Switch to ${branch.name} branch`}
-                  >
-                    {branch.name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Building2 className="mr-2 size-4 text-muted-foreground" />
+            Switch Branch
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              {branches?.map((branch) => (
+                <DropdownMenuCheckboxItem
+                  key={branch.id}
+                  checked={branch.id === selectedBranch?.id}
+                  onCheckedChange={() => handleSwitchBranch(branch)}
+                  className="cursor-pointer"
+                  title={`Switch to ${branch.name} branch`}
+                >
+                  {branch.name}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
 
-          <DropdownMenuItem asChild>
-            <Link
-              href="/branches/manage"
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <Settings className="size-4 text-muted-foreground" />
-              Manage Branches
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-  )
+        <DropdownMenuItem asChild>
+          <Link
+            href="/branches/manage"
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <Settings className="size-4 text-muted-foreground" />
+            Manage Branches
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </DropdownMenuContent>
+  );
 }
 
 export function CurrentBranchDropdown() {
-  const {state} = useSidebar();
+  const { state, openMobile } = useSidebar();
   //Getting the setBranchId from the context
-  const { branchId} = useBranch();
+  const { branchId } = useBranch();
   //Calling the QueryClient
 
   const { data: currentBranch, isLoading: isLoadingCurrent } =
@@ -104,8 +106,6 @@ export function CurrentBranchDropdown() {
   if (currentBranch && selectedBranch?.id !== currentBranch.id) {
     setSelectedBranch(currentBranch);
   }
-
- 
 
   if (isLoadingCurrent || isLoadingBranches) {
     return (
@@ -123,13 +123,13 @@ export function CurrentBranchDropdown() {
   if (!selectedBranch) {
     return <p className="truncate text-muted-foreground">No branch selected</p>;
   }
- if (state === "collapsed") {
+  if (state === "collapsed" && !openMobile) {
     // ICON-ONLY (fits 40×40 button)
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-          variant={"secondary"}
+            variant={"secondary"}
             size="icon"
             className="h-15.5 w-full"
             title={`${currentBranch?.name} (branch)`}
@@ -137,12 +137,16 @@ export function CurrentBranchDropdown() {
             <ChefHat />
           </Button>
         </DropdownMenuTrigger>
-       <CurrentBranchDropdownContent branches={branches} setSelectedBranch={setSelectedBranch} selectedBranch={selectedBranch}/>
+        <CurrentBranchDropdownContent
+          branches={branches}
+          setSelectedBranch={setSelectedBranch}
+          selectedBranch={selectedBranch}
+        />
       </DropdownMenu>
     );
   }
 
-// FULL VERSION (text + chevron)
+  // FULL VERSION (text + chevron)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -165,8 +169,11 @@ export function CurrentBranchDropdown() {
           <ChevronDown className="size-4 text-muted-foreground" />
         </div>
       </DropdownMenuTrigger>
-      <CurrentBranchDropdownContent branches={branches} setSelectedBranch={setSelectedBranch} selectedBranch={selectedBranch}/>
+      <CurrentBranchDropdownContent
+        branches={branches}
+        setSelectedBranch={setSelectedBranch}
+        selectedBranch={selectedBranch}
+      />
     </DropdownMenu>
-        
   );
 }

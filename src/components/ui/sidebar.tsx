@@ -1,10 +1,8 @@
 "use client";
-
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
-
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@ui/button";
@@ -259,7 +257,7 @@ function SidebarTrigger({
   variant = "ghost",
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
 
   return (
     <Button
@@ -274,7 +272,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      {state === "expanded" ? <PanelLeftClose /> : <PanelLeftOpen />}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
