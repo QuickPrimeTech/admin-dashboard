@@ -81,6 +81,7 @@ export function OfferForm() {
       {
         onSuccess: () => {
           form.reset();
+          setMediaPreview(null);
         },
       }
     );
