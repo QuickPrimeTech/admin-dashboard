@@ -104,7 +104,7 @@ export function OfferForm() {
       >
         {/* Left: 1. Image Card */}
         <div className="md:w-1/3 shrink-0 space-y-6">
-          <Card className="md:sticky md:top-28">
+          <Card className="md:sticky md:top-28 px-4">
             <CardHeader>
               <CardTitle>
                 <ImageIcon className="inline mr-2 h-5 w-5" />
@@ -114,7 +114,7 @@ export function OfferForm() {
                 Upload an eye-catching **image** for your offer.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 aspect-3/2 relative">
+            <CardContent className="px-0 space-y-4 aspect-3/2 relative">
               {mediaPreview ? (
                 <Image
                   src={mediaPreview}
@@ -125,7 +125,7 @@ export function OfferForm() {
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                  className="w-full flex flex-col justify-center items-center h-full border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
                 >
                   <Upload className="w-8 h-8 mx-auto mb-2 text-foreground-muted" />
                   <p>Click to upload image</p>
@@ -164,7 +164,8 @@ export function OfferForm() {
                 <Button
                   variant="destructive"
                   type="button"
-                  className="w-full"
+                  size={"sm"}
+                  className="w-fit absolute bottom-0 right-0"
                   onClick={() => {
                     setMediaPreview(null);
                     if (fileInputRef.current) fileInputRef.current.value = "";
