@@ -29,7 +29,7 @@ export function EditMenuItemProvider({
   children: React.ReactNode;
   id: number;
 }) {
-  const {branchId} = useBranch();
+  const { branchId } = useBranch();
   const { data, status, refetch, isError } = useMenuItemQuery(id, branchId);
   const [choices, setChoices] = useState<ChoiceFormData[]>([]);
   const [editingChoice, setEditingChoice] = useState<ChoiceFormData | null>(
@@ -44,7 +44,8 @@ export function EditMenuItemProvider({
   }, [data]);
 
   const addChoice = (choice: ChoiceFormData) => {
-    setChoices((prev) => [...prev, { ...choice, id: crypto.randomUUID() }]);
+    //Added the id at the front to avoid overwriting existing ids
+    setChoices((prev) => [...prev, { id: crypto.randomUUID(), ...choice }]);
   };
 
   const removeChoice = (id: string) => {

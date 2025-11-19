@@ -96,7 +96,10 @@ export function ChoiceBuilder() {
       setOptionError("You must add at least one option");
       return;
     }
-    const combinedChoices = [...choices, data];
+    //Adding a random id to the choice data
+    const dataWithId = { ...data, id: crypto.randomUUID() };
+
+    const combinedChoices = [...choices, dataWithId];
 
     const formData = new FormData();
     //Making sure the id exists
@@ -113,7 +116,7 @@ export function ChoiceBuilder() {
       setEditingChoice(null);
     } else {
       // Add new choice
-      addChoice(data); // Send to context
+      addChoice(dataWithId); // Send to context
     }
     // merge existing choices + new choice data
 

@@ -121,7 +121,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       publicId = uploadResult.public_id;
     }
 
-    // 🧩 Case 2: Remove image explicitly
+    //  Case 2: Remove image explicitly
     else if (isRemoveRequest && existingItem.public_id) {
       await deleteImageFromCloudinary(existingItem.public_id);
       uploadedImageUrl = null;
