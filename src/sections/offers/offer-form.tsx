@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils";
 import { useCreateOfferMutation } from "@/hooks/use-offers";
 import { useBranch } from "@providers/branch-provider";
 import Image from "next/image";
+import { Spinner } from "@/components/ui/spinner";
 
 // Map the day indices to a practical label (0=Sunday, 1=Monday...)
 const DAYS_OF_WEEK = [
@@ -92,7 +93,6 @@ export function OfferForm() {
 
   const onSubmit = (values: OfferFormValues) => {
     console.log("Submit offer:", values);
-
     createOfferMutation.mutate({ formData: values, branchId: branchId });
   };
 
@@ -438,8 +438,19 @@ export function OfferForm() {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="w-full">
-            Create Offer
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={createOfferMutation.isPending}
+          >
+            {createOfferMutation.isPending ? (
+              <>
+                <Spinner />
+                Creating Offer...
+              </>
+            ) : (
+              "Create Offer"
+            )}
           </Button>
         </div>
       </form>

@@ -51,6 +51,13 @@ export async function POST(request: Request) {
       branch_id: branchId,
     };
 
+    if (
+      data.image_url instanceof File &&
+      data.image_url.size > 9 * 1024 * 1024
+    ) {
+      return createResponse(403, "Image size should not exceed 9MB.");
+    }
+
     //Get the folder path for the offer images
     const folderPath = await getSanitizedPath();
     //Handle Image upload to cloudinary

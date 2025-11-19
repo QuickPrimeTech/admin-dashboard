@@ -23,7 +23,7 @@ export const offerSchema = z.object({
   // Schedule Type (unchanged)
   isRecurring: z.boolean(),
 
-  // ⚠️ CORRECTED: Now expects Date objects or undefined
+  // CORRECTED: Now expects Date objects or undefined
   startDate: z.date().optional(),
   endDate: z.date().optional(),
 
@@ -45,6 +45,13 @@ export const refinedOfferSchema = offerSchema.superRefine((data, ctx) => {
       code: z.ZodIssueCode.custom,
       message: "Offer image is required.", // This is the required message
       path: ["image"],
+    });
+  }
+
+  if (data.image instanceof File && data.image.size > 9 * 1024 * 1024) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Image size should not exceed 9MB.",
     });
   }
 
