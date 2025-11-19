@@ -44,6 +44,8 @@ export async function POST(request: NextRequest) {
       choices,
     };
 
+    console.log("Received menu item data choices:", data.choices);
+
     // Validate
     const parsedData = menuItemSchema.safeParse(data);
     if (!parsedData.success) {
