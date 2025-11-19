@@ -84,11 +84,11 @@ export function ChoiceBuilder() {
     //checking if the choice is being edited or added new
     if (editingChoice) {
       // Update existing choice
-      addChoice(data); // ✅ Send to context
+      addChoice(data); // Send to context
       setEditingChoice(null);
     } else {
       // Add new choice
-      addChoice(data); // ✅ Send to context
+      addChoice(data); // Send to context
     }
 
     resetForm();

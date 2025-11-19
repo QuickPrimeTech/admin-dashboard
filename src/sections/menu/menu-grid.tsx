@@ -109,6 +109,9 @@ export function MenuGrid({ items, onDelete }: MenuGridProps) {
                 </div>
               </div>
             )}
+            {item.is_popular && (
+              <Badge className="absolute top-4 right-4">Popular</Badge>
+            )}
           </div>
           <CardHeader>
             <div className="flex justify-between items-start">

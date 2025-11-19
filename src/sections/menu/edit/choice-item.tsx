@@ -27,18 +27,21 @@ interface ChoiceItemProps {
 }
 
 export default function ChoiceItem({ choice, onEdit }: ChoiceItemProps) {
-
-   //Get the branch id from the context
-    const {branchId} = useBranch();
+  //Get the branch id from the context
+  const { branchId } = useBranch();
 
   const [open, setOpen] = useState(false);
   const { choices, setChoices, data: serverData } = useMenuItemForm();
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
 
   const handleDelete = async () => {
+    console.log("Deleting choice...", choice);
+    console.log("Current choices:", choices);
     if (!serverData?.id) return;
 
     const updatedChoices = choices.filter((c) => c.id !== choice.id);
+
+    console.log("Updated choices after deletion:", updatedChoices);
 
     const formData = new FormData();
     formData.append("id", serverData.id);

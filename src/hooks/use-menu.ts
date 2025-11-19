@@ -107,11 +107,14 @@ export function useUpdateMenuItemMutation() {
       return data;
     },
     onSuccess: (data, { branchId }) => {
+      //Show toast confirmation
+      toast.success(data.message ?? "Menu item updated successfully");
+
       //Get queryKey
       const queryKey = getMenuKey(branchId);
 
       const updatedItem = data.data;
-
+      console.log("updated item --->", updatedItem);
       if (!updatedItem) return;
 
       const id = Number(updatedItem.id);
@@ -135,10 +138,8 @@ export function useUpdateMenuItemMutation() {
       ]);
 
       if (cachedMenuItem) {
-        queryClient.setQueryData<MenuItem>(["menu-item", id], updatedItem);
+        queryClient.setQueryData<MenuItem>([...queryKey, id], updatedItem);
       }
-
-      toast.success(data.message ?? "Menu item updated successfully");
     },
     onError: (error) => {
       const message =

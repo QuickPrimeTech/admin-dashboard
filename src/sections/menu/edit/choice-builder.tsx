@@ -24,13 +24,14 @@ import { Spinner } from "@ui/spinner";
 import { useBranch } from "@/components/providers/branch-provider";
 
 export function ChoiceBuilder() {
-   //Get the branch id from the context
-    const {branchId} = useBranch();
+  //Get the branch id from the context
+  const { branchId } = useBranch();
 
   const [isOpen, setIsOpen] = useState(false);
   const [optionLabel, setOptionLabel] = useState("");
   const [optionPrice, setOptionPrice] = useState("");
   const [optionError, setOptionError] = useState("");
+
   //Getting the mutation function that updates the menu item
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
 
@@ -40,7 +41,7 @@ export function ChoiceBuilder() {
     editingChoice,
     setEditingChoice,
     data: serverData,
-  } = useMenuItemForm(); // ✅ from context
+  } = useMenuItemForm(); // from context
 
   const form = useForm<ChoiceFormData>({
     resolver: zodResolver(choiceSchema),
@@ -108,11 +109,11 @@ export function ChoiceBuilder() {
     //checking if the choice is being edited or added new
     if (editingChoice) {
       // Update existing choice
-      addChoice(data); // ✅ Send to context
+      addChoice(data); //Send to context
       setEditingChoice(null);
     } else {
       // Add new choice
-      addChoice(data); // ✅ Send to context
+      addChoice(data); // Send to context
     }
     // merge existing choices + new choice data
 
@@ -185,7 +186,7 @@ export function ChoiceBuilder() {
               <Input
                 type="number"
                 placeholder="Price"
-                step="0.01"
+                step="1"
                 min="0"
                 value={optionPrice}
                 onChange={(e) => setOptionPrice(e.target.value)}
