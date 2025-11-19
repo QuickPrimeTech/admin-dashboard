@@ -3,11 +3,7 @@ import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createResponse } from "@/helpers/api-responses";
 import { getCurrentBranchId } from "@/helpers/common";
-type Params = {
-  params: Promise<{
-    id: string;
-  }>;
-};
+import { Params } from "@/types/api";
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const supabase = await createClient();
