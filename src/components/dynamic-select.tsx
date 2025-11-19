@@ -60,24 +60,19 @@ export function DynamicSelect<
   };
 
   useEffect(() => {
-    if (serverCategories) {
-      if (serverCategories.length < 3) {
-        const uniqueCategories = Array.from(
-          new Set(
-            [...categories, ...prefilledCat].map((item) => item).filter(Boolean)
-          )
-        );
+    if (!serverCategories) return;
 
-        setCategories(uniqueCategories);
-      } else {
-        setCategories(serverCategories);
-      }
+    let merged =
+      serverCategories.length < 3
+        ? Array.from(new Set([...serverCategories, ...prefilledCat]))
+        : [...serverCategories];
 
-      // Ensure the currently selected value is included
-      if (field.value && !serverCategories.includes(field.value)) {
-        setCategories((prev) => [...prev, field.value]);
-      }
+    // ensure selected value is included once
+    if (field.value && !merged.includes(field.value)) {
+      merged = [...merged, field.value];
     }
+
+    setCategories(merged);
   }, [serverCategories, field.value]);
 
   return (

@@ -1,6 +1,5 @@
 // app/api/menu-items/route.ts
 import { NextRequest } from "next/server";
-
 import {
   getSanitizedPath,
   getAuthenticatedUser,
@@ -10,7 +9,6 @@ import {
   deleteImageFromCloudinary,
   getCurrentBranchId,
 } from "@/helpers/common";
-import { revalidatePage } from "@/helpers/revalidator";
 import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
 import { createResponse } from "@/helpers/api-responses";
 import { createClient } from "@/utils/supabase/server";
@@ -75,8 +73,11 @@ export async function POST(request: NextRequest) {
 
     const branch_id = await getCurrentBranchId();
 
-    if(!branch_id) {
-      return createResponse(403, "You have to select a branch first before creating a menu item");
+    if (!branch_id) {
+      return createResponse(
+        403,
+        "You have to select a branch first before creating a menu item"
+      );
     }
     // Prepare new menu item
     const newMenuItem = {
@@ -140,8 +141,11 @@ export async function GET(req: NextRequest) {
 
   const branchId = await getCurrentBranchId();
 
-  if(!branchId){
-    return createResponse(403, "You should choose a branch before fetching menu items");
+  if (!branchId) {
+    return createResponse(
+      403,
+      "You should choose a branch before fetching menu items"
+    );
   }
 
   if (id) {
@@ -149,11 +153,12 @@ export async function GET(req: NextRequest) {
     const { data, error } = await supabase
       .from("menu_items")
       .select("*")
-      .eq("id", id).eq("branch_id", branchId)
+      .eq("id", id)
+      .eq("branch_id", branchId)
       .single();
 
     if (error) {
-      console.log("menu items error ------>",error);
+      console.log("menu items error ------>", error);
       return createResponse(500, "Failed to fetch menu item", null);
     }
 
@@ -163,11 +168,12 @@ export async function GET(req: NextRequest) {
   //Otherwise fetch all menu items is not provided and id
   const { data, error } = await supabase
     .from("menu_items")
-    .select("*").eq("branch_id", branchId)
+    .select("*")
+    .eq("branch_id", branchId)
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.log(error)
+    console.log(error);
     return createResponse(502, "Failed to fetch menu items from the database");
   }
 
@@ -276,7 +282,6 @@ export async function PATCH(request: NextRequest) {
       public_id: publicId,
     };
 
-
     // Update in Supabase
     const { data: updatedItem, error: updateError } = await supabase
       .from("menu_items")
@@ -294,7 +299,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    await revalidatePage("/menu");
+    // await revalidatePage("/menu");
     return createResponse(
       200,
       "Menu item updated successfully",
@@ -313,9 +318,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-
   // Checking if the user is authenticated
-const supabase = await createClient();
+  const supabase = await createClient();
 
   try {
     const { searchParams } = new URL(request.url);
@@ -342,18 +346,25 @@ const supabase = await createClient();
     const { data, error: deleteError } = await supabase
       .from("menu_items")
       .delete()
-      .eq("id", id).select().single();
+      .eq("id", id)
+      .select()
+      .single();
 
     if (deleteError) {
-      return createResponse(502,
-        "Failed to delete menu item",
-      );
+      return createResponse(502, "Failed to delete menu item");
     }
     //revalidating the page in the frontend for the menu items to be rendered
-    await revalidatePage("/menu");
+    // await revalidatePage("/menu");
     //  returning a success message to the frontend
-    return createResponse(200, `${data.name} deleted successfully from the menu`, data);
+    return createResponse(
+      200,
+      `${data.name} deleted successfully from the menu`,
+      data
+    );
   } catch {
-    return createResponse(500, "An error occurred on the server while deleting your menu item");
+    return createResponse(
+      500,
+      "An error occurred on the server while deleting your menu item"
+    );
   }
 }
