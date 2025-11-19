@@ -1,11 +1,10 @@
 "use server";
+
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { SignupProps } from "@/types/authentication";
 import { LoginFormData } from "@/schemas/authentication";
 import { cookies } from "next/headers";
-import { switchBranch } from "@/app/actions/branches";
-import { revalidatePath } from "next/cache";
 
 export async function login(loginData: LoginFormData) {
   const supabase = await createClient();
@@ -33,14 +32,6 @@ export async function login(loginData: LoginFormData) {
       success: false,
       message: "There was an error fetching your restaurant data",
     };
-  }
-
-  // If only one branch exists, set its ID in user_metadata
-  if (branches.length === 1) {
-    await switchBranch(branches[0].id);
-    console.log("-----revalidating path ---------");
-    revalidatePath("/", "layout");
-    redirect("/dashboard");
   }
 
   redirect("/branches");
