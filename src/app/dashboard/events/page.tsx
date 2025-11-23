@@ -7,10 +7,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "@ui/card";
+import { Badge } from "@ui/badge";
+import { Button } from "@ui/button";
+import { Input } from "@ui/input";
 import { Calendar, Users, Phone, Mail, Search } from "lucide-react";
 import { toast } from "sonner";
 import { ReservationStatus } from "@/types/reservations";

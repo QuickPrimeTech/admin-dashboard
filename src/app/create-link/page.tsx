@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, LinkIcon, Loader } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@ui/card";
+import { Button } from "@ui/button";
+import { Skeleton } from "@ui/skeleton";
+import { Copy, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Spinner } from "@ui/spinner";
 
 export default function InviteAdminPage() {
   const [loading, setLoading] = useState(false);
@@ -62,7 +63,7 @@ export default function InviteAdminPage() {
           >
             {loading ? (
               <>
-                <Loader className="animate-spin" />
+                <Spinner />
                 Generating...
               </>
             ) : (

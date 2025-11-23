@@ -81,14 +81,14 @@ export function ChoiceBuilder() {
       setOptionError("You must add at least one option");
       return;
     }
+
     //checking if the choice is being edited or added new
     if (editingChoice) {
       // Update existing choice
-      addChoice(data); // ✅ Send to context
+      addChoice(data); // Send to context
       setEditingChoice(null);
     } else {
-      // Add new choice
-      addChoice(data); // ✅ Send to context
+      addChoice(data); // Send to context
     }
 
     resetForm();

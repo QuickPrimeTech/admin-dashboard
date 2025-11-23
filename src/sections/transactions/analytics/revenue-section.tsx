@@ -1,22 +1,18 @@
 "use client";
 import { TrendingUp, DollarSign, ShoppingBag, Percent } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { CountingNumber } from "@/components/ui/shadcn-io/counting-number";
+import { CountingNumber } from "@ui/shadcn-io/counting-number";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { AnalyticsData } from "@/types/transactions/analytics";
+} from "@ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@ui/chart";
+import { Skeleton } from "@ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
+import type { AnalyticsData } from "@/types/transactions";
 
 type RevenueSectionProps = {
   data?: AnalyticsData["data"];

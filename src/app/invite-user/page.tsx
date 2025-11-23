@@ -1,24 +1,60 @@
 // app/invite-user/page.tsx
-
-import { FeaturesPanel } from "@/sections/invite-user/features-panel";
 import { InviteSignupForm } from "@/sections/invite-user/invite-form";
 import { InvalidLinkMessage } from "@/sections/invite-user/invalid-message";
-import { supabase } from "@/lib/server/supabase";
+import { createClient } from "@/utils/supabase/server";
 import { isAfter } from "date-fns";
+import { Metadata } from "next";
 
 type InviteUserPageProps = {
-  searchParams: Promise<{ token: string }>;
+  searchParams: Promise<{ token?: string }>;
 };
 
-// ✅ Correct Next.js Page Component Definition
+// 🔹 This runs before the page is rendered
+export async function generateMetadata({
+  searchParams,
+}: InviteUserPageProps): Promise<Metadata> {
+  const { token } = await searchParams;
+
+  if (!token) {
+    return { title: "Invalid Token - QuickPrimeTech" };
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("invite_tokens")
+    .select("expires_at")
+    .eq("token", token)
+    .single();
+
+  if (error || !data) {
+    return { title: "Invalid Token - QuickPrimeTech" };
+  }
+
+  const expired = isAfter(new Date(), new Date(data.expires_at));
+
+  if (expired) {
+    return { title: "Expired Token - QuickPrimeTech" };
+  }
+
+  return { title: "Sign up Page - QuickPrimeTech" };
+}
+
+// 🔹 Page component
 export default async function InviteUserPage({
   searchParams,
 }: InviteUserPageProps) {
   const { token } = await searchParams;
+  const commonRequest = "Please request a new one from QuickPrimeTech.";
 
-  if (!token || typeof token !== "string") {
-    return <InvalidLinkMessage message="No invite token provided." />;
+  if (!token) {
+    return (
+      <InvalidLinkMessage
+        message={`No invite token provided in the URL. ${commonRequest}`}
+      />
+    );
   }
+    const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("invite_tokens")
@@ -28,7 +64,9 @@ export default async function InviteUserPage({
 
   if (error || !data) {
     return (
-      <InvalidLinkMessage message="This is not a valid invite link. Please request a new one from QuickPrimeTech." />
+      <InvalidLinkMessage
+        message={`This is not a valid invite link. ${commonRequest}`}
+      />
     );
   }
 
@@ -36,13 +74,14 @@ export default async function InviteUserPage({
 
   if (expired) {
     return (
-      <InvalidLinkMessage message="This invite link has expired. Please request a new one from QuickPrimeTech." />
+      <InvalidLinkMessage
+        message={`This invite link has expired. ${commonRequest}`}
+      />
     );
   }
 
   return (
     <div className="min-h-screen flex">
-      <FeaturesPanel />
       <InviteSignupForm />
     </div>
   );

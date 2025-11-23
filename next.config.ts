@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**", // allow all Cloudinary paths
       },
+      {
+        protocol: "https",
+        hostname: "aswymauztuhebxnyfdpb.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/**",
+      },
     ],
   },
 };

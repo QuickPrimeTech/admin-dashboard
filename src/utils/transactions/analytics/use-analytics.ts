@@ -1,8 +1,5 @@
 // utils/transactions/analytics/use-analytics.ts
-import {
-  AnalyticsData,
-  RawAnalyticsResponse,
-} from "@/types/transactions/analytics";
+import { AnalyticsData, RawAnalyticsResponse } from "@/types/transactions";
 
 export function transformAnalytics(
   raw: RawAnalyticsResponse,

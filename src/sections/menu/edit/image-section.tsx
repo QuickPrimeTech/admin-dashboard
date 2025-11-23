@@ -21,7 +21,7 @@ import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ImageSectionSkeleton } from "../skeletons/image-section-skeleton";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
 import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
 import {
   AlertDialog,
@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@ui/alert-dialog";
+import { useBranch } from "@providers/branch-provider";
 
 /* -------------------------------------------------
  *  Types
@@ -44,6 +45,9 @@ type ImageData = { image: File | null; lqip: string | null };
  *  Main component
  * ------------------------------------------------*/
 export function ImageSection() {
+   //Get the branch id from the context
+    const {branchId} = useBranch();
+
   const { status, data: serverData } = useMenuItemForm();
   //Getting the mutation function that updates the menu item
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
@@ -115,7 +119,7 @@ export function ImageSection() {
       if (!serverData?.id) return;
       formData.append("id", serverData.id);
       //Sending the data to the mutation function
-      await mutateAsync({ formData });
+      await mutateAsync({ formData, branchId });
       setImageData(null);
     } catch {
       toast.error("There was an error submitting your image");
@@ -216,8 +220,19 @@ export function ImageSection() {
                             variant="destructive"
                             disabled={isPending}
                           >
-                            <Trash2 className="mr-2 h-4 w-4" /> Save Changes
-                            (Delete Image)
+                            {
+                              isPending ? (
+                                <>
+                                <Spinner />
+                                Deleting image...
+                                </>
+                              ):(
+                                <>
+                                <Trash2 /> Save Changes
+                                (Delete Image)
+                                </>
+                              )
+                            }
                           </Button>
                         </AlertDialogTrigger>
 

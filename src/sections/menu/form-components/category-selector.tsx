@@ -7,15 +7,10 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+} from "@ui/select";
+import { Button } from "@ui/button";
+import { Input } from "@ui/input";
+import { FormItem, FormLabel, FormControl, FormMessage } from "@ui/form";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +18,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@ui/dialog";
 import { Plus } from "lucide-react";
 import { ControllerRenderProps, FieldValues } from "react-hook-form";
 
@@ -32,17 +27,32 @@ type CategorySelectProps<TFieldValues extends FieldValues> = {
   categories: string[];
 };
 
+const prefilledCat = ["Food", "Interior", "Exterior", "Staff"];
+
 export function CategorySelect<TFieldValues extends FieldValues>({
   field,
   categories,
 }: CategorySelectProps<TFieldValues>) {
+
+  //Prefilled values if the user hasn't set any yet
+
   const [localCategories, setLocalCategories] = useState<string[]>(categories);
+
   const [openDialog, setOpenDialog] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
+    if(categories.length < 4){
+      
+       const uniqueCategories = Array.from(
+    new Set([...categories, ...prefilledCat].map((item) => item).filter(Boolean))
+  );
+      setLocalCategories(uniqueCategories);
+      return
+    }
     setLocalCategories(categories);
-  }, [categories]);
+  }, [categories, prefilledCat]);
+
   const handleSelectChange = (value: string) => {
     if (value === "__custom") {
       setOpenDialog(true);
@@ -108,6 +118,11 @@ export function CategorySelect<TFieldValues extends FieldValues>({
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
               autoFocus
+              onKeyDown={(e) => {
+                if(e.key === "Enter") {
+                  handleAddCustom();
+                }
+              }}
             />
           </div>
           <DialogFooter>

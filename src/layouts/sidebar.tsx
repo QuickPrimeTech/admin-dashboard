@@ -1,4 +1,3 @@
-import { RestaurantName } from "@/components/restaurant/restaurantName";
 import {
   Sidebar,
   SidebarContent,
@@ -8,40 +7,28 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { MenuIcon } from "lucide-react";
-import { Suspense } from "react";
-import { SidebarMenuGroups } from "./sidebar-menu-items"; // ✅ single import
+  SidebarSeparator,
+} from "@ui/sidebar";
+import { SidebarMenuGroups } from "./sidebar-menu-items";
 import { SidebarLogout } from "./sidebar-logout";
+import { CurrentBranchDropdown } from "@/components/restaurant/current-branch-dropdown";
 
 export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="p-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <MenuIcon className="h-4 w-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <Suspense
-                    fallback={<Skeleton className="h-5 w-40 rounded-md" />}
-                  >
-                    <RestaurantName />
-                  </Suspense>
-                  <span className="truncate text-xs">Dashboard</span>
-                </div>
-              </div>
+              <CurrentBranchDropdown />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
-        {/* ✅ All menu groups rendered from client component */}
+        <SidebarSeparator className="mx-0" />
+        {/* All menu groups rendered from client component */}
         <SidebarMenuGroups />
       </SidebarContent>
 

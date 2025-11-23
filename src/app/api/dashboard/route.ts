@@ -1,75 +1,45 @@
 // /app/api/stats/route.ts
-import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-
-async function createSupabaseServerClient() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-      },
-    }
-  );
-}
+import { createClient } from "@/utils/supabase/server";
+import { createResponse } from "@/helpers/api-responses";
+import { OverviewStats } from "@/types/dashboard";
+import { getCurrentBranchId } from "@/helpers/common";
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const supabase = await createClient();
 
   try {
+    const branchId = await getCurrentBranchId();
+
     const [menuRes, reservationsRes, eventsRes, galleryRes] = await Promise.all(
       [
         supabase
           .from("menu_items")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id),
+          .select("*", { count: "exact", head: true }).eq("branch_id", branchId),
 
         supabase
           .from("reservations")
           .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id)
-          .eq("status", "pending"),
+          .eq("status", "pending").eq("branch_id", branchId),
 
         supabase
           .from("private_events")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id),
+          .select("*", { count: "exact", head: true }).eq("branch_id", branchId),
 
         supabase
           .from("gallery")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id),
+          .select("*", { count: "exact", head: true }).eq("branch_id", branchId)
       ]
     );
-
-    return NextResponse.json({
-      success: true,
-      data: {
+const data =  {
         menu: menuRes.count ?? 0,
         reservations: reservationsRes.count ?? 0,
         events: eventsRes.count ?? 0,
         gallery: galleryRes.count ?? 0,
-      },
-    });
+      }
+
+    return createResponse<OverviewStats>(200, "Successfully fetched all the overview stats", data);
   } catch {
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch stats" },
-      { status: 500 }
+    return createResponse(500, "There was an error fetching the overview statistics"
     );
   }
 }

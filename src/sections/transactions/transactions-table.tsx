@@ -23,15 +23,15 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@ui/button";
+import { Input } from "@ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -39,36 +39,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@ui/table";
+import { Badge } from "@ui/badge";
+import { Skeleton } from "@ui/skeleton";
 import Link from "next/link";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@ui/hover-card";
 import { formatDate, formatTime12Hour } from "@/utils/date-formatters";
+import { ApiResponse, Payment } from "@/types/transactions";
 
-export type Payment = {
-  id: string;
-  order_id: string;
-  phone: string;
-  amount: number;
-  status: "pending" | "success" | "failed";
-  created_at: string;
-  user_id: string;
-  order?: {
-    name: string;
-  };
-};
-
-type ApiResponse = {
-  status: number;
-  success: boolean;
-  message: string;
-  data?: Payment[];
-};
 type TransactionsTableProps = {
   phone?: string;
 };

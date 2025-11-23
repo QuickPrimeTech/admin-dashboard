@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Form,
   FormControl,
@@ -16,23 +16,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+} from "@ui/form";
+import { Input } from "@ui/input";
+import { Button } from "@ui/button";
+import { Switch } from "@ui/switch";
 import { toast } from "sonner";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
 import { useEffect } from "react";
 
-export default function AvailabilitySection() {
-  const { availabilityInfo, setAvailabilityInfo } = useMenuItemForm();
   const defaultData: AvailabilityFormData = {
     is_available: true,
     is_popular: false,
     start_time: "08:00",
     end_time: "10:00",
   };
+  
+export default function AvailabilitySection() {
+  const { availabilityInfo, setAvailabilityInfo } = useMenuItemForm();
+
   const form = useForm<AvailabilityFormData>({
     resolver: zodResolver(availabilitySchema) as Resolver<AvailabilityFormData>,
     defaultValues: defaultData,

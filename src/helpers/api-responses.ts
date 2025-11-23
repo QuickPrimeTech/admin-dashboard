@@ -8,15 +8,14 @@ export interface ApiResponse<T> {
   success: boolean;
 }
 
-// --- Helper to create responses ---
 export function createResponse<T>(
   status: number,
   message: string,
   data: T | null = null,
   success?: boolean
 ): NextResponse<ApiResponse<T>> {
-  // ✅ If success isn’t explicitly provided, infer from whether data exists
-  const isSuccess = success ?? Boolean(data);
+  // Success is either explicitly passed OR inferred from status
+  const isSuccess = success ?? (status >= 200 && status < 300);
 
   return NextResponse.json({ message, data, success: isSuccess }, { status });
 }

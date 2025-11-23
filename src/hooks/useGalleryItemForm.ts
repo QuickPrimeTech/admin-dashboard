@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   formSchema,
   FormData as FormDataProps,
-} from "@/schemas/galllery-item-schema";
-import { ServerGalleryItem } from "@/types/gallery"; // assume you have a type for existing item
+} from "@/schemas/gallery-item-schema";
+import { GalleryItem } from "@/types/gallery"; // assume you have a type for existing item
 import { buildGalleryFormData } from "@/helpers/galleryHelpers";
 import {
   useCreateGalleryItemMutation,
@@ -13,11 +13,15 @@ import {
 } from "./use-gallery";
 import { toast } from "sonner";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
+import { useBranch } from "@providers/branch-provider";
 
 export function useGalleryItemForm(
-  item: ServerGalleryItem | null | undefined,
+  item: GalleryItem | null | undefined,
   onOpenChange: (open: boolean) => void
 ) {
+  //Get the branchId from the context
+  const { branchId } = useBranch();
+
   //Mutation function for adding a gallery Item
   const addMutation = useCreateGalleryItemMutation();
   //Mutation function for adding a gallery Item
@@ -62,7 +66,6 @@ export function useGalleryItemForm(
   }, [item, form]);
   const onSubmit = async (data: FormDataProps) => {
     if (item) {
-      console.log(selectedFile);
       //Creating a lqip if the image changed
       let lqip;
       if (selectedFile) {
@@ -80,14 +83,11 @@ export function useGalleryItemForm(
         selectedFile
       );
 
-      console.log("formData from update--->", formData);
-      console.log("Incoming data --->", data);
-
       //close the edit diaog
       onOpenChange(false);
       //Running the tanstack mutation query
       updateMutation.mutate(
-        { formData, updatedItem },
+        { formData, updatedItem, branchId },
         {
           onSuccess: () => {
             form.reset(); // clear form
@@ -103,22 +103,23 @@ export function useGalleryItemForm(
         return;
       }
 
-      console.log("Adding new gallery item...");
       const formData = await buildGalleryFormData(data, selectedFile, true);
-      console.log("formData from create--->", formData);
 
       onOpenChange(false);
       //Running the tanstack mutation query
-      addMutation.mutate(formData, {
-        onSuccess: () => {
-          form.reset(); // clear form
-          setSelectedFile(null);
-          setExistingImageUrl(null);
-        },
-        onError: () => {
-          onOpenChange(true);
-        },
-      });
+      addMutation.mutate(
+        { formData, branchId },
+        {
+          onSuccess: () => {
+            form.reset(); // clear form
+            setSelectedFile(null);
+            setExistingImageUrl(null);
+          },
+          onError: () => {
+            onOpenChange(true);
+          },
+        }
+      );
     }
   };
 

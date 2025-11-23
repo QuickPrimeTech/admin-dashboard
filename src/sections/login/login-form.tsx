@@ -1,19 +1,17 @@
 //sections/login/login-form.tsx
 
 "use client";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Form,
   FormControl,
@@ -21,29 +19,30 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, AlertCircle, ChefHat, Loader } from "lucide-react";
+} from "@ui/form";
+import { Checkbox } from "@ui/checkbox";
+import { Alert, AlertDescription } from "@ui/alert";
+import { Eye, EyeOff, AlertCircle, ChefHat, Lock, Mail } from "lucide-react";
 import { login } from "@/app/auth/actions/actions";
 import { toast } from "sonner";
 import Link from "next/link";
-
-const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  rememberMe: z.boolean().default(false),
-});
+import { loginSchema, LoginFormData } from "@/schemas/authentication";
+import { Spinner } from "@ui/spinner";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@ui/input-group";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ❗️ NO GENERIC PARAMETER HERE
+  // NO GENERIC PARAMETER HERE
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -51,14 +50,10 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError("");
-    const formData = new FormData();
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-
-    const response = await login(formData);
+    const response = await login(data);
     if (!response.success) {
       toast.error(response.message);
     }
@@ -103,12 +98,17 @@ export function LoginForm() {
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="admin@restaurant.com"
-                        disabled={isLoading}
-                        {...field}
-                      />
+                      <InputGroup>
+                        <InputGroupInput
+                          type="email"
+                          placeholder="Enter your email here..."
+                          disabled={isLoading}
+                          {...field}
+                        />
+                        <InputGroupAddon>
+                          <Mail />
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -119,31 +119,33 @@ export function LoginForm() {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-sm text-card-foreground">
+                      Password
+                    </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
+                      <InputGroup>
+                        <InputGroupInput
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
-                          disabled={isLoading}
+                          placeholder="Enter your password here..."
                           {...field}
                         />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
-                          disabled={isLoading}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </div>
+                        <InputGroupAddon>
+                          <Lock />
+                        </InputGroupAddon>
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupButton
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="text-muted-foreground" />
+                            ) : (
+                              <Eye className="text-muted-foreground" />
+                            )}
+                          </InputGroupButton>
+                        </InputGroupAddon>
+                      </InputGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -155,7 +157,7 @@ export function LoginForm() {
                   control={form.control}
                   name="rememberMe"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormItem className="flex flex-row items-center space-y-0">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
@@ -165,11 +167,9 @@ export function LoginForm() {
                           disabled={isLoading}
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-normal">
-                          Remember me
-                        </FormLabel>
-                      </div>
+                      <FormLabel className="text-sm font-normal">
+                        Remember me
+                      </FormLabel>
                     </FormItem>
                   )}
                 />
@@ -186,7 +186,7 @@ export function LoginForm() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    <Spinner />
                     Signing in...
                   </>
                 ) : (

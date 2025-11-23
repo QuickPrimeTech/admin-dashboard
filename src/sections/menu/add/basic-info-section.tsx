@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Form,
   FormControl,
@@ -15,17 +15,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+} from "@ui/form";
+import { Input } from "@ui/input";
+import { Textarea } from "@ui/textarea";
+import { Button } from "@ui/button";
 import { toast } from "sonner";
 import { BasicInfoFormData, basicInfoSchema } from "@/schemas/menu";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import { Save } from "lucide-react";
 import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
 import { useEffect } from "react";

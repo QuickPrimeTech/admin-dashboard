@@ -5,21 +5,21 @@ import Link from "next/link";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
 import { RevenueSection } from "@/sections/transactions/analytics/revenue-section";
 import { CustomersSection } from "@/sections/transactions/analytics/customers-section";
 import { TimePatterns } from "@/sections/transactions/analytics/time-patterns";
 import { PopularItems } from "@/sections/transactions/analytics/popular-items";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { AnalyticsData } from "@/types/transactions/analytics";
+import { ButtonGroup } from "@ui/button-group";
+import { AnalyticsData } from "@/types/transactions";
 import { transformAnalytics } from "@/utils/transactions/analytics/use-analytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@ui/dropdown-menu";
 
 export default function AnalyticsPage() {
   const [days, setDays] = useState(3); // default: 3 days

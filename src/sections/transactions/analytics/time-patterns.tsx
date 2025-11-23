@@ -7,14 +7,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { AnalyticsData } from "@/types/transactions/analytics";
+} from "@ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@ui/chart";
+import { Skeleton } from "@ui/skeleton";
+import type { AnalyticsData } from "@/types/transactions";
 
 type TimePatternsProps = {
   data?: AnalyticsData["data"];

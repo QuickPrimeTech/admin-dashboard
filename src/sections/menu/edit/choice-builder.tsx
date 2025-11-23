@@ -20,13 +20,18 @@ import { choiceSchema, type ChoiceFormData } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { ChoiceOptionItem } from "./choice-option-item";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export function ChoiceBuilder() {
+  //Get the branch id from the context
+  const { branchId } = useBranch();
+
   const [isOpen, setIsOpen] = useState(false);
   const [optionLabel, setOptionLabel] = useState("");
   const [optionPrice, setOptionPrice] = useState("");
   const [optionError, setOptionError] = useState("");
+
   //Getting the mutation function that updates the menu item
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
 
@@ -36,7 +41,7 @@ export function ChoiceBuilder() {
     editingChoice,
     setEditingChoice,
     data: serverData,
-  } = useMenuItemForm(); // ✅ from context
+  } = useMenuItemForm(); // from context
 
   const form = useForm<ChoiceFormData>({
     resolver: zodResolver(choiceSchema),
@@ -91,7 +96,10 @@ export function ChoiceBuilder() {
       setOptionError("You must add at least one option");
       return;
     }
-    const combinedChoices = [...choices, data];
+    //Adding a random id to the choice data
+    const dataWithId = { ...data, id: crypto.randomUUID() };
+
+    const combinedChoices = [...choices, dataWithId];
 
     const formData = new FormData();
     //Making sure the id exists
@@ -99,16 +107,16 @@ export function ChoiceBuilder() {
 
     formData.append("id", serverData.id);
     formData.append("choices", JSON.stringify(combinedChoices));
-    await mutateAsync({ formData });
+    await mutateAsync({ formData, branchId });
 
     //checking if the choice is being edited or added new
     if (editingChoice) {
       // Update existing choice
-      addChoice(data); // ✅ Send to context
+      addChoice(data); //Send to context
       setEditingChoice(null);
     } else {
       // Add new choice
-      addChoice(data); // ✅ Send to context
+      addChoice(dataWithId); // Send to context
     }
     // merge existing choices + new choice data
 
@@ -181,7 +189,7 @@ export function ChoiceBuilder() {
               <Input
                 type="number"
                 placeholder="Price"
-                step="0.01"
+                step="1"
                 min="0"
                 value={optionPrice}
                 onChange={(e) => setOptionPrice(e.target.value)}

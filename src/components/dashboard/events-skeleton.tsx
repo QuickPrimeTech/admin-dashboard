@@ -1,5 +1,5 @@
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardContent } from "@ui/card";
+import { Skeleton } from "@ui/skeleton";
 export const Events = () => {
   return (
     <Card>

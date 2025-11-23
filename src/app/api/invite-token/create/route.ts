@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/server/supabase"; // your supabase client helper
 import crypto from "crypto";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST() {
   // Generate secure random token
+  const supabase  = await createClient();
   const token = crypto.randomBytes(32).toString("hex");
 
   // Set expiration date (e.g. 24 hours from now)
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(
+    Date.now() + 7 * 24 * 60 * 60 * 1000
+  ).toISOString();
 
   const { error } = await supabase.from("invite_tokens").insert({
     token,

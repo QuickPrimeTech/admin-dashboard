@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useCreateMenuItemMutation } from "@/hooks/use-menu";
+import { useBranch } from "@/components/providers/branch-provider";
 
 type MenuItemFormContextType = {
   imageInfo: ImageInfo | null;
@@ -54,6 +55,8 @@ export function AddMenuItemProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { branchId } = useBranch();
+
   const localStorageKey = "add-menu-item-form-data";
 
   // ✅ Use typed mutation
@@ -169,14 +172,17 @@ export function AddMenuItemProvider({
       });
 
       // ✅ Send via typed mutation
-      mutate(formData, {
-        onSuccess: () => {
-          resetFormState();
-        },
-        onError: (err) => {
-          console.error("Menu item creation failed", err);
-        },
-      });
+      mutate(
+        { formData, branchId },
+        {
+          onSuccess: () => {
+            resetFormState();
+          },
+          onError: (err) => {
+            console.error("Menu item creation failed", err);
+          },
+        }
+      );
     } catch (err: unknown) {
       if (err instanceof ZodError) {
         err.errors.forEach((issue) =>
@@ -191,8 +197,10 @@ export function AddMenuItemProvider({
     }
   };
 
-  const addChoice = (choice: ChoiceFormData) =>
-    setChoices((prev) => [...prev, { ...choice, id: crypto.randomUUID() }]);
+  const addChoice = (choice: ChoiceFormData) => {
+    const newChoice = { id: crypto.randomUUID(), ...choice };
+    setChoices((prev) => [...prev, newChoice]);
+  };
 
   const removeChoice = (id: string) =>
     setChoices((prev) => prev.filter((choice) => choice.id !== id));

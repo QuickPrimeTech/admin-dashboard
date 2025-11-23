@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@ui/card";
+import { Button } from "@ui/button";
+import { Badge } from "@ui/badge";
 import { Pencil, Trash2 } from "lucide-react";
 import type { ChoiceFormData } from "@/schemas/menu";
 import {
@@ -15,10 +15,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@ui/alert-dialog";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
+import { useBranch } from "@providers/branch-provider";
 
 interface ChoiceItemProps {
   choice: ChoiceFormData;
@@ -26,6 +27,9 @@ interface ChoiceItemProps {
 }
 
 export default function ChoiceItem({ choice, onEdit }: ChoiceItemProps) {
+  //Get the branch id from the context
+  const { branchId } = useBranch();
+
   const [open, setOpen] = useState(false);
   const { choices, setChoices, data: serverData } = useMenuItemForm();
   const { mutateAsync, isPending } = useUpdateMenuItemMutation();
@@ -40,7 +44,7 @@ export default function ChoiceItem({ choice, onEdit }: ChoiceItemProps) {
     formData.append("choices", JSON.stringify(updatedChoices));
 
     try {
-      await mutateAsync({ formData });
+      await mutateAsync({ formData, branchId });
       setChoices(updatedChoices);
       setOpen(false); // ✅ close dialog manually after success
     } catch (error) {

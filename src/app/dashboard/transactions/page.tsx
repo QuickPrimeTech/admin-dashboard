@@ -1,7 +1,7 @@
 import { TransactionsTable } from "@/sections/transactions/transactions-table";
 import Link from "next/link";
 import { BarChart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 
 export default function TransactionsPage() {
   return (

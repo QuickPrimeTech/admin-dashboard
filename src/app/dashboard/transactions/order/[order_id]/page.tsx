@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@ui/skeleton";
+import { Badge } from "@ui/badge";
+import { Card, CardContent } from "@ui/card";
+import { Separator } from "@ui/separator";
 import {
   CalendarIcon,
   ClockIcon,
@@ -19,37 +19,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
+import { Order } from "@/types/transactions";
 
 // --- Type Definitions ---
 
 type Props = {
   params: Promise<{ order_id: string }>;
-};
-
-type OrderItem = {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  category?: string;
-  description?: string;
-  image_url?: string;
-};
-
-type Order = {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  items: OrderItem[];
-  total: number;
-  payment_method: string;
-  pickup_date: string;
-  pickup_time: string;
-  special_instructions?: string;
-  status: string;
-  created_at: string;
 };
 
 // --- Currency Formatter Utility ---
@@ -154,7 +130,7 @@ export default function Page(props: Props) {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Header Section */}
-      <div className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-b border-border">
+      <div className="bg-linear-to-br from-primary/5 via-background to-accent/5 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
@@ -322,7 +298,7 @@ export default function Page(props: Props) {
                           key={index}
                           className="p-6 flex items-center gap-4"
                         >
-                          <Skeleton className="size-20 rounded-lg flex-shrink-0" />
+                          <Skeleton className="size-20 rounded-lg shrink-0" />
                           <div className="flex-1 space-y-2">
                             <Skeleton className="h-5 w-3/4" />
                             <Skeleton className="h-4 w-1/4" />
@@ -341,7 +317,7 @@ export default function Page(props: Props) {
                         className="p-6 hover:bg-accent/5 transition-colors flex items-center gap-4"
                       >
                         {/* Item Image */}
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           {item.image_url ? (
                             <Image
                               src={item.image_url || "/placeholder.jpg"}
@@ -376,7 +352,7 @@ export default function Page(props: Props) {
                         </div>
 
                         {/* Item Pricing */}
-                        <div className="text-right flex-shrink-0">
+                        <div className="text-right shrink-0">
                           <p className="font-bold text-xl text-primary">
                             {formatCurrency(item.price * item.quantity)}
                           </p>
@@ -403,7 +379,7 @@ export default function Page(props: Props) {
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <Card className="py-0 pb-4 overflow-hidden border-2 shadow-lg">
-                <div className="bg-gradient-to-br from-primary to-primary/80 px-6 py-5">
+                <div className="bg-linear-to-br from-primary to-primary/80 px-6 py-5">
                   <h2 className="text-2xl font-bold text-primary-foreground">
                     Order Summary
                   </h2>

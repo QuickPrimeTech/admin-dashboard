@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Item,
   ItemContent,
@@ -18,17 +18,17 @@ import {
   ItemMedia,
   ItemSeparator,
   ItemTitle,
-} from "@/components/ui/item";
+} from "@ui/item";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import type { AnalyticsData } from "@/types/transactions/analytics";
+} from "@ui/empty";
+import { Skeleton } from "@ui/skeleton";
+import { Badge } from "@ui/badge";
+import type { AnalyticsData } from "@/types/transactions";
 
 type PopularItemsProps = {
   data?: AnalyticsData["data"];

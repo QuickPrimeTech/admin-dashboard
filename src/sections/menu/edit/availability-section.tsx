@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Form,
   FormControl,
@@ -16,19 +16,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+} from "@ui/form";
+import { Input } from "@ui/input";
+import { Switch } from "@ui/switch";
 import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { AvailabilitySkeleton } from "@/sections/menu/skeletons/availability-skeleton";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { Edit } from "lucide-react";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export default function AvailabilitySection() {
   const { data: serverData, status } = useMenuItemForm();
+  //Get the branch id from the context
+  const { branchId } = useBranch();
   //Getting the mutation function that updates the menu item
   const { mutate, isPending } = useUpdateMenuItemMutation();
 
@@ -67,16 +70,13 @@ export default function AvailabilitySection() {
 
     Object.keys(form.formState.dirtyFields).forEach((key) => {
       const value = data[key as keyof AvailabilityFormData];
-      formData.append(
-        key,
-        typeof value === "object" ? JSON.stringify(value) : String(value)
-      );
+      formData.append(key, String(value));
     });
     //Appending the id so that the server can know which image to edit
     if (!serverData?.id) return;
     formData.append("id", serverData.id);
     //Sending data to the backend
-    mutate({ formData });
+    mutate({ formData, branchId });
   };
 
   return (

@@ -1,12 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { Search } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { ScrollArea, ScrollBar } from "@ui/scroll-area";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 
 interface MenuFiltersProps {
   searchTerm: string;
@@ -40,8 +36,8 @@ export function MenuFilters({
       </div>
 
       {/* Scrollable categories */}
-      <ScrollArea className="rounded-lg flex-1 w-0">
-        <div className="flex gap-2 py-2 px-4 bg-accent/40">
+      <ScrollArea className="rounded-lg flex-1 max-sm:w-full w-0">
+        <div className="flex gap-2 py-2 px-4 bg-accent">
           {categories.map((category) => (
             <Button
               key={category}

@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/card";
 import {
   Form,
   FormControl,
@@ -16,25 +16,26 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from "@ui/form";
+import { Input } from "@ui/input";
+import { Textarea } from "@ui/textarea";
 import { BasicInfoFormData, basicInfoSchema } from "@/schemas/menu";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import { useMenuItemForm } from "@/contexts/menu/edit-menu-item";
 import { BasicInfoSkeleton } from "../skeletons/basic-info-skeleton";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { Edit } from "lucide-react";
 import { useUpdateMenuItemMutation } from "@/hooks/use-menu";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@ui/spinner";
 import { DynamicSelect } from "@/components/dynamic-select";
+import { useBranch } from "@/components/providers/branch-provider";
 
 export default function BasicInfoSection() {
   const { data: serverData, status } = useMenuItemForm();
+
+  //Get the branch id from the context
+  const { branchId } = useBranch();
+
   //Getting the mutation function that updates the menu item
   const { mutate, isPending } = useUpdateMenuItemMutation();
   const form = useForm<BasicInfoFormData>({
@@ -77,7 +78,7 @@ export default function BasicInfoSection() {
     //Appending the id so that the server can know which image to edit
     formData.append("id", serverData.id);
 
-    mutate({ formData });
+    mutate({ formData, branchId });
   };
 
   // Render actual form when loaded

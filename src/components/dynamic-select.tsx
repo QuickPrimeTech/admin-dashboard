@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import {
   Select,
@@ -23,6 +22,7 @@ import { Button } from "@ui/button";
 import { useCategoriesQuery } from "@/hooks/use-menu";
 import { Skeleton } from "./ui/skeleton";
 import { Plus } from "lucide-react";
+import { useBranch } from "./providers/branch-provider";
 
 type DynamicSelectProps<
   TFieldValues extends FieldValues,
@@ -35,10 +35,18 @@ export function DynamicSelect<
   TFieldValues extends FieldValues,
   TName extends Path<TFieldValues>
 >({ field }: DynamicSelectProps<TFieldValues, TName>) {
+  const { branchId } = useBranch();
   //Getting the categories using the react query
-  const { data: serverCategories, isPending, isError } = useCategoriesQuery();
+  const {
+    data: serverCategories,
+    isPending,
+    isError,
+  } = useCategoriesQuery(branchId);
 
-  const [categories, setCategories] = useState<string[]>([]);
+  //fallback categories for when the server doesn't fetch the categories
+  const prefilledCat = ["Main Dishes", "Starters", "Desserts"];
+
+  const [categories, setCategories] = useState<string[]>(prefilledCat);
   const [open, setOpen] = useState(false);
   const [custom, setCustom] = useState("");
 
@@ -52,14 +60,19 @@ export function DynamicSelect<
   };
 
   useEffect(() => {
-    if (serverCategories) {
-      setCategories(serverCategories);
+    if (!serverCategories) return;
 
-      // Ensure the currently selected value is included
-      if (field.value && !serverCategories.includes(field.value)) {
-        setCategories((prev) => [...prev, field.value]);
-      }
+    let merged =
+      serverCategories.length < 3
+        ? Array.from(new Set([...serverCategories, ...prefilledCat]))
+        : [...serverCategories];
+
+    // ensure selected value is included once
+    if (field.value && !merged.includes(field.value)) {
+      merged = [...merged, field.value];
     }
+
+    setCategories(merged);
   }, [serverCategories, field.value]);
 
   return (

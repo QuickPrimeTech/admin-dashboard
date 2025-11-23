@@ -4,8 +4,8 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@ui/card";
+import { Skeleton } from "@ui/skeleton";
 
 export function MenuItemSkeleton() {
   return (

@@ -2,16 +2,20 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
-import { cloudinary } from "@/lib/server/cloudinary";
+import { cloudinary } from "@/utils/cloudinary/server";
 import { UploadResult } from "@/types/cloudinary";
+import { cookies } from "next/headers";
 
+//This function gets the current branch Id from the cookies setting
+export async function getCurrentBranchId() {
+  const currentBranch = (await cookies()).get("app_branch")?.value;
+  return currentBranch;
+}
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
 export async function getAuthenticatedUser() {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getUser();
+  const { user } = data;
 
   if (!user || error) {
     return {
@@ -28,40 +32,66 @@ export async function getAuthenticatedUser() {
 }
 
 //This is the function that gets all the info about a menu items such as public Id so that actions such as deleting images is possible
-export async function getMenuItemById(userId: string, itemId: string) {
+export async function getMenuItemById(itemId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("menu_items")
     .select("*")
     .eq("id", itemId)
-    .eq("user_id", userId)
     .single();
 
   return { data, error };
 }
 
 //This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
-export async function getSanitizedRestaurantName(
-  userId: string
-): Promise<string> {
+export async function getSanitizedPath(): Promise<string> {
   const supabase = await createClient();
 
+  //Get the restaurant name from the restaurant table
   const { data: restaurant, error } = await supabase
     .from("restaurants")
     .select("name")
-    .eq("user_id", userId)
     .single();
 
   if (!restaurant || error || !restaurant.name) {
     throw new Error("Restaurant not found for this user");
   }
 
-  const sanitized = restaurant.name
+  const currentBranchId = await getCurrentBranchId();
+
+  if (!currentBranchId) {
+    throw new Error(
+      "You need to select a branch before starting creating and updating data"
+    );
+  }
+
+  //Getting the branchName
+
+  const { data: branchData, error: branchError } = await supabase
+    .from("branch_settings")
+    .select("name")
+    .eq("id", currentBranchId)
+    .single();
+
+  // catching error while fetching the current branch
+  if (branchError || !branchData.name) {
+    throw new Error("There was an error getting your current branch");
+  }
+
+  const currentBranchName = branchData.name;
+
+  // Create sanitized path
+  const sanitizedRestaurant = restaurant.name
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9\-]/g, "");
 
-  return sanitized;
+  const sanitizedBranch = currentBranchName
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
+
+  return `${sanitizedRestaurant}/${sanitizedBranch}`;
 }
 
 //This is the function that gets the folder path and uploads the image

@@ -1,21 +1,26 @@
 import { NextRequest } from "next/server";
 import {
-  getAuthenticatedUser,
   uploadImageToCloudinary,
   uploadAndReplaceImage,
   deleteImageFromCloudinary,
-  errorResponse,
-  successResponse,
-  getSanitizedRestaurantName,
+  getSanitizedPath,
+  getCurrentBranchId,
 } from "@/helpers/common";
-import { GalleryItemInsert, ServerGalleryItem } from "@/types/gallery";
+import { GalleryItemInsert, GalleryItem } from "@/types/gallery";
 import { createClient } from "@/utils/supabase/server";
 import { createResponse } from "@/helpers/api-responses";
 
 export async function POST(req: NextRequest) {
   // checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
+  const supabase = await createClient();
+
+  const branch_id = await getCurrentBranchId();
+
+  if (!branch_id)
+    return createResponse(
+      502,
+      "You should select a branch first before creating a gallery photo"
+    );
 
   try {
     const formData = await req.formData();
@@ -29,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     if (!file) return createResponse(400, "No file uploaded");
 
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    const sanitizedRestaurantName = await getSanitizedPath();
 
     // --- Upload to Cloudinary safely ---
     let uploadResult;
@@ -59,7 +64,7 @@ export async function POST(req: NextRequest) {
       lqip,
       image_url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
-      user_id: user.id,
+      branch_id,
     };
 
     //Inserting the item to the database
@@ -71,9 +76,9 @@ export async function POST(req: NextRequest) {
 
     if (supabaseError) return createResponse(500, supabaseError.message);
 
-    return createResponse<ServerGalleryItem>(
+    return createResponse<GalleryItem>(
       200,
-      "Image uploaded to successfully",
+      "Your Gallery photo has been created successfully",
       data
     );
   } catch {
@@ -89,12 +94,17 @@ export async function GET() {
   const supabase = await createClient();
 
   try {
+    const branchId = await getCurrentBranchId();
+
     const { data, error } = await supabase
       .from("gallery")
       .select("*")
+      .eq("branch_id", branchId)
       .order("created_at", { ascending: false });
 
-    if (error) return createResponse(500, "Failed to fetch gallery items");
+    if (error) {
+      return createResponse(500, "Failed to fetch gallery items");
+    }
 
     return createResponse(
       200,
@@ -112,9 +122,8 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   //checking if the user is authenticated
-  const { user, supabase, response } = await getAuthenticatedUser();
-  if (!user) return response;
-
+  const supabase = await createClient();
+  //Getting the data from the frontend
   const formData = await req.formData();
   const id = formData.get("id") as string;
   const file = formData.get("file") as File | null;
@@ -124,7 +133,7 @@ export async function PATCH(req: NextRequest) {
   const category = formData.get("category") as string | null;
 
   let uploadedImageUrl = "";
-  let publicId;
+  let publicId = "";
 
   //If a file exists I want to replace the existing one with the incoming one
   if (file) {
@@ -133,28 +142,34 @@ export async function PATCH(req: NextRequest) {
       .from("gallery")
       .select("public_id")
       .eq("id", Number(id))
-      .eq("user_id", user.id)
       .single();
 
-    if (error)
-      return errorResponse(
-        "Item not found or unauthorized",
+    if (error) {
+      return createResponse(
         404,
-        error.message
+        error.message || "Item not found or unauthorized"
       );
+    }
 
     publicId = data.public_id;
 
-    const sanitizedRestaurantName = await getSanitizedRestaurantName(user.id);
+    //Getting the restaurant name from the db
+    const sanitizedRestaurantName = await getSanitizedPath();
+
+    // ----- THIS PART NEEDS IMPROVEMENT - THE DATA SHOULD NOT BE UPDATED IN SUPABASE IF THE IMAGE ISN'T REPLACED ------
+    //Replacing the incoming image from cloudinary with the incoming one
     const uploadResult = await uploadAndReplaceImage(
       file,
       `${sanitizedRestaurantName}/gallery`,
       publicId
     );
+
+    //Updating the variables if the cloudinary succeeded
     uploadedImageUrl = uploadResult.secure_url;
     publicId = uploadResult.public_id;
   }
 
+  //------ I SHOULD LATER PUT A TRY CATCH BLOCK FOR THE CLOUDINARY UPLOAD FUNCTION TO MAKE SURE THE DATA DOESN'T GO TO SUPABASE IF THAT FAILS ----
   const galleryItem = {
     title,
     description,
@@ -167,25 +182,26 @@ export async function PATCH(req: NextRequest) {
   const { error: updateError } = await supabase
     .from("gallery")
     .update(galleryItem)
-    .eq("id", parseInt(id))
-    .eq("user_id", user.id);
+    .eq("id", parseInt(id));
 
-  if (updateError)
-    return errorResponse(
-      "Failed to update gallery item",
+  if (updateError) {
+    return createResponse(
       500,
-      updateError.message
+      updateError.message || "Failed to update gallery item"
     );
-  return successResponse("Successfully updated your gallery photo.");
+  }
+
+  return createResponse(200, "Successfully updated your gallery photo.");
 }
 
 export async function DELETE(request: NextRequest) {
   const supabase = await createClient();
 
+  //Getting the search param for example /api/gallery?id=78
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  if (!id) return errorResponse("Missing gallery item ID", 400);
+  if (!id) return createResponse(403, "Missing gallery item ID");
 
   //Getting the public id for cloudinary to delete the image
   const { data: item, error: fetchError } = await supabase
@@ -195,8 +211,12 @@ export async function DELETE(request: NextRequest) {
     .select()
     .single();
 
+  //If there was an error gettin the data from supabase, I will then throw an error
   if (fetchError || !item) {
-    return errorResponse("Gallery item not found", 404, fetchError?.message);
+    return createResponse(
+      404,
+      fetchError?.message || "Gallery item was not found in the database"
+    );
   }
 
   // Delete from Cloudinary first
@@ -206,7 +226,7 @@ export async function DELETE(request: NextRequest) {
     return createResponse(502, "Failed to delete image from Cloudinary");
   }
 
-  //Deleting the image from supabase
+  //Deleting the record for the gallery image from supabase
   const { error: deleteError } = await supabase
     .from("gallery")
     .delete()

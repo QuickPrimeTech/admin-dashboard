@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@ui/card";
+import { Button } from "@ui/button";
 import { MailCheck, RefreshCcw } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 
 export default function VerifyPendingPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
@@ -83,9 +83,9 @@ export default function VerifyPendingPage() {
           <Button
             variant="ghost"
             className="w-full text-muted-foreground text-sm"
-            onClick={() => router.push("/login")}
+            asChild
           >
-            Back to Login
+            <Link href={"/login"}>Back to Login</Link>
           </Button>
         </CardContent>
       </Card>

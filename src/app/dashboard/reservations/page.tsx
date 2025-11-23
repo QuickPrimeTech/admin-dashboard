@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ReservationsFilters } from "@/sections/reservations/reservations-filters";
 import { ReservationsList } from "@/sections/reservations/reservations-list";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@ui/skeleton";
 import { toast } from "sonner";
 import { ReservationStatus } from "@/types/reservations";
 import { supabase } from "@/lib/server/supabase";

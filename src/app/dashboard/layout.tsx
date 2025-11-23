@@ -1,5 +1,5 @@
 import type React from "react";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@ui/sidebar";
 import { AppSidebar } from "@/layouts/sidebar";
 import { AppNavbar } from "@/layouts/navbar";
 import { cookies } from "next/headers";

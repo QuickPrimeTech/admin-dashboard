@@ -55,11 +55,46 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ✅ Redirect authenticated users *away* from the login page
-  if (user && (pathname === "/" || pathname === "/login")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+  if (user) {
+    const hasOnboarded = user.user_metadata?.has_onboarded;
+    //Getting the current branch
+
+    const branchId = request.cookies.get("app_branch")?.value;
+    // User logged in but not onboarded
+    //Prevent redirection of apis
+    if (
+      !hasOnboarded &&
+      !pathname.startsWith("/onboarding") &&
+      !pathname.startsWith("/api")
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
+
+    // Onboarded user trying to visit onboarding again
+    if (hasOnboarded && pathname.startsWith("/onboarding")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
+    //if the user has onboarded and he has not chosen a branch;
+    if (
+      hasOnboarded &&
+      !branchId &&
+      !pathname.startsWith("/branches") &&
+      !pathname.startsWith("/api")
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/branches";
+      return NextResponse.redirect(url);
+    }
+    // Onboarded user trying to visit login/root
+    if (pathname === "/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

@@ -11,6 +11,7 @@ import {
   QrCode,
   ShoppingBag,
   CreditCard,
+  Gift,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,7 +22,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@ui/sidebar";
 
 // Define all menu groups here in the client component
 const menuGroups = {
@@ -37,6 +38,7 @@ const menuGroups = {
     { title: "Transactions", url: "/dashboard/transactions", icon: CreditCard },
   ],
   marketing: [
+    { title: "Offers & Promos", url: "/dashboard/offers", icon: Gift },
     { title: "QR Code", url: "/dashboard/qrcode-generator", icon: QrCode },
     { title: "FAQs", url: "/dashboard/faqs", icon: HelpCircle },
   ],
