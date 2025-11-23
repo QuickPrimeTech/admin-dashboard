@@ -11,7 +11,8 @@ export async function GET() {
   const { data, error } = await supabase
     .from("reservations")
     .select("*")
-    .eq("branch_id", branchId);
+    .eq("branch_id", branchId)
+    .order("created_at", { ascending: false }); //newest first
 
   if (error) {
     return createResponse(500, error.message || "Failed to fetch reservations");

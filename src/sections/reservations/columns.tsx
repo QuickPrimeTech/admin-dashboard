@@ -1,5 +1,6 @@
 "use client";
 
+import { Reservation } from "@/types/reservations";
 import { ColumnDef } from "@tanstack/react-table";
 
 // This type is used to define the shape of our data.
@@ -11,17 +12,29 @@ export type Payment = {
   email: string;
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Reservation>[] = [
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "date",
+    header: "Date booked",
+  },
+  {
+    accessorKey: "time",
+    header: "Time",
+  },
+  {
+    accessorKey: "guests",
+    header: "Guest No",
+  },
+  {
+    accessorKey: "phone",
+    header: "Phone No",
   },
   {
     accessorKey: "email",
     header: "Email",
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
   },
 ];
