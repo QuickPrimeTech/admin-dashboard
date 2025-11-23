@@ -6,6 +6,7 @@ import axios, { AxiosError } from "axios";
 function getReservationKey(branchId: string) {
   return ["reservations", branchId];
 }
+
 export function useReservationQuery(branchId: string) {
   return useQuery<Reservation[], AxiosError<ApiResponse<null>>>({
     queryKey: getReservationKey(branchId),
@@ -15,3 +16,5 @@ export function useReservationQuery(branchId: string) {
     },
   });
 }
+
+export function useUpdateReservationMutation() {}

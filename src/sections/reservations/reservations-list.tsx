@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardContent,
@@ -8,32 +6,14 @@ import {
   CardTitle,
 } from "@ui/card";
 import { Badge } from "@ui/badge";
-import { Button } from "@ui/button";
 import { Calendar, Clock, Phone, Mail } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@ui/dialog";
-import { useState } from "react";
-import { Reservation, ReservationStatus } from "@/types/reservations";
+import { Reservation } from "@/types/reservations";
 
-interface ReservationsListProps {
+type ReservationsListProps = {
   reservations: Reservation[];
-  onUpdateStatus: (id: number, status: ReservationStatus) => void;
-  onDelete: (id: number) => void;
-}
+};
 
-export function ReservationsList({
-  reservations,
-  onUpdateStatus,
-  onDelete,
-}: ReservationsListProps) {
-  const [reservationToDelete, setReservationToDelete] =
-    useState<Reservation | null>(null);
-
+export function ReservationsList({ reservations }: ReservationsListProps) {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "confirmed":
@@ -126,83 +106,10 @@ export function ReservationsList({
                   <strong>Occasion:</strong> {reservation.occasion}
                 </p>
               )}
-
-              <div className="flex justify-between mt-4">
-                <div className="flex gap-2">
-                  {reservation.status !== "confirmed" && (
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        onUpdateStatus(reservation.id, "confirmed")
-                      }
-                    >
-                      Confirm
-                    </Button>
-                  )}
-                  {reservation.status !== "cancelled" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        onUpdateStatus(reservation.id, "cancelled")
-                      }
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                  {reservation.status !== "pending" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onUpdateStatus(reservation.id, "pending")}
-                    >
-                      Mark Pending
-                    </Button>
-                  )}
-                </div>
-                <Button
-                  variant="destructive"
-                  onClick={() => setReservationToDelete(reservation)}
-                >
-                  Delete
-                </Button>
-              </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      {/* Delete confirmation dialog */}
-      <Dialog
-        open={!!reservationToDelete}
-        onOpenChange={() => setReservationToDelete(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-          </DialogHeader>
-          <p>Are you sure you want to delete this reservation?</p>
-          <DialogFooter className="mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setReservationToDelete(null)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (reservationToDelete) {
-                  onDelete(reservationToDelete.id);
-                  setReservationToDelete(null);
-                }
-              }}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

@@ -13,6 +13,6 @@ export type Reservation = {
   dining_preference?: string | null;
   occasion?: string | null;
   requests?: string | null; // renamed from notes
-  user_id: string;
+  branch_id: string;
   created_at?: string;
 };
