@@ -1,7 +1,7 @@
 // @/hooks/use-branches.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { Branch } from "@/types/onboarding";
 import { toast } from "sonner";
 import { BranchFormValues } from "@/schemas/onboarding";

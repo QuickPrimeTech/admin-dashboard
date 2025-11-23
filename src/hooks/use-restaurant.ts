@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { Restaurant } from "@/types/onboarding";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { toast } from "sonner";
 
 export function useRestaurantQuery() {

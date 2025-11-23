@@ -1,4 +1,4 @@
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { generateBlurDataURL } from "@/helpers/file-helpers";
 import { OfferFormValues } from "@/schemas/offers";
 import { Offer } from "@/types/offers";

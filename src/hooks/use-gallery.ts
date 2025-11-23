@@ -1,6 +1,6 @@
 // @/hooks/use-gallery.ts
 
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { OverviewStats } from "@/types/dashboard";
 import { GalleryItem } from "@/types/gallery";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

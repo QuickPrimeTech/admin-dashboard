@@ -1,6 +1,6 @@
 import { FAQ } from "@/types/faqs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { FaqFormData } from "@/schemas/faqs";
