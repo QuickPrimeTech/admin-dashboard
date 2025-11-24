@@ -8,13 +8,24 @@ import { DataTable } from "@/sections/reservations/data-table";
 export default function ReservationsPage() {
   const { branchId } = useBranch();
   const { data, isPending } = useReservationQuery(branchId);
-  return isPending ? (
-    <div>Loading reservation table</div>
-  ) : (
-    data && (
-      <div className="container mx-auto py-10">
-        <DataTable columns={columns} data={data} />
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">Reservation History</h1>
+        <p className="text-muted-foreground">
+          Manage your restaurant&apos;s reservation info
+        </p>
       </div>
-    )
+      {isPending ? (
+        <div>Loading reservation table</div>
+      ) : (
+        data && (
+          <div className="container mx-auto">
+            <DataTable columns={columns} data={data} />
+          </div>
+        )
+      )}
+    </div>
   );
 }
