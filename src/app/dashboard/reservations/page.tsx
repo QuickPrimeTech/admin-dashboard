@@ -8,6 +8,7 @@ import { DataTable } from "@/sections/reservations/data-table";
 export default function ReservationsPage() {
   const { branchId } = useBranch();
   const { data, isPending } = useReservationQuery(branchId);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -17,15 +18,9 @@ export default function ReservationsPage() {
           Manage your restaurant&apos;s reservation info
         </p>
       </div>
-      {isPending ? (
-        <div>Loading reservation table</div>
-      ) : (
-        data && (
-          <div className="container mx-auto">
-            <DataTable columns={columns} data={data} />
-          </div>
-        )
-      )}
+      <div className="container mx-auto">
+        <DataTable columns={columns} data={data} isPending={isPending} />
+      </div>
     </div>
   );
 }

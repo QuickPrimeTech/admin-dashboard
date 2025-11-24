@@ -23,20 +23,23 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Search } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  data: TData[] | undefined;
+  isPending: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  isPending,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState([]);
 
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -87,7 +90,17 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isPending ? (
+              Array.from({ length: 10 }).map((_, idx) => (
+                <TableRow key={idx} className="animate-pulse">
+                  {columns.map((_, i) => (
+                    <TableCell key={i}>
+                      <Skeleton className="h-6 rounded-md" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
