@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ChangeEventHandler } from "react";
+import { type ChangeEventHandler } from "react";
 import Image from "next/image";
 import { Edit2 } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
 import { Spinner } from "@ui/spinner";
-import { generateBlurDataURL, resizeImage } from "@/helpers/file-helpers";
 import { cn } from "@/lib/utils";
 import { useRestaurantQuery } from "@/hooks/use-restaurant";
 import { generateGradient } from "@/components/navbar/user-dropdown";
 import { getInitials } from "@/helpers/text-formatters";
-import { toast } from "sonner";
+import { useAvatarUrl, useUploadAvatar } from "@/hooks/use-avatar-url";
+import { useMemo } from "react";
 
 type Props = {
   size: number;
@@ -20,97 +19,28 @@ export default function Avatar({
   size,
   className,
 }: Props & React.ComponentProps<"label">) {
-  const supabase = createClient();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-
-  // Get restaurant name
   const { data: restaurant } = useRestaurantQuery();
 
-  //Gradient fallback incase the image doesn't exist
+  // Fetch avatar URL
+  const { data: avatarUrl } = useAvatarUrl(restaurant?.avatar_url);
+
+  // Upload mutation
+  const uploadMutation = useUploadAvatar(restaurant?.id, size);
+
+  // Gradient fallback in case the image doesn't exist
   const gradient = useMemo(
     () => generateGradient(restaurant?.name || ""),
     [restaurant]
   );
 
-  // load existing avatar if present
-  useEffect(() => {
-    const setAvatar = async () => {
-      if (!restaurant?.avatar_url) return;
-      /** ------------- Create a signed url that will last for 4 hours ---------------**/
-      const { data: avatarData } = await supabase.storage
-        .from("avatars")
-        .createSignedUrl(restaurant.avatar_url, 60 * 60 * 4);
-
-      setAvatarUrl(avatarData?.signedUrl ?? null);
-    };
-    setAvatar();
-  }, [restaurant]);
-
   const uploadAvatar: ChangeEventHandler<HTMLInputElement> = async (e) => {
-    try {
-      setUploading(true);
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      // shrink the image BEFORE upload
-      const resizedBlob = await resizeImage(file, size * 2);
-
-      /* -------------------------------------------------------------
-         1. DELETE OLD FILE IF EXISTS
-      ------------------------------------------------------------- */
-      if (restaurant?.avatar_url) {
-        await supabase.storage.from("avatars").remove([restaurant.avatar_url]);
-      }
-
-      /* -------------------------------------------------------------
-         2. UPLOAD NEW FILE
-      ------------------------------------------------------------- */
-
-      const ext = file.name.split(".").pop();
-      const path = `avatar-${Date.now()}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("avatars")
-        .upload(path, resizedBlob);
-
-      if (error) throw error;
-
-      /* -------------------------------------------------------------
-         3. GENERATE THE LQIP TO SEND TO THE DB
-      ------------------------------------------------------------- */
-
-      // Convert blob → file (so LQIP function accepts it)
-      const resizedFile = new File([resizedBlob], file.name, {
-        type: file.type,
-      });
-
-      const lqip = await generateBlurDataURL(resizedFile);
-
-      /* -------------------------------------------------------------
-         4. UPDATE RESTAURANT.avatar_url
-      ------------------------------------------------------------- */
-      const { error: updateError } = await supabase
-        .from("restaurants")
-        .update({ avatar_url: path, lqip })
-        .eq("id", restaurant?.id);
-
-      if (updateError) throw updateError;
-
-      // preview resized version
-      setAvatarUrl(URL.createObjectURL(resizedBlob));
-
-      //Send toast message
-      toast.success("Profile photo updated successfully", {
-        description: "Your profile has been updated successfully",
-      });
-    } catch (err) {
-      console.error(err);
-      toast.error("Upload failed");
-    } finally {
-      setUploading(false);
-    }
+    uploadMutation.mutate({
+      file,
+      oldAvatarPath: restaurant?.avatar_url,
+    });
   };
 
   /* ---------- render ---------- */
@@ -146,12 +76,12 @@ export default function Avatar({
       <span
         className={`absolute inset-0 grid place-content-center
                        bg-background/40 text-foreground ${
-                         !uploading && "opacity-0"
+                         !uploadMutation.isPending && "opacity-0"
                        }
      hover:opacity-100 focus-within:opacity-100
       transition-opacity`}
       >
-        {uploading ? (
+        {uploadMutation.isPending ? (
           <Spinner size={size / 4} />
         ) : (
           <Edit2 size={size / 4} aria-hidden />
@@ -163,7 +93,7 @@ export default function Avatar({
         id="avatar-upload"
         type="file"
         accept="image/*"
-        disabled={uploading}
+        disabled={uploadMutation.isPending}
         onChange={uploadAvatar}
         className="sr-only"
       />

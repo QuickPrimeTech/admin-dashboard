@@ -19,6 +19,7 @@ import { useRestaurantQuery } from "@/hooks/use-restaurant";
 import { Skeleton } from "@ui/skeleton";
 import { redirect } from "next/navigation";
 import { useUserQuery } from "@/hooks/use-user";
+import { useAvatarUrl } from "@/hooks/use-avatar-url";
 
 //  Dynamic random gradient generator
 export function generateGradient(seed: string) {
@@ -42,6 +43,9 @@ export function UserDropdown() {
   // Get restaurant name
   const { data: restaurant, isLoading: isLoadingRestaurant } =
     useRestaurantQuery();
+
+  // Fetch avatar URL
+  const { data: avatarUrl } = useAvatarUrl(restaurant?.avatar_url);
 
   // Derive initials from restaurant name
   const initials = useMemo(() => {
@@ -83,8 +87,9 @@ export function UserDropdown() {
             >
               <Avatar>
                 <AvatarImage
-                  src={"/some-random-url.png"}
+                  src={avatarUrl ?? undefined}
                   alt={`${restaurant} profile`}
+                  className="object-cover"
                 />
                 <AvatarFallback
                   className={`bg-linear-to-br ${gradient} text-white text-sm font-semibold`}
