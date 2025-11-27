@@ -4,9 +4,10 @@ import { Restaurant } from "@/types/onboarding";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/api";
 import { toast } from "sonner";
+import { RestaurantFormData } from "@/schemas/profile";
 
 export function useRestaurantQuery() {
-  return useQuery({
+  return useQuery<RestaurantFormData>({
     queryKey: ["restaurant"],
     queryFn: async () => {
       const supabase = createClient();
@@ -31,12 +32,12 @@ export function useCreateRestaurantMutation() {
   return useMutation<
     ApiResponse<Restaurant>,
     AxiosError<ApiResponse<null>>,
-    { name: string; owner: string | null }
+    { name: string; owner?: string; website?: string }
   >({
-    mutationFn: async (restaurantName) => {
+    mutationFn: async (restaurantInfo) => {
       const res = await axios.post<ApiResponse<Restaurant>>(
         "/api/onboarding/restaurant",
-        restaurantName
+        restaurantInfo
       );
 
       return res.data;

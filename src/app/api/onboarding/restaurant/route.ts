@@ -1,4 +1,6 @@
-import { ApiResponse, createResponse } from "@/helpers/api-responses";
+import { createResponse } from "@/helpers/api-responses";
+import { RestaurantFormData } from "@/schemas/profile";
+import { ApiResponse } from "@/types/api";
 import { Restaurant } from "@/types/onboarding";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,7 +12,7 @@ export async function POST(
   const supabase = await createClient();
 
   //  Read restaurant name from request
-  const restaurant = await req.json();
+  const restaurant = (await req.json()) as RestaurantFormData;
 
   if (!restaurant) {
     return createResponse(403, "The restaurant name is required!");
@@ -32,6 +34,7 @@ export async function POST(
       {
         name: restaurant.name,
         owner: restaurant.owner,
+        website: restaurant.website,
         user_id: user.id, // required for conflict resolution
       },
       {
