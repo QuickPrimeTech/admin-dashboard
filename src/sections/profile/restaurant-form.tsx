@@ -41,8 +41,8 @@ export function RestaurantForm() {
     if (restaurant) {
       form.reset({
         name: restaurant.name,
-        owner: restaurant.owner ?? "",
-        website: restaurant.website,
+        owner: restaurant.owner || undefined,
+        website: restaurant.website || undefined,
       });
     }
   }, [restaurant]);
