@@ -1,13 +1,13 @@
 "use client";
 
 import { useBranch } from "@/components/providers/branch-provider";
-import { useReservationQuery } from "@/hooks/use-reservations";
+import { useReservationsQuery } from "@/hooks/use-reservations";
 import { columns } from "@/sections/reservations/columns";
 import { DataTable } from "@/sections/reservations/data-table";
 
 export default function ReservationsPage() {
   const { branchId } = useBranch();
-  const { data, isPending } = useReservationQuery(branchId);
+  const { data, isPending } = useReservationsQuery(branchId);
 
   return (
     <div className="space-y-6">

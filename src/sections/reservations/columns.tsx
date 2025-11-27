@@ -60,7 +60,7 @@ export const columns: ColumnDef<Reservation>[] = [
       const reservationId = row.original;
       return (
         <Button variant={"outline"} asChild size={"xs"}>
-          <Link href={`/reservations/${reservationId.id}`}>
+          <Link href={`/dashboard/reservations/${reservationId.id}`}>
             <Calendar />
             See Details
           </Link>
