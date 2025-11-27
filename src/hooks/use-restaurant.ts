@@ -4,10 +4,9 @@ import { Restaurant } from "@/types/onboarding";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/api";
 import { toast } from "sonner";
-import { RestaurantFormData } from "@/schemas/profile";
 
 export function useRestaurantQuery() {
-  return useQuery<RestaurantFormData>({
+  return useQuery<Restaurant>({
     queryKey: ["restaurant"],
     queryFn: async () => {
       const supabase = createClient();

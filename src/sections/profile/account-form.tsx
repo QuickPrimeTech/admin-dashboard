@@ -18,7 +18,6 @@ import {
 } from "@ui/form";
 import { Eye, EyeOff, KeyRound, Mail, Save } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Skeleton } from "@ui/skeleton";
 import { Spinner } from "@ui/spinner";
 import {
   accountSettingsSchema,
@@ -27,6 +26,7 @@ import {
 import { useUserQuery } from "@/hooks/use-user";
 import { useUpdateAccountMutation } from "@/hooks/use-user";
 import { PasswordStrengthMeter } from "@ui/password-strength-meter";
+import { InputSkeleton } from "@/components/ui/input";
 
 export function AccountForm() {
   const { data: user, isPending } = useUserQuery();
@@ -63,8 +63,6 @@ export function AccountForm() {
     update.mutate(values, { onSettled: () => setIsLoading(false) });
   };
 
-  const InputSkeleton = <Skeleton className="h-9 w-full" />;
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-6">
@@ -78,7 +76,7 @@ export function AccountForm() {
                 <FormLabel>Email address</FormLabel>
                 <FormControl>
                   {isPending ? (
-                    InputSkeleton
+                    <InputSkeleton />
                   ) : (
                     <InputGroup>
                       <InputGroupInput
@@ -105,7 +103,7 @@ export function AccountForm() {
                 <FormLabel>Current password</FormLabel>
                 <FormControl>
                   {isPending ? (
-                    InputSkeleton
+                    <InputSkeleton />
                   ) : (
                     <InputGroup>
                       <InputGroupInput
@@ -147,7 +145,7 @@ export function AccountForm() {
                   </FormLabel>
                   <FormControl>
                     {isPending ? (
-                      InputSkeleton
+                      <InputSkeleton />
                     ) : (
                       <InputGroup>
                         <InputGroupInput
@@ -185,7 +183,7 @@ export function AccountForm() {
                 <FormLabel>Confirm new password</FormLabel>
                 <FormControl>
                   {isPending ? (
-                    InputSkeleton
+                    <InputSkeleton />
                   ) : (
                     <InputGroup>
                       <InputGroupInput

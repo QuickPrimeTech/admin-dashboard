@@ -94,7 +94,7 @@ export default function Avatar({
       const { error: updateError } = await supabase
         .from("restaurants")
         .update({ avatar_url: path, lqip })
-        .eq("id", restaurant.id);
+        .eq("id", restaurant?.id);
 
       if (updateError) throw updateError;
 
@@ -128,7 +128,7 @@ export default function Avatar({
       {avatarUrl ? (
         <Image
           src={avatarUrl}
-          alt={`${restaurant.name} Profile picture`}
+          alt={`${restaurant?.name} Profile picture`}
           fill
           className="object-cover"
           placeholder={restaurant?.lqip ? "blur" : "empty"}

@@ -19,6 +19,9 @@ export type Branch = {
 export type Restaurant = {
   id: string;
   name: string;
+  avatar_url: string | null;
+  lqip: string | null;
+  website: string | null;
   user_id: string;
 };
 
