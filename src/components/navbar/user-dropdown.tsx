@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -16,10 +16,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { logout } from "@/app/auth/actions/actions";
 import { LogOutDialog } from "@/components/logout-dialog";
 import { useRestaurantQuery } from "@/hooks/use-restaurant";
-import { createClient } from "@/utils/supabase/client";
 import { Skeleton } from "@ui/skeleton";
-import { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { useUserQuery } from "@/hooks/use-user";
+import { useAvatarUrl } from "@/hooks/use-avatar-url";
 
 //  Dynamic random gradient generator
 export function generateGradient(seed: string) {
@@ -38,27 +38,14 @@ export function generateGradient(seed: string) {
 export function UserDropdown() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { data: user, isPending } = useUserQuery();
 
   // Get restaurant name
   const { data: restaurant, isLoading: isLoadingRestaurant } =
     useRestaurantQuery();
 
-  // Supabase client
-  const supabase = createClient();
-
-  // Fetch logged-in user details
-  useEffect(() => {
-    async function fetchUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-    }
-    fetchUser();
-  }, [supabase]);
-
-  const isLoadingUser = !user;
+  // Fetch avatar URL
+  const { data: avatarUrl } = useAvatarUrl(restaurant?.avatar_url);
 
   // Derive initials from restaurant name
   const initials = useMemo(() => {
@@ -80,12 +67,11 @@ export function UserDropdown() {
     setDialogOpen(true);
     await logout();
     queryClient.clear();
-    setUser(null);
     redirect("/login");
   }
 
   // Show skeleton if either restaurant or user data is loading
-  const isLoading = isLoadingRestaurant || isLoadingUser;
+  const isLoading = isLoadingRestaurant || isPending;
 
   return (
     <>
@@ -101,8 +87,9 @@ export function UserDropdown() {
             >
               <Avatar>
                 <AvatarImage
-                  src={"/some-random-url.png"}
+                  src={avatarUrl ?? undefined}
                   alt={`${restaurant} profile`}
+                  className="object-cover"
                 />
                 <AvatarFallback
                   className={`bg-linear-to-br ${gradient} text-white text-sm font-semibold`}

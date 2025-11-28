@@ -3,3 +3,9 @@ export type Params = {
     id: string;
   }>;
 };
+
+export type ApiResponse<T> = {
+  message: string;
+  data: T | null;
+  success: boolean;
+};

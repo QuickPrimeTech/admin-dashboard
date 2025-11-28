@@ -2,11 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { Restaurant } from "@/types/onboarding";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { toast } from "sonner";
 
 export function useRestaurantQuery() {
-  return useQuery({
+  return useQuery<Restaurant>({
     queryKey: ["restaurant"],
     queryFn: async () => {
       const supabase = createClient();
@@ -31,12 +31,12 @@ export function useCreateRestaurantMutation() {
   return useMutation<
     ApiResponse<Restaurant>,
     AxiosError<ApiResponse<null>>,
-    { name: string; owner: string | null }
+    { name: string; owner?: string; website?: string }
   >({
-    mutationFn: async (restaurantName) => {
+    mutationFn: async (restaurantInfo) => {
       const res = await axios.post<ApiResponse<Restaurant>>(
         "/api/onboarding/restaurant",
-        restaurantName
+        restaurantInfo
       );
 
       return res.data;

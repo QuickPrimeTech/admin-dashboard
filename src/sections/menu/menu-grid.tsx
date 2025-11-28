@@ -24,7 +24,7 @@ import Image from "next/image";
 import { MenuItem } from "@/types/menu";
 import Link from "next/link";
 import { UseMutationResult } from "@tanstack/react-query";
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { AxiosError } from "axios";
 import { useBranch } from "@/components/providers/branch-provider";
 import {

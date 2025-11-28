@@ -2,7 +2,6 @@
 import { NextRequest } from "next/server";
 import {
   getSanitizedPath,
-  getAuthenticatedUser,
   uploadImageToCloudinary,
   getCurrentBranchId,
 } from "@/helpers/common";
@@ -128,14 +127,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
-  // Checking if the user is authenticated
-  const { supabase, response } = await getAuthenticatedUser();
-  if (response) return response;
-
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-
+export async function GET() {
+  const supabase = await createClient();
   const branchId = await getCurrentBranchId();
 
   if (!branchId) {
@@ -143,22 +136,6 @@ export async function GET(req: NextRequest) {
       403,
       "You should choose a branch before fetching menu items"
     );
-  }
-
-  if (id) {
-    // Fetch a single item by ID
-    const { data, error } = await supabase
-      .from("menu_items")
-      .select("*")
-      .eq("id", id)
-      .eq("branch_id", branchId)
-      .single();
-
-    if (error) {
-      return createResponse(500, "Failed to fetch menu item", null);
-    }
-
-    return createResponse(200, "Menu item fetched successfully", data);
   }
 
   //Otherwise fetch all menu items is not provided and id

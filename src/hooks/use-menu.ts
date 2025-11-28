@@ -1,6 +1,6 @@
 // hooks/use-menu.ts
 
-import { ApiResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { createClient } from "@/utils/supabase/client";
 import { OverviewStats } from "@/types/dashboard";
 import { MenuItem } from "@/types/menu";

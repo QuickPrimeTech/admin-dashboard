@@ -1,56 +1,28 @@
 // app/api/reservations/route.ts
+import { createResponse } from "@/helpers/api-responses";
+import { getCurrentBranchId } from "@/helpers/common";
+import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-
-async function createSupabaseServerClient() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-      },
-    }
-  );
-}
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (!user || userError) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const supabase = await createClient();
+  const branchId = await getCurrentBranchId();
 
   const { data, error } = await supabase
     .from("reservations")
     .select("*")
-    .eq("user_id", user.id);
+    .eq("branch_id", branchId)
+    .order("created_at", { ascending: false }); //newest first
 
   if (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to fetch reservations",
-        error: error.message,
-      },
-      { status: 500 }
-    );
+    return createResponse(500, error.message || "Failed to fetch reservations");
   }
 
-  return NextResponse.json({ success: true, data });
+  return createResponse(290, "Reservations fetched successfully!", data);
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createClient();
   const {
     data: { user },
     error: userError,
@@ -115,7 +87,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createClient();
   const {
     data: { user },
     error: userError,
@@ -164,7 +136,7 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createClient();
   const {
     data: { user },
     error: userError,

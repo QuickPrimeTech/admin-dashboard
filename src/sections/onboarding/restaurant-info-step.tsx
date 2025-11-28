@@ -51,7 +51,7 @@ export function RestaurantInfoStep({
     }
 
     await createMutation.mutateAsync(
-      { name: values.name, owner: null },
+      { name: values.name },
       {
         onSuccess: () => {
           celebrateSuccess();

@@ -7,12 +7,13 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@ui/form";
-import { ChefHat, Save, User } from "lucide-react";
+import { ChefHat, Link, Save, User } from "lucide-react";
 import {
   useCreateRestaurantMutation,
   useRestaurantQuery,
@@ -32,19 +33,28 @@ export function RestaurantForm() {
     defaultValues: {
       name: "",
       owner: "",
+      website: "",
     },
   });
 
   useEffect(() => {
     if (restaurant) {
-      form.reset({ name: restaurant.name, owner: restaurant.owner ?? "" });
+      form.reset({
+        name: restaurant.name,
+        owner: restaurant.owner || undefined,
+        website: restaurant.website || undefined,
+      });
     }
   }, [restaurant]);
 
   const onSubmit = (values: RestaurantFormData) => {
     setIsLoading(() => true);
     updateMutation.mutate(
-      { name: values.name, owner: values.owner || null },
+      {
+        name: values.name,
+        owner: values.owner,
+        website: values.website,
+      },
       {
         onSettled: () => {
           setIsLoading(() => false);
@@ -111,7 +121,35 @@ export function RestaurantForm() {
             )}
           />
         </div>
-
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                {isPending ? (
+                  InputSkeleton
+                ) : (
+                  <InputGroup>
+                    <InputGroupInput
+                      placeholder="Enter restaurant website URL here..."
+                      {...field}
+                    />
+                    <InputGroupAddon>
+                      <Link />
+                    </InputGroupAddon>
+                  </InputGroup>
+                )}
+              </FormControl>
+              <FormDescription>
+                This is optional but highly recommended if you want instant
+                updates to your website
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button
           type="submit"
           disabled={!form.formState.isDirty || isLoading || isPending}

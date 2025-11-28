@@ -5,6 +5,7 @@ import { AppNavbar } from "@/layouts/navbar";
 import { cookies } from "next/headers";
 import { AppBreadcrumb } from "@/components/app-breadcrumb";
 import ConnectionStatus from "@/components/connection-status";
+import { Banner } from "@/components/banner";
 
 export default async function AdminLayout({
   children,
@@ -21,6 +22,7 @@ export default async function AdminLayout({
         <AppNavbar />
         <main className="flex-1 p-4 md:p-6 bg-muted/40">
           <AppBreadcrumb />
+          <Banner />
           {children}
           <ConnectionStatus />
         </main>

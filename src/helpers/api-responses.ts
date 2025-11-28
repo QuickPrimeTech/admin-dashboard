@@ -1,12 +1,7 @@
 // @/helpers/api-responses.ts
 
+import { ApiResponse } from "@/types/api";
 import { NextResponse } from "next/server";
-
-export interface ApiResponse<T> {
-  message: string;
-  data: T | null;
-  success: boolean;
-}
 
 export function createResponse<T>(
   status: number,

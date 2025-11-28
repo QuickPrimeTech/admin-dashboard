@@ -1,4 +1,5 @@
-import { ApiResponse, createResponse } from "@/helpers/api-responses";
+import { createResponse } from "@/helpers/api-responses";
+import { ApiResponse } from "@/types/api";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 

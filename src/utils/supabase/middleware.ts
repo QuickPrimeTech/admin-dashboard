@@ -90,7 +90,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
     // Onboarded user trying to visit login/root
-    if (pathname === "/login") {
+    if (pathname === "/login" || pathname === "/") {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);

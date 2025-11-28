@@ -7,6 +7,7 @@ export async function GET(req: Request) {
   // Get the phone number from query params
   const url = new URL(req.url);
   const phone = url.searchParams.get("phone");
+  //Get the current restaurant branch id
 
   // Build the base query: payments joined with orders to get customer name
   let query = supabase
