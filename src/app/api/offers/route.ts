@@ -5,6 +5,7 @@ import {
   getSanitizedPath,
   uploadImageToCloudinary,
 } from "@/helpers/common";
+import { createSlug } from "@/helpers/slug";
 import { createClient } from "@/utils/supabase/server";
 
 type OfferFormData = {
@@ -20,6 +21,7 @@ type OfferFormData = {
   public_id?: string;
   branch_id: string;
   lqip: string | null;
+  slug: string;
 };
 
 export async function GET() {
@@ -76,6 +78,7 @@ export async function POST(request: Request) {
       image_url: formValues.get("image") as File,
       lqip: formValues.get("lqip") as string,
       branch_id: branchId,
+      slug: createSlug(formValues.get("title") as string),
     };
 
     if (
@@ -115,7 +118,10 @@ export async function POST(request: Request) {
     if (error) {
       //Rolling back the uploaded image in case of database insertion error
       await deleteImageFromCloudinary(uploadResult.public_id);
-      return createResponse(502, "Failed to create offer. Please try again.");
+      return createResponse(
+        502,
+        error.message || "Failed to create offer. Please try again."
+      );
     }
 
     return createResponse(200, "Offer created successfully", insertData);

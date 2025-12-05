@@ -1,5 +1,4 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@ui/button";
@@ -19,9 +18,9 @@ import {
   useRestaurantQuery,
 } from "@/hooks/use-restaurant";
 import { useEffect, useState } from "react";
-import { Skeleton } from "@ui/skeleton";
 import { Spinner } from "@ui/spinner";
 import { RestaurantFormData, restaurantFormSchema } from "@/schemas/profile";
+import { InputSkeleton } from "@/components/ui/input";
 
 export function RestaurantForm() {
   const { data: restaurant, isPending } = useRestaurantQuery();
@@ -62,7 +61,6 @@ export function RestaurantForm() {
       }
     );
   };
-  const InputSkeleton = <Skeleton className="h-9" />;
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-6">
@@ -76,7 +74,7 @@ export function RestaurantForm() {
                 <FormLabel>Restaurant name</FormLabel>
                 <FormControl>
                   {isPending ? (
-                    InputSkeleton
+                    <InputSkeleton />
                   ) : (
                     <InputGroup>
                       <InputGroupInput
@@ -103,7 +101,7 @@ export function RestaurantForm() {
                 <FormLabel>Owner</FormLabel>
                 <FormControl>
                   {isPending ? (
-                    InputSkeleton
+                    <InputSkeleton />
                   ) : (
                     <InputGroup>
                       <InputGroupInput
@@ -129,11 +127,11 @@ export function RestaurantForm() {
               <FormLabel>Website</FormLabel>
               <FormControl>
                 {isPending ? (
-                  InputSkeleton
+                  <InputSkeleton />
                 ) : (
                   <InputGroup>
                     <InputGroupInput
-                      placeholder="Enter restaurant website URL here..."
+                      placeholder="e.g. https://mamafood.co.ke"
                       {...field}
                     />
                     <InputGroupAddon>

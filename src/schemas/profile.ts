@@ -14,7 +14,7 @@ export const restaurantFormSchema = z.object({
         if (!val) return true; // optional
         try {
           const url = new URL(val);
-          return url.protocol === "https:"; // require HTTPS
+          return url.protocol === "https:" || "http:"; // require HTTPS
         } catch {
           return false; // invalid URL
         }
