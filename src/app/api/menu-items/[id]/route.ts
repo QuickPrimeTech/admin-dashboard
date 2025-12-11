@@ -6,6 +6,7 @@ import {
   getSanitizedPath,
   uploadAndReplaceImage,
 } from "@/helpers/common";
+import { createSlug } from "@/helpers/slug";
 import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
 import { Params } from "@/types/api";
 import { createClient } from "@/utils/supabase/server";
@@ -91,7 +92,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       end_time:
         formData.get("end_time") ??
         (existingItem.end_time ? existingItem.end_time.slice(0, 5) : null),
-
+      slug: formData.get("name")
+        ? createSlug(formData.get("name") as string)
+        : existingItem.slug,
       choices: formData.has("choices") ? choices : existingItem.choices,
     };
 

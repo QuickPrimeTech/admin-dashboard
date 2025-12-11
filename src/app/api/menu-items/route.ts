@@ -8,6 +8,7 @@ import {
 import { menuItemSchema } from "@/schemas/menu";
 import { createResponse } from "@/helpers/api-responses";
 import { createClient } from "@/utils/supabase/server";
+import { createSlug } from "@/helpers/slug";
 
 export async function POST(request: NextRequest) {
   try {
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
       dietary_preference: [],
       image_url: uploadedImageUrl,
       branch_id,
+      slug: createSlug(data.name as string),
       public_id: publicId,
     };
 

@@ -25,7 +25,7 @@ export function FormContent() {
           <ChoicesList />
           <ChoiceBuilder />
           <div className="flex justify-end">
-            <Button type="submit" onClick={submitForm}>
+            <Button type="submit" onClick={submitForm} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Spinner />
