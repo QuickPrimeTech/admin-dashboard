@@ -13,7 +13,7 @@ export function useUpdateSettings(branchId: string) {
 
   return useMutation({
     mutationFn: async (data: BasicInfoData) => {
-      const response = await axios.patch(`/api/branches/settings`, data);
+      const response = await axios.patch(`/api/settings`, data);
       return response.data;
     },
     onSuccess: () => {

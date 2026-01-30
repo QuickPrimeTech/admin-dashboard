@@ -30,10 +30,16 @@ import { useBranch } from "@/components/providers/branch-provider";
 import { useEffect } from "react";
 import { InputSkeleton } from "@ui/input";
 import { OpeningHoursDialog } from "./opening-hours-dialog";
+import { useUpdateSettings } from "@/hooks/use-settings";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 export function BasicInfoForm() {
   const { branchId } = useBranch();
   const { data: branch, isPending } = useGetCurrentBranch(branchId);
+  // Initialize mutation
+  const updateSettings = useUpdateSettings(branchId);
+  const isSubmitting = updateSettings.isPending;
 
   const form = useForm<BasicInfoData>({
     resolver: zodResolver(basicInfoSchema),
@@ -56,14 +62,15 @@ export function BasicInfoForm() {
     });
   }, [branch, form]);
 
-  const onSubmit = (values: BasicInfoData) => {
-    // This will be a JSONB array ready for Supabase
-    console.log("Submitting values:", values);
-    // console.log(
-    //   "Opening hours as JSONB:",
-    //   JSON.stringify(values.opening_hours),
-    // );
-    // TODO: Send to your API/mutation
+  const onSubmit = async (values: BasicInfoData) => {
+    await updateSettings.mutateAsync(values, {
+      onSuccess: () => {
+        toast.success("Settings updated successfully");
+      },
+      onError: () => {
+        toast.error("Failed to save changes. Please try again.");
+      },
+    });
   };
 
   return (
@@ -157,8 +164,12 @@ export function BasicInfoForm() {
             />
           </CardContent>
           <CardFooter className="justify-end">
-            <Button disabled={!form.formState.isDirty} type="submit">
-              <Save className="mr-2 h-4 w-4" /> Save Changes
+            <Button
+              disabled={!form.formState.isDirty || isSubmitting}
+              type="submit"
+            >
+              {isSubmitting ? <Spinner /> : <Save />}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </CardFooter>
         </Card>

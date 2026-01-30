@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server"; // or your supabase client
 import { getCurrentBranchId } from "@/helpers/common";
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { branchId: string } },
-) {
+export async function PATCH(request: Request) {
   // Create a Supabase instance
   const supabase = await createClient();
 
@@ -14,8 +11,6 @@ export async function PATCH(
 
   try {
     const body = await request.json();
-    const { branchId } = params;
-
     // Update branch_settings table (or your table name)
     const { data, error } = await supabase
       .from("branch_settings")
@@ -32,6 +27,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
+    console.log(error);
     return NextResponse.json(
       { error: error.message || "Failed to update settings" },
       { status: 500 },
