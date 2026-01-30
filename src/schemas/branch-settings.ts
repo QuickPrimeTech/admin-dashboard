@@ -3,12 +3,21 @@ import { z } from "zod";
 
 const url = z.string().url("Invalid URL").optional().or(z.literal(""));
 
+// Define the day schedule type
+export const dayScheduleSchema = z.object({
+  day: z.string(),
+  isOpen: z.boolean(),
+  openTime: z.string(),
+  closeTime: z.string(),
+});
+
 export const basicInfoSchema = z.object({
   name: z.string().min(1, "Branch name is required"),
-  opening_hours: z.string().optional(),
+  opening_hours: z.array(dayScheduleSchema),
   is_open: z.boolean(),
 });
 
+export type DaySchedule = z.infer<typeof dayScheduleSchema>;
 export type BasicInfoData = z.infer<typeof basicInfoSchema>;
 
 export const contactInfoSchema = z.object({
