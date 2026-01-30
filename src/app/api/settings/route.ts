@@ -1,36 +1,44 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server"; // or your supabase client
+// app/api/settings/route.ts
+import { createClient } from "@/utils/supabase/server";
 import { getCurrentBranchId } from "@/helpers/common";
+import { createResponse } from "@/helpers/api-responses";
 
 export async function PATCH(request: Request) {
-  // Create a Supabase instance
   const supabase = await createClient();
-
-  //Get the current branch id
   const branchId = await getCurrentBranchId();
+
+  if (!branchId) {
+    return createResponse(401, "No branch selected");
+  }
 
   try {
     const body = await request.json();
-    // Update branch_settings table (or your table name)
+
+    // Remove undefined values to avoid overwriting existing data with null
+    const updateData = Object.fromEntries(
+      Object.entries(body).filter(([_, v]) => v !== undefined),
+    );
+
     const { data, error } = await supabase
       .from("branch_settings")
-      .update({
-        name: body.name,
-        is_open: body.is_open,
-        opening_hours: body.opening_hours, // JSONB array
-      })
+      .update(updateData)
       .eq("id", branchId)
       .select()
       .single();
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    console.log(error);
-    return NextResponse.json(
-      { error: error.message || "Failed to update settings" },
-      { status: 500 },
+    return createResponse(
+      200,
+      "Successfully updated branch settings information",
+      data,
     );
+  } catch (error: unknown) {
+    console.error("Settings update error:", error);
+
+    const message =
+      error instanceof Error ? error.message : "Failed to update settings";
+
+    return createResponse(500, message);
   }
 }

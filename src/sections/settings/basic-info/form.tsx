@@ -64,11 +64,14 @@ export function BasicInfoForm() {
 
   const onSubmit = async (values: BasicInfoData) => {
     await updateSettings.mutateAsync(values, {
-      onSuccess: () => {
-        toast.success("Settings updated successfully");
+      onSuccess: (res) => {
+        toast.success(res.message || "Settings updated successfully");
       },
-      onError: () => {
-        toast.error("Failed to save changes. Please try again.");
+      onError: (error) => {
+        toast.error(
+          error.response?.data.message ||
+            "Failed to save changes. Please try again.",
+        );
       },
     });
   };

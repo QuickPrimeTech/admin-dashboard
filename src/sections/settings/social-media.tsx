@@ -1,4 +1,5 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SocialMediaData, socialMediaSchema } from "@/schemas/branch-settings";
@@ -9,15 +10,53 @@ import { IoLogoTiktok } from "react-icons/io5";
 import { FaXTwitter } from "react-icons/fa6";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 import { Instagram, Facebook, Youtube, Save } from "lucide-react";
+import { toast } from "sonner";
+import { useBranch } from "@/components/providers/branch-provider";
+import { useGetCurrentBranch } from "@/hooks/use-branches";
+import { useUpdateSettings } from "@/hooks/use-settings";
+import { Spinner } from "@/components/ui/spinner";
+import { useEffect } from "react";
 
 export function SocialMediaForm() {
+  const { branchId } = useBranch();
+  const { data: branch } = useGetCurrentBranch(branchId);
+  // Initialize mutation
+  const updateSettings = useUpdateSettings(branchId);
+  const isSubmitting = updateSettings.isPending;
+
   const form = useForm<SocialMediaData>({
     resolver: zodResolver(socialMediaSchema),
-    defaultValues: {},
+    defaultValues: {
+      instagram_url: undefined,
+      facebook_url: undefined,
+      x_url: undefined,
+      youtube_url: undefined,
+      tiktok_url: undefined,
+    },
   });
 
-  const onSubmit = (values: SocialMediaData) => {
-    console.log("About to submit social media values as --------->", values);
+  useEffect(() => {
+    if (!branch) return;
+    form.reset({
+      instagram_url: branch.instagram_url,
+      facebook_url: branch.facebook_url,
+      x_url: branch.x_url,
+      youtube_url: branch.youtube_url,
+      tiktok_url: branch.tiktok_url,
+    });
+  }, [branch, form]);
+  const onSubmit = async (values: SocialMediaData) => {
+    await updateSettings.mutateAsync(values, {
+      onSuccess: (res) => {
+        toast.success(res.message);
+      },
+      onError: (error) => {
+        toast.error(
+          error.response?.data.message ||
+            "Failed to save changes. Please try again.",
+        );
+      },
+    });
   };
 
   return (
@@ -123,7 +162,7 @@ export function SocialMediaForm() {
             {/* X (Twitter) */}
             <FormField
               control={form.control}
-              name="x"
+              name="x_url"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>X (formerly Twitter)</FormLabel>
@@ -133,7 +172,7 @@ export function SocialMediaForm() {
                         <FaXTwitter />
                       </InputGroupAddon>
                       <InputGroupInput
-                        placeholder="https://twitter.com/yourpage"
+                        placeholder="https://x.com/yourpage"
                         {...field}
                       />
                     </InputGroup>
@@ -143,9 +182,13 @@ export function SocialMediaForm() {
             />
 
             <div className="col-span-1 md:col-span-2 flex justify-end pt-4">
-              <Button type="submit" className="flex items-center gap-2">
-                <Save />
-                Save Social Links
+              <Button
+                type="submit"
+                disabled={!form.formState.isDirty || isSubmitting}
+                className="flex items-center gap-2"
+              >
+                {isSubmitting ? <Spinner /> : <Save />}
+                {isSubmitting ? "Saving Social Links..." : " Save Social Links"}
               </Button>
             </div>
           </form>

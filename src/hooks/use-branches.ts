@@ -6,26 +6,31 @@ import { Branch } from "@/types/onboarding";
 import { toast } from "sonner";
 import { BranchFormValues } from "@/schemas/onboarding";
 
-const BRANCHES_QUERY_KEY = ["branches"];
+export const BRANCHES_QUERY_KEY = ["branches"];
 
 export function useBranchesQuery() {
   return useQuery({
     queryKey: BRANCHES_QUERY_KEY,
     queryFn: async () => {
       const res = await axios.get<ApiResponse<Branch[]>>(
-        "/api/onboarding/branches"
+        "/api/onboarding/branches",
       );
       return res.data.data;
     },
   });
 }
 
+export const getCurrentBranchKey = (branchId: string) => [
+  "current-branch",
+  branchId,
+];
+
 export function useGetCurrentBranch(branchId: string) {
   const { data: branches } = useBranchesQuery();
 
   return useQuery({
     enabled: !!branchId && !!branches, // wait for branches
-    queryKey: ["current-branch", branchId],
+    queryKey: getCurrentBranchKey(branchId),
     queryFn: async () => {
       if (!branches) return null;
 
@@ -46,7 +51,7 @@ export function useCreateBranchMutation() {
     mutationFn: async (values) => {
       const res = await axios.post<ApiResponse<Branch>>(
         "/api/onboarding/branches",
-        values
+        values,
       );
       return res.data;
     },
@@ -69,7 +74,7 @@ export function useCreateBranchMutation() {
       if (onMutateResult?.previousBranches) {
         queryClient.setQueryData(
           BRANCHES_QUERY_KEY,
-          onMutateResult.previousBranches
+          onMutateResult.previousBranches,
         );
       }
       if (err instanceof AxiosError) {
@@ -97,7 +102,7 @@ export function useDeleteBranchMutation() {
   >({
     mutationFn: async (id) => {
       const res = await axios.delete<ApiResponse<Branch>>(
-        `/api/onboarding/branches?id=${id}`
+        `/api/onboarding/branches?id=${id}`,
       );
       return res.data;
     },
@@ -120,7 +125,7 @@ export function useDeleteBranchMutation() {
       if (onMutateResult?.previousBranches) {
         queryClient.setQueryData(
           BRANCHES_QUERY_KEY,
-          onMutateResult.previousBranches
+          onMutateResult.previousBranches,
         );
       }
       if (err instanceof AxiosError) {
@@ -145,7 +150,7 @@ export function useUpdateBranchMutation() {
     mutationFn: async (branch) => {
       const res = await axios.patch<ApiResponse<Branch>>(
         `/api/onboarding/branches`,
-        branch
+        branch,
       );
       return res.data;
     },
@@ -160,7 +165,7 @@ export function useUpdateBranchMutation() {
       queryClient.setQueryData<Branch[]>(BRANCHES_QUERY_KEY, (branches) => {
         if (!branches) return [branch];
         return branches.map((oldBranch) =>
-          oldBranch.id !== branch.id ? oldBranch : branch
+          oldBranch.id !== branch.id ? oldBranch : branch,
         );
       });
 
@@ -171,7 +176,7 @@ export function useUpdateBranchMutation() {
       if (onMutateResult?.previousBranches) {
         queryClient.setQueryData(
           BRANCHES_QUERY_KEY,
-          onMutateResult.previousBranches
+          onMutateResult.previousBranches,
         );
       }
       if (err instanceof AxiosError) {
@@ -188,13 +193,13 @@ export function useOnboardUser() {
   return useMutation<ApiResponse<boolean>, AxiosError<ApiResponse<null>>>({
     mutationFn: async () => {
       const res = await axios.post<ApiResponse<boolean>>(
-        "/api/onboarding/success"
+        "/api/onboarding/success",
       );
       return res.data;
     },
     onError: (err) => {
       toast.error(
-        err.response?.data.message || "There was a problem onboarding you"
+        err.response?.data.message || "There was a problem onboarding you",
       );
     },
     onSuccess: (data) => {

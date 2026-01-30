@@ -1,3 +1,5 @@
+import { DaySchedule } from "@/schemas/branch-settings";
+
 export type Branch = {
   id: string;
   name: string;
@@ -9,11 +11,11 @@ export type Branch = {
   website?: string;
   instagram_url?: string;
   facebook_url?: string;
-  twitter_url?: string;
+  x_url?: string;
   youtube_url?: string;
   tiktok_url?: string;
-  opening_hours?: string;
-  is_open?: true;
+  opening_hours?: DaySchedule[];
+  is_open?: boolean;
 };
 
 export type Restaurant = {
