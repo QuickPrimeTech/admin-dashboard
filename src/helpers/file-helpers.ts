@@ -42,7 +42,7 @@ export async function generateBlurDataURL(file: File): Promise<string> {
         if (!context) return reject("Canvas context not available");
 
         // scale down image
-        const width = 16; // desired small width
+        const width = 32; // desired small width
         const scale = width / img.width;
         const height = img.height * scale;
 
@@ -101,7 +101,7 @@ export async function resizeImage(file: File, maxSize: number): Promise<Blob> {
           resolve(blob);
         },
         "image/jpeg",
-        1 // compression quality
+        1, // compression quality
       );
     };
 

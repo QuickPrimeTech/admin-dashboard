@@ -1,6 +1,6 @@
 import { ScrollArea, ScrollBar } from "@ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
-import { BasicInfoForm } from "@/sections/settings/basic-info";
+import { BasicInfoForm } from "@/sections/settings/basic-info/form";
 import { ContactInfoForm } from "@/sections/settings/contact-info";
 import { SocialMediaForm } from "@/sections/settings/social-media";
 import { Info, Phone, Send } from "lucide-react";

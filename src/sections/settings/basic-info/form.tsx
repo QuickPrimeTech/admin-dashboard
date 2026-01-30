@@ -1,4 +1,6 @@
+// @/components/branch-settings/basic-info-form.tsx
 "use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BasicInfoData, basicInfoSchema } from "@/schemas/branch-settings";
@@ -17,8 +19,8 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@ui/form";
-import { Textarea, TextareaSkeleton } from "@ui/textarea";
 import { Switch, SwitchSkeleton } from "@ui/switch";
 import { Button } from "@ui/button";
 import { Save, Store } from "lucide-react";
@@ -27,23 +29,25 @@ import { useGetCurrentBranch } from "@/hooks/use-branches";
 import { useBranch } from "@/components/providers/branch-provider";
 import { useEffect } from "react";
 import { InputSkeleton } from "@ui/input";
+import { OpeningHoursDialog } from "./opening-hours-dialog";
+import { useUpdateSettings } from "@/hooks/use-settings";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 export function BasicInfoForm() {
-  //Get the branc Id from the context
   const { branchId } = useBranch();
-
-  //Get the current branch Info
   const { data: branch, isPending } = useGetCurrentBranch(branchId);
-
-  const defaultValues: BasicInfoData = {
-    name: "",
-    is_open: true,
-    opening_hours: "",
-  };
+  // Initialize mutation
+  const updateSettings = useUpdateSettings(branchId);
+  const isSubmitting = updateSettings.isPending;
 
   const form = useForm<BasicInfoData>({
     resolver: zodResolver(basicInfoSchema),
-    defaultValues,
+    defaultValues: {
+      name: "",
+      is_open: true,
+      opening_hours: [],
+    },
   });
 
   useEffect(() => {
@@ -51,15 +55,25 @@ export function BasicInfoForm() {
     form.reset({
       name: branch.name,
       is_open: branch.is_open,
-      opening_hours: branch.opening_hours,
+      // Handle both string (legacy) and array (new) formats safely
+      opening_hours: Array.isArray(branch.opening_hours)
+        ? branch.opening_hours
+        : [],
     });
-  }, [branch]);
+  }, [branch, form]);
 
-  const onSubmit = (values: BasicInfoData) => {
-    console.log(
-      "You are about to submit the following values ---------->",
-      values
-    );
+  const onSubmit = async (values: BasicInfoData) => {
+    await updateSettings.mutateAsync(values, {
+      onSuccess: (res) => {
+        toast.success(res.message || "Settings updated successfully");
+      },
+      onError: (error) => {
+        toast.error(
+          error.response?.data.message ||
+            "Failed to save changes. Please try again.",
+        );
+      },
+    });
   };
 
   return (
@@ -136,23 +150,29 @@ export function BasicInfoForm() {
                   <FormLabel>Opening Hours</FormLabel>
                   <FormControl>
                     {isPending ? (
-                      <TextareaSkeleton />
+                      <div className="h-10 bg-muted animate-pulse rounded-md" />
                     ) : (
-                      <Textarea
-                        placeholder="Mon-Fri: 11:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
-                        className="resize-none"
-                        {...field}
+                      <OpeningHoursDialog
+                        value={field.value || []}
+                        onChange={field.onChange}
                       />
                     )}
                   </FormControl>
+                  <FormDescription>
+                    Set your weekly operating schedule
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
           <CardFooter className="justify-end">
-            <Button disabled={!form.formState.isDirty}>
-              <Save /> Save Changes
+            <Button
+              disabled={!form.formState.isDirty || isSubmitting}
+              type="submit"
+            >
+              {isSubmitting ? <Spinner /> : <Save />}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </CardFooter>
         </Card>

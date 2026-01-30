@@ -8,20 +8,52 @@ import { Textarea } from "@ui/textarea";
 import { Button } from "@ui/button";
 import { Mail, Phone, Save } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
+import { useBranch } from "@/components/providers/branch-provider";
+import { useGetCurrentBranch } from "@/hooks/use-branches";
+import { useUpdateSettings } from "@/hooks/use-settings";
+import { toast } from "sonner";
+import { useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export function ContactInfoForm() {
-  const defaultValues = {};
+  const { branchId } = useBranch();
+  const { data: branch } = useGetCurrentBranch(branchId);
+  // Initialize mutation
+  const updateSettings = useUpdateSettings(branchId);
+  const isSubmitting = updateSettings.isPending;
+
+  const defaultValues = {
+    email: undefined,
+    phone: undefined,
+    address: undefined,
+  };
 
   const form = useForm<ContactInfoData>({
     resolver: zodResolver(contactInfoSchema),
     defaultValues,
   });
 
-  const onSubmit = (values: ContactInfoData) => {
-    console.log(
-      "You are about to submit a contact info -------------->",
-      values
-    );
+  useEffect(() => {
+    if (!branch) return;
+    form.reset({
+      email: branch.email,
+      phone: branch.phone,
+      address: branch.address,
+    });
+  }, [branch, form]);
+
+  const onSubmit = async (values: ContactInfoData) => {
+    await updateSettings.mutateAsync(values, {
+      onSuccess: (res) => {
+        toast.success(res.message);
+      },
+      onError: (error) => {
+        toast.error(
+          error.response?.data.message ||
+            "Failed to save changes. Please try again.",
+        );
+      },
+    });
   };
   return (
     <Card>
@@ -88,8 +120,14 @@ export function ContactInfoForm() {
               )}
             />
             <CardFooter className="justify-end">
-              <Button type="submit">
-                <Save /> Save Contact Information
+              <Button
+                type="submit"
+                disabled={!form.formState.isDirty || isSubmitting}
+              >
+                {isSubmitting ? <Spinner /> : <Save />}
+                {isSubmitting
+                  ? "Saving Contact Info..."
+                  : "Save Contact Information"}
               </Button>
             </CardFooter>
           </form>
