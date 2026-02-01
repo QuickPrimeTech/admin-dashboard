@@ -1,4 +1,6 @@
-import { Order, OrderStatus } from "@/types/order";
+// sections/orders/order-details-sheet.tsx
+
+import { OrderUI, OrderStatus } from "@/types/order";
 import {
   Sheet,
   SheetContent,
@@ -27,7 +29,7 @@ import { format, isToday, isTomorrow } from "date-fns";
 import Link from "next/link";
 
 interface OrderDetailsSheetProps {
-  order: Order | null;
+  order: OrderUI | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusChange: (orderId: string, newStatus: OrderStatus) => void;
@@ -42,8 +44,8 @@ const statusLabels: Record<OrderStatus, string> = {
 
 const statusColors: Record<OrderStatus, string> = {
   new: "bg-primary text-primary-foreground",
-  preparing: "bg-primary text-primary-foreground",
-  ready: "bg-success text-success-foreground",
+  preparing: "bg-blue-600 text-white",
+  ready: "bg-green-600 text-white",
   completed: "bg-muted text-muted-foreground",
 };
 
@@ -116,7 +118,6 @@ export function OrderDetailsSheet({
             </Badge>
           </div>
 
-          {/* Scheduled banner */}
           {isScheduled && order.scheduledFor && (
             <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-3 text-primary">
               <CalendarClock className="h-5 w-5" />
@@ -129,7 +130,6 @@ export function OrderDetailsSheet({
             </div>
           )}
 
-          {/* Completed banner */}
           {isCompleted && order.completedAt && (
             <div className="flex items-center gap-2 rounded-lg bg-success/10 px-4 py-3 text-success">
               <CheckCircle2 className="h-5 w-5" />
@@ -172,13 +172,16 @@ export function OrderDetailsSheet({
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          {/* Customer Info */}
           <div className="space-y-3">
             <h3 className="font-semibold">Customer</h3>
             <div className="space-y-2 rounded-lg bg-secondary p-4">
               <div className="flex items-center gap-2">
                 <User className="size-4 text-muted-foreground" />
                 <span>{order.customerName}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="size-4" />
+                <span>{order.phone}</span>
               </div>
               {order.type === "delivery" && order.deliveryAddress && (
                 <div className="flex items-start gap-2">
@@ -187,13 +190,13 @@ export function OrderDetailsSheet({
                 </div>
               )}
               <div className="flex gap-2 pt-2">
-                <Button variant="success" size="sm" className="gap-1" asChild>
-                  <Link href={`tel:${order.orderNumber}`}>
+                <Button variant="default" size="sm" className="gap-1" asChild>
+                  <Link href={`tel:${order.phone}`}>
                     <Phone className="size-4" />
                     Call
                   </Link>
                 </Button>
-                <Button variant="blue" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1">
                   <MessageSquare className="h-4 w-4" />
                   Message
                 </Button>
@@ -203,7 +206,6 @@ export function OrderDetailsSheet({
 
           <Separator />
 
-          {/* Order Items */}
           <div className="space-y-3">
             <h3 className="font-semibold">Order Items</h3>
             <div className="space-y-3">
@@ -244,7 +246,6 @@ export function OrderDetailsSheet({
 
           <Separator />
 
-          {/* Order Summary */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
@@ -262,7 +263,6 @@ export function OrderDetailsSheet({
 
           <Separator />
 
-          {/* Actions */}
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1 gap-2">
               <Printer className="h-4 w-4" />
@@ -274,14 +274,12 @@ export function OrderDetailsSheet({
                   nextAction.action();
                   onOpenChange(false);
                 }}
-                variant={
-                  order.status === "preparing"
-                    ? "blue"
-                    : order.status === "ready"
-                      ? "success"
-                      : "default"
-                }
-                className={cn("flex-1")}
+                className={cn(
+                  "flex-1",
+                  order.status === "preparing" &&
+                    "bg-blue-600 hover:bg-blue-700",
+                  order.status === "ready" && "bg-green-600 hover:bg-green-700",
+                )}
               >
                 {nextAction.label}
               </Button>

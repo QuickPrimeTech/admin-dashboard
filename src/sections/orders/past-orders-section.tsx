@@ -1,7 +1,8 @@
-import { Order} from "@/types/order";
+// sections/orders/past-orders-section.tsx
+import { OrderUI } from "@/types/order";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Clock,
   MapPin,
@@ -9,14 +10,14 @@ import {
   Bike,
   User,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
 
 interface PastOrdersSectionProps {
-  orders: Order[];
-  onViewDetails: (order: Order) => void;
+  orders: OrderUI[];
+  onViewDetails: (order: OrderUI) => void;
 }
 
 const formatCompletedTime = (date: Date) => {
@@ -29,9 +30,8 @@ const formatCompletedTime = (date: Date) => {
   return format(date, "EEE, MMM d 'at' h:mm a");
 };
 
-// Group orders by completed date
-const groupByDate = (orders: Order[]) => {
-  const groups: { label: string; orders: Order[] }[] = [];
+const groupByDate = (orders: OrderUI[]) => {
+  const groups: { label: string; orders: OrderUI[] }[] = [];
 
   const todayOrders = orders.filter(
     (o) => o.completedAt && isToday(o.completedAt),
@@ -79,8 +79,8 @@ function PastOrderCard({
   order,
   onViewDetails,
 }: {
-  order: Order;
-  onViewDetails: (order: Order) => void;
+  order: OrderUI;
+  onViewDetails: (order: OrderUI) => void;
 }) {
   return (
     <Card className="bg-secondary/50 transition-all hover:bg-secondary">

@@ -1,3 +1,4 @@
+// sections/orders/stats-bar.tsx
 import { TrendingUp, Clock, DollarSign, Package } from "lucide-react";
 
 interface StatsBarProps {

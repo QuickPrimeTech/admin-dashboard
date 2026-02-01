@@ -1,46 +1,32 @@
-export type OrderStatus = "new" | "preparing" | "ready" | "completed";
-export type OrderType = "pickup" | "delivery";
-export type OrderPriority = "normal" | "high" | "scheduled";
-
-export type OrderItem = {
+// types/order.ts
+export interface OrderItem {
   id: string;
   name: string;
   quantity: number;
   price: number;
   modifiers?: string[];
-};
+}
 
-export type Order = {
+export type OrderStatus = "new" | "preparing" | "ready" | "completed";
+export type OrderType = "delivery" | "pickup";
+export type OrderPriority = "normal" | "high" | "scheduled";
+
+export type OrderUI = {
   id: string;
   orderNumber: string;
   customerName: string;
+  email: string;
+  phone: string;
   type: OrderType;
   status: OrderStatus;
   priority: OrderPriority;
   items: OrderItem[];
   total: number;
+  deliveryAddress?: string;
+  specialInstructions?: string;
   createdAt: Date;
   scheduledFor?: Date;
   completedAt?: Date;
-  estimatedTime?: number;
-  specialInstructions?: string;
-  deliveryAddress?: string;
-};
-
-export type SupabaseOrder = {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  total: number;
+  branchId: string;
   paymentMethod: string;
-  pickupDate: string | null;
-  pickupTime: string | null;
-  deliveryDate: string | null;
-  deliveryTime: string | null;
-  deliveryAddress: string | null;
-  status: string;
-  order_status: OrderStatus;
-  special_instructions: string | null;
-  created_at: string;
 };

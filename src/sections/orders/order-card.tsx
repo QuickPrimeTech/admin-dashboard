@@ -1,4 +1,5 @@
-import { Order, OrderStatus } from "@/types/order";
+// sections/orders/order-card.tsx
+import { OrderUI, OrderStatus } from "@/types/order";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,9 +17,9 @@ import { cn } from "@/lib/utils";
 import { format, isToday, isTomorrow, differenceInHours } from "date-fns";
 
 interface OrderCardProps {
-  order: Order;
+  order: OrderUI;
   onStatusChange: (orderId: string, newStatus: OrderStatus) => void;
-  onViewDetails: (order: Order) => void;
+  onViewDetails: (order: OrderUI) => void;
   compact?: boolean;
 }
 
@@ -102,7 +103,6 @@ export function OrderCard({
           "ring-2 ring-destructive",
       )}
     >
-      {/* Priority / Status indicators */}
       {isNew && !isScheduled && (
         <div className="absolute -right-1 -top-1">
           <span className="relative flex h-4 w-4">
@@ -161,7 +161,6 @@ export function OrderCard({
           </div>
         </div>
 
-        {/* Scheduled time banner */}
         {isScheduled && order.scheduledFor && (
           <div
             className={cn(
@@ -237,7 +236,7 @@ export function OrderCard({
         <div className="flex items-center justify-between border-t border-border pt-3">
           <div>
             <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-xl font-bold">${order.total.toFixed(2)}</p>
+            <p className="text-xl font-bold">Ksh {order.total.toFixed(2)}</p>
           </div>
 
           <div className="flex gap-2">
@@ -254,19 +253,17 @@ export function OrderCard({
               <Button
                 onClick={nextAction.action}
                 size="sm"
-                variant={isPreparing ? "blue" : isReady ? "success" : "default"}
+                variant={
+                  isPreparing ? "default" : isReady ? "default" : "default"
+                }
                 className={cn(
-                  isNew &&
-                    !isScheduled &&
-                    "animate-pulse bg-primary hover:bg-primary/90",
+                  isNew && !isScheduled && "animate-pulse",
                   isNew &&
                     isScheduled &&
                     scheduleUrgency === "urgent" &&
                     "bg-destructive hover:bg-destructive/90",
-                  isNew &&
-                    isScheduled &&
-                    scheduleUrgency !== "urgent" &&
-                    "bg-primary hover:bg-primary/90",
+                  isPreparing && "bg-blue-600 hover:bg-blue-700",
+                  isReady && "bg-green-600 hover:bg-green-700",
                 )}
               >
                 {nextAction.label}
