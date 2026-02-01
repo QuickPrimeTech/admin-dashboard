@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isToday, isTomorrow } from "date-fns";
+import Link from "next/link";
 
 interface OrderDetailsSheetProps {
   order: Order | null;
@@ -77,7 +78,7 @@ export function OrderDetailsSheet({
         };
       case "preparing":
         return {
-          label: "Mark Ready",
+          label: "Mark as Ready",
           action: () => onStatusChange(order.id, "ready"),
         };
       case "ready":
@@ -98,7 +99,7 @@ export function OrderDetailsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+      <SheetContent className="rounded-l-xl w-full overflow-y-auto sm:max-w-lg px-6 py-10">
         <SheetHeader className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -176,21 +177,23 @@ export function OrderDetailsSheet({
             <h3 className="font-semibold">Customer</h3>
             <div className="space-y-2 rounded-lg bg-secondary p-4">
               <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
+                <User className="size-4 text-muted-foreground" />
                 <span>{order.customerName}</span>
               </div>
               {order.type === "delivery" && order.deliveryAddress && (
                 <div className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                  <span>{order.deliveryAddress}</span>
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm">{order.deliveryAddress}</span>
                 </div>
               )}
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="gap-1">
-                  <Phone className="h-4 w-4" />
-                  Call
+                <Button variant="success" size="sm" className="gap-1" asChild>
+                  <Link href={`tel:${order.orderNumber}`}>
+                    <Phone className="size-4" />
+                    Call
+                  </Link>
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="blue" size="sm" className="gap-1">
                   <MessageSquare className="h-4 w-4" />
                   Message
                 </Button>
@@ -271,14 +274,14 @@ export function OrderDetailsSheet({
                   nextAction.action();
                   onOpenChange(false);
                 }}
-                className={cn(
-                  "flex-1",
-                  order.status === "new" && "bg-primary hover:bg-primary/90",
-                  order.status === "preparing" &&
-                    "bg-warning text-warning-foreground hover:bg-warning/90",
-                  order.status === "ready" &&
-                    "bg-success text-success-foreground hover:bg-success/90",
-                )}
+                variant={
+                  order.status === "preparing"
+                    ? "blue"
+                    : order.status === "ready"
+                      ? "success"
+                      : "default"
+                }
+                className={cn("flex-1")}
               >
                 {nextAction.label}
               </Button>

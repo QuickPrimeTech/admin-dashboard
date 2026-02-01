@@ -242,10 +242,9 @@ export function OrderCard({
 
           <div className="flex gap-2">
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => onViewDetails(order)}
-              className="text-muted-foreground hover:text-foreground"
             >
               Details
               <ChevronRight className="ml-1 h-4 w-4" />
@@ -255,6 +254,7 @@ export function OrderCard({
               <Button
                 onClick={nextAction.action}
                 size="sm"
+                variant={isPreparing ? "blue" : isReady ? "success" : "default"}
                 className={cn(
                   isNew &&
                     !isScheduled &&
@@ -267,10 +267,6 @@ export function OrderCard({
                     isScheduled &&
                     scheduleUrgency !== "urgent" &&
                     "bg-primary hover:bg-primary/90",
-                  isPreparing &&
-                    "bg-warning text-warning-foreground hover:bg-warning/90",
-                  isReady &&
-                    "bg-success text-success-foreground hover:bg-success/90",
                 )}
               >
                 {nextAction.label}
