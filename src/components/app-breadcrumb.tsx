@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -23,70 +22,92 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@ui/button";
 import { useRouter } from "next/navigation";
 
+const NON_INDEX_SEGMENTS = new Set(["edit"]);
+
+// Define the shape of a breadcrumb item
+interface BreadcrumbData {
+  href: string;
+  label: string;
+  isLast: boolean;
+  isClickable: boolean;
+}
+
 export function AppBreadcrumb() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Split path into segments
   const segments = pathname.split("/").filter(Boolean);
 
-  // Generate breadcrumb items
-  const breadcrumbs = segments.map((segment, idx) => {
+  // Generate breadcrumb data (not JSX yet)
+  const breadcrumbData: BreadcrumbData[] = segments.map((segment, idx) => {
     const href = "/" + segments.slice(0, idx + 1).join("/");
-
-    // Make last segment the page
     const isLast = idx === segments.length - 1;
+    const hasNextSegment = idx < segments.length - 1;
 
-    // Capitalize first letter and replace dashes with spaces
     const label = segment
       .replace(/-/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    return isLast ? (
-      <BreadcrumbItem key={href}>
-        <BreadcrumbPage>{label}</BreadcrumbPage>
-      </BreadcrumbItem>
-    ) : (
-      <BreadcrumbItem key={href}>
+    const isNonIndex =
+      NON_INDEX_SEGMENTS.has(segment.toLowerCase()) && hasNextSegment;
+
+    return {
+      href,
+      label,
+      isLast,
+      isClickable: !isLast && !isNonIndex,
+    };
+  });
+
+  const MAX_VISIBLE = 5;
+  const shouldEllipsis = breadcrumbData.length > MAX_VISIBLE;
+
+  // Helper to render a single breadcrumb item
+  const renderBreadcrumbItem = (item: BreadcrumbData, key: string) => {
+    if (item.isLast) {
+      return (
+        <BreadcrumbItem key={key}>
+          <BreadcrumbPage>{item.label}</BreadcrumbPage>
+        </BreadcrumbItem>
+      );
+    }
+
+    if (!item.isClickable) {
+      return (
+        <BreadcrumbItem key={key}>
+          <span className="text-muted-foreground">{item.label}</span>
+        </BreadcrumbItem>
+      );
+    }
+
+    return (
+      <BreadcrumbItem key={key}>
         <BreadcrumbLink asChild>
-          <Link href={href}>{label}</Link>
+          <Link href={item.href}>{item.label}</Link>
         </BreadcrumbLink>
       </BreadcrumbItem>
     );
-  });
+  };
 
-  // Optionally add ellipsis if too many items
-  const MAX_VISIBLE = 5;
-  const shouldEllipsis = breadcrumbs.length > MAX_VISIBLE;
-  const visibleBreadcrumbs = shouldEllipsis
-    ? [
-        breadcrumbs[0],
-        <BreadcrumbItem key="ellipsis">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1">
-              <BreadcrumbEllipsis />
-              <span className="sr-only">Toggle menu</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {breadcrumbs.slice(1, -1).map((item, i) => (
-                <DropdownMenuItem key={i}>
-                  {item.props.children.props.children}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </BreadcrumbItem>,
-        breadcrumbs[breadcrumbs.length - 1],
-      ]
-    : breadcrumbs;
+  // Generate visible breadcrumbs
+  let visibleItems: BreadcrumbData[] = breadcrumbData;
+  let hiddenItems: BreadcrumbData[] = [];
+
+  if (shouldEllipsis) {
+    visibleItems = [
+      breadcrumbData[0],
+      ...breadcrumbData.slice(-1), // Keep first and last
+    ];
+    hiddenItems = breadcrumbData.slice(1, -1); // Middle items go to dropdown
+  }
 
   return (
     <div className="flex items-center gap-3 mb-6">
       <Button
-        variant="ghost"
+        variant="secondary"
         size="sm"
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft />
         <span>Back</span>
@@ -94,12 +115,50 @@ export function AppBreadcrumb() {
 
       <Breadcrumb>
         <BreadcrumbList>
-          {visibleBreadcrumbs.map((crumb, i) => (
-            <React.Fragment key={i}>
-              {crumb}
-              {i < visibleBreadcrumbs.length - 1 && <BreadcrumbSeparator />}
-            </React.Fragment>
-          ))}
+          {shouldEllipsis ? (
+            <>
+              {renderBreadcrumbItem(breadcrumbData[0], "first")}
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center gap-1">
+                    <BreadcrumbEllipsis />
+                    <span className="sr-only">Toggle menu</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    {hiddenItems.map((item) => (
+                      <DropdownMenuItem
+                        key={item.href}
+                        asChild={item.isClickable}
+                      >
+                        {item.isClickable ? (
+                          <Link href={item.href}>{item.label}</Link>
+                        ) : (
+                          <span className="text-muted-foreground cursor-default">
+                            {item.label}
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+              {renderBreadcrumbItem(
+                breadcrumbData[breadcrumbData.length - 1],
+                "last",
+              )}
+            </>
+          ) : (
+            breadcrumbData.map((item, idx) => (
+              <React.Fragment key={item.href}>
+                {renderBreadcrumbItem(item, item.href)}
+                {idx < breadcrumbData.length - 1 && <BreadcrumbSeparator />}
+              </React.Fragment>
+            ))
+          )}
         </BreadcrumbList>
       </Breadcrumb>
     </div>
