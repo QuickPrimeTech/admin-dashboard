@@ -162,7 +162,7 @@ export function Notifications() {
           {hasUnread && (
             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white ring-2 ring-background">
+              <span className="relative inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white ring-2 ring-primary/80">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             </span>

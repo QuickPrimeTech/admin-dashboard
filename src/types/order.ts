@@ -26,3 +26,21 @@ export type Order = {
   specialInstructions?: string;
   deliveryAddress?: string;
 };
+
+export type SupabaseOrder = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  total: number;
+  paymentMethod: string;
+  pickupDate: string | null;
+  pickupTime: string | null;
+  deliveryDate: string | null;
+  deliveryTime: string | null;
+  deliveryAddress: string | null;
+  status: string;
+  order_status: OrderStatus;
+  special_instructions: string | null;
+  created_at: string;
+};
