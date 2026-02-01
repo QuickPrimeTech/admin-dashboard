@@ -9,6 +9,7 @@ import { menuItemSchema } from "@/schemas/menu";
 import { createResponse } from "@/helpers/api-responses";
 import { createClient } from "@/utils/supabase/server";
 import { createSlug } from "@/helpers/slug";
+import { revalidatePage } from "@/helpers/revalidator";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
         400,
         "Invalid form data",
         JSON.stringify(errors),
-        false
+        false,
       );
     }
 
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     if (imageFile) {
       const uploadResult = await uploadImageToCloudinary(
         imageFile,
-        `${sanitizedRestaurantName}/menu-items`
+        `${sanitizedRestaurantName}/menu-items`,
       );
       uploadedImageUrl = uploadResult.secure_url;
       publicId = uploadResult.public_id;
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
     if (!branch_id) {
       return createResponse(
         403,
-        "You have to select a branch first before creating a menu item"
+        "You have to select a branch first before creating a menu item",
       );
     }
     // Prepare new menu item
@@ -107,16 +108,19 @@ export async function POST(request: NextRequest) {
         500,
         "Failed to save item",
         error?.message ?? "Unknown error",
-        false
+        false,
       );
     }
+
+    //Revalidate the menu page to reflect the new item
+    await revalidatePage("/menu");
 
     // Return the newly inserted item including its Supabase ID
     return createResponse(
       200,
       "Menu item was created successfully",
       insertedItem,
-      true
+      true,
     );
   } catch (err) {
     const error = err as Error;
@@ -124,7 +128,7 @@ export async function POST(request: NextRequest) {
       500,
       error.message || "An error occurred while submitting your menu details",
       null,
-      false
+      false,
     );
   }
 }
@@ -136,7 +140,7 @@ export async function GET() {
   if (!branchId) {
     return createResponse(
       403,
-      "You should choose a branch before fetching menu items"
+      "You should choose a branch before fetching menu items",
     );
   }
 
