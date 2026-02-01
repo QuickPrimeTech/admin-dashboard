@@ -150,17 +150,14 @@ export function Notifications() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
           className="relative"
           aria-label={`view notifications ${hasUnread ? `(${unreadCount} unread)` : ""}`}
           title="See your notifications"
         >
           <Bell
-            className={cn(
-              "h-5 w-5 transition-colors",
-              hasUnread && "text-foreground",
-            )}
+            className={cn("transition-colors", hasUnread && "text-foreground")}
           />
           {hasUnread && (
             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
@@ -170,9 +167,6 @@ export function Notifications() {
               </span>
             </span>
           )}
-          {/* {urgentCount > 0 && (
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-background" />
-          )} */}
         </Button>
       </PopoverTrigger>
 

@@ -42,7 +42,7 @@ const statusLabels: Record<OrderStatus, string> = {
 
 const statusColors: Record<OrderStatus, string> = {
   new: "bg-primary text-primary-foreground",
-  preparing: "bg-warning text-warning-foreground",
+  preparing: "bg-primary text-primary-foreground",
   ready: "bg-success text-success-foreground",
   completed: "bg-muted text-muted-foreground",
 };
