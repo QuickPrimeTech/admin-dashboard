@@ -25,12 +25,12 @@ import { useRouter } from "next/navigation";
 const NON_INDEX_SEGMENTS = new Set(["edit"]);
 
 // Define the shape of a breadcrumb item
-interface BreadcrumbData {
+type BreadcrumbData = {
   href: string;
   label: string;
   isLast: boolean;
   isClickable: boolean;
-}
+};
 
 export function AppBreadcrumb() {
   const pathname = usePathname();
