@@ -17,3 +17,5 @@ export function useOrders(branchId: string) {
     staleTime: 30 * 1000, // 30 seconds
   });
 }
+
+export function useUpdateOrderMutation() {}

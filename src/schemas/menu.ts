@@ -1,3 +1,5 @@
+// src/schemas/menu.ts
+
 import { z } from "zod";
 
 // Choice option schema
@@ -13,7 +15,7 @@ export const imageSchema = z.object({
     .refine(
       (file) =>
         !file || (file instanceof File && file.type.startsWith("image/")),
-      "Only image files are allowed"
+      "Only image files are allowed",
     )
     .optional(),
 });
@@ -28,7 +30,7 @@ export const availabilitySchema = z
       // Accepts both 08:00 and 08:00:00 formats
       .regex(
         /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/,
-        "Invalid start time format"
+        "Invalid start time format",
       )
       .default("08:00"),
     end_time: z
