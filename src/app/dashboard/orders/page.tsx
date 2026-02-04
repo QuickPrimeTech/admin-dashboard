@@ -60,7 +60,7 @@ export default function OrdersDashboard() {
         specialInstructions: order.special_instructions,
         createdAt: parseISO(order.created_at),
         scheduledFor,
-        completedAt: null,
+        completedAt: order.completed_at ? parseISO(order.completed_at) : null,
         branchId: order.branch_id,
         paymentMethod: order.payment_method,
         raw: order,

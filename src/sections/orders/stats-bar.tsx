@@ -30,7 +30,7 @@ export function StatsBar({
     {
       icon: DollarSign,
       label: "Today's Revenue",
-      value: `$${totalRevenue.toFixed(0)}`,
+      value: `Ksh ${totalRevenue.toFixed(0)}`,
       color: "text-success",
     },
     {

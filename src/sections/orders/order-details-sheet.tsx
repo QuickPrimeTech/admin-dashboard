@@ -84,7 +84,7 @@ function InfoRow({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center justify-between gap-3 pl-2">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
           <Icon className="h-4 w-4 text-muted-foreground" />
@@ -176,7 +176,7 @@ function StatusBadge({ status }: { status: OrderStatus }) {
       icon: PackageCheck,
     },
     completed: {
-      color: "bg-muted text-muted-foreground border border-border",
+      color: "bg-success text-success-foreground border border-border",
       icon: CheckCircle2,
     },
   };
@@ -202,6 +202,10 @@ export function OrderDetailsSheet({
   if (!order) return null;
 
   const placedTime = useTimeAgo(order.createdAt);
+
+  const completedTime = order.completedAt
+    ? useTimeAgo(order.completedAt)
+    : null;
 
   const basePrice = Math.floor(order.total * (1 / 1.18));
 
@@ -280,6 +284,13 @@ export function OrderDetailsSheet({
                 }
               />
               <InfoRow icon={Calendar} label="Date Placed" value={placedTime} />
+              {completedTime && (
+                <InfoRow
+                  icon={CheckCircle2}
+                  label="Competed At"
+                  value={completedTime}
+                />
+              )}
             </>
           )}
         </Section>

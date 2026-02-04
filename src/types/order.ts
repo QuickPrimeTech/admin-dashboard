@@ -78,6 +78,7 @@ export type OrderDB = {
   special_instructions: string | null;
   status: "pending" | "success";
   order_status: OrderStatus | null;
+  completed_at: string | null;
   branch_id: string; // uuid
 };
 

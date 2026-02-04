@@ -3,9 +3,9 @@ import { OrderViewModel, OrderStatus } from "@/types/order";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bike, ShoppingBag, ChevronRight } from "lucide-react";
+import { Bike, ShoppingBag, ChevronRight, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isToday } from "date-fns";
+import { isToday, isBefore } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import {
   formatDueTime,
@@ -31,6 +31,12 @@ export function OrderCard({
   const isScheduled = order.priority === "scheduled" && order.scheduledFor;
   const isTodayOrder = order.scheduledFor && isToday(order.scheduledFor);
 
+  // Check if overdue (scheduled time has passed and not completed)
+  const isOverdue =
+    order.scheduledFor &&
+    isBefore(order.scheduledFor, new Date()) &&
+    order.status !== "completed";
+
   // Auto-updating time display
   const placedTime = useTimeAgo(order.createdAt);
 
@@ -43,14 +49,37 @@ export function OrderCard({
     <Card
       className={cn(
         "relative overflow-hidden transition-all duration-200",
-        "hover:shadow-md hover:border-primary/30",
-        isNew && "border-l-4 border-l-primary",
+        "hover:shadow-md",
+        isOverdue
+          ? "border-2 border-destructive shadow-destructive/30"
+          : "hover:border-primary/30",
+        isNew && !isOverdue && "border-l-4 border-l-primary",
       )}
     >
-      <CardContent className="p-4 space-y-3">
+      {/* Blinking indicator for overdue orders */}
+      {isOverdue && (
+        <div className="absolute top-3 right-3">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+          </span>
+        </div>
+      )}
+
+      {/* Overdue badge */}
+      {isOverdue && (
+        <div className="absolute -top-px -right-px">
+          <Badge className="rounded-tl-none rounded-br-none bg-destructive border-0 font-semibold">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Overdue
+          </Badge>
+        </div>
+      )}
+
+      <CardContent className={cn("p-4 space-y-3", isOverdue && "pt-8")}>
         {/* Top row: Type badge + Time info */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge variant={order.type === "delivery" ? "info" : "warning"}>
               {order.type === "delivery" ? (
                 <Bike className="h-3 w-3" />
@@ -64,8 +93,12 @@ export function OrderCard({
             {order.scheduledFor && (
               <span
                 className={cn(
-                  "text-xs text-muted-foreground",
-                  isTodayOrder && "font-medium",
+                  "text-xs",
+                  isOverdue
+                    ? "text-destructive font-semibold"
+                    : isTodayOrder
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground",
                 )}
               >
                 {isTodayOrder
@@ -83,7 +116,14 @@ export function OrderCard({
 
         {/* Customer name */}
         <div>
-          <h3 className="font-semibold leading-tight">{order.customerName}</h3>
+          <h3
+            className={cn(
+              "font-semibold leading-tight",
+              isOverdue && "text-destructive",
+            )}
+          >
+            {order.customerName}
+          </h3>
         </div>
 
         {/* Food items - just names, minimal */}
@@ -92,10 +132,15 @@ export function OrderCard({
         </p>
         <Separator />
         {/* Bottom row: Total + Actions */}
-        <div className="flex items-center justify-between ">
+        <div className="flex items-center justify-between">
           <div>
             <span className="text-xs text-muted-foreground">Total</span>
-            <p className="text-lg font-semibold">
+            <p
+              className={cn(
+                "text-lg font-semibold",
+                isOverdue ? "text-destructive" : "text-foreground",
+              )}
+            >
               Ksh {order.total.toLocaleString()}
             </p>
           </div>
@@ -114,7 +159,7 @@ export function OrderCard({
                 onClick={nextAction.action}
                 size="sm"
                 variant={isNew ? "default" : isPreparing ? "blue" : "success"}
-                className="cursor-pointer"
+                className={cn("cursor-pointer", isOverdue && "animate-pulse")}
               >
                 {nextAction.label}
                 <ChevronRight className="ml-1 h-4 w-4" />

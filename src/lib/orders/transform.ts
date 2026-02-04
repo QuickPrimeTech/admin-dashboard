@@ -1,8 +1,8 @@
 // lib/orders/transform.ts
 import { Tables } from "@/types/supabase";
-import { OrderUI, OrderItem } from "@/types/order";
+import { OrderViewModel, OrderItem } from "@/types/order";
 
-export function transformOrder(row: Tables<"orders">): OrderUI {
+export function transformOrder(row: Tables<"orders">): OrderViewModel {
   // Parse items from JSONB - handles the menu item structure
   const rawItems = (row.items as any[]) || [];
   const items: OrderItem[] = rawItems.map(
@@ -35,7 +35,7 @@ export function transformOrder(row: Tables<"orders">): OrderUI {
   }
 
   // Determine priority
-  let priority: OrderUI["priority"] = "normal";
+  let priority: OrderViewModel["priority"] = "normal";
   if (scheduledFor && scheduledFor > new Date()) {
     priority = "scheduled";
   }
@@ -48,7 +48,7 @@ export function transformOrder(row: Tables<"orders">): OrderUI {
   }
 
   // Map DB status to UI status
-  const statusMap: Record<string, OrderUI["status"]> = {
+  const statusMap: Record<string, OrderViewModel["status"]> = {
     pending: "new",
     preparing: "preparing",
     ready: "ready",
@@ -81,6 +81,6 @@ export function transformOrder(row: Tables<"orders">): OrderUI {
   };
 }
 
-export function transformOrders(rows: Tables<"orders">[]): OrderUI[] {
+export function transformOrders(rows: Tables<"orders">[]): OrderViewModel[] {
   return rows.map(transformOrder);
 }

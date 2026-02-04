@@ -1,17 +1,17 @@
 // sections/orders/scheduled-orders-section.tsx
-import { OrderUI, OrderStatus } from "@/types/order";
+import { OrderViewModel, OrderStatus } from "@/types/order";
 import { CalendarClock } from "lucide-react";
 import { isToday, isTomorrow, format } from "date-fns";
 import { OrderCard } from "./order-card";
 
 interface ScheduledOrdersSectionProps {
-  orders: OrderUI[];
+  orders: OrderViewModel[];
   onStatusChange: (orderId: string, newStatus: OrderStatus) => void;
-  onViewDetails: (order: OrderUI) => void;
+  onViewDetails: (order: OrderViewModel) => void;
 }
 
-const groupByScheduleDate = (orders: OrderUI[]) => {
-  const groups: { label: string; orders: OrderUI[] }[] = [];
+const groupByScheduleDate = (orders: OrderViewModel[]) => {
+  const groups: { label: string; orders: OrderViewModel[] }[] = [];
 
   const todayOrders = orders.filter(
     (o) => o.scheduledFor && isToday(o.scheduledFor),
@@ -52,7 +52,7 @@ const groupByScheduleDate = (orders: OrderUI[]) => {
         acc[dateKey].push(order);
         return acc;
       },
-      {} as Record<string, OrderUI[]>,
+      {} as Record<string, OrderViewModel[]>,
     );
 
     Object.entries(byDate).forEach(([date, orders]) => {

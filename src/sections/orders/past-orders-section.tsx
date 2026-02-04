@@ -1,5 +1,4 @@
 // sections/orders/past-orders-section.tsx
-import { OrderUI } from "@/types/order";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,10 +13,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
+import { OrderViewModel } from "@/types/order";
 
 interface PastOrdersSectionProps {
-  orders: OrderUI[];
-  onViewDetails: (order: OrderUI) => void;
+  orders: OrderViewModel[];
+  onViewDetails: (order: OrderViewModel) => void;
 }
 
 const formatCompletedTime = (date: Date) => {
@@ -30,8 +30,8 @@ const formatCompletedTime = (date: Date) => {
   return format(date, "EEE, MMM d 'at' h:mm a");
 };
 
-const groupByDate = (orders: OrderUI[]) => {
-  const groups: { label: string; orders: OrderUI[] }[] = [];
+const groupByDate = (orders: OrderViewModel[]) => {
+  const groups: { label: string; orders: OrderViewModel[] }[] = [];
 
   const todayOrders = orders.filter(
     (o) => o.completedAt && isToday(o.completedAt),
@@ -79,8 +79,8 @@ function PastOrderCard({
   order,
   onViewDetails,
 }: {
-  order: OrderUI;
-  onViewDetails: (order: OrderUI) => void;
+  order: OrderViewModel;
+  onViewDetails: (order: OrderViewModel) => void;
 }) {
   return (
     <Card className="bg-secondary/50 transition-all hover:bg-secondary">
@@ -133,18 +133,18 @@ function PastOrderCard({
 
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <p className="font-bold">${order.total.toFixed(2)}</p>
+              <p className="font-bold">Ksh {order.total.toFixed(2)}</p>
               <p className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {order.completedAt && formatCompletedTime(order.completedAt)}
               </p>
             </div>
             <Button
-              variant="ghost"
+              variant="success"
               size="sm"
               onClick={() => onViewDetails(order)}
-              className="text-muted-foreground hover:text-foreground"
             >
+              Details
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
