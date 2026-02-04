@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/helpers/common";
+import { getCurrentBranchId } from "@/helpers/common";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, supabase, response } = await getAuthenticatedUser();
-    if (!user) return response;
+    const supabase = await createClient();
 
     const { updates } = await request.json();
 
     if (!Array.isArray(updates)) {
       return NextResponse.json(
         { success: false, message: "'updates' must be an array.", error: null },
-        { status: 400 }
+        { status: 400 },
       );
     }
+    //Getting current branchId
+    const branchId = await getCurrentBranchId();
 
     const results = await Promise.all(
       updates.map(
@@ -22,8 +24,8 @@ export async function POST(request: NextRequest) {
             .from("faqs")
             .update({ order_index: item.order_index })
             .eq("id", item.id)
-            .eq("user_id", user.id) // explicit ownership check
-      )
+            .eq("branch_id", branchId), // explicit ownership check
+      ),
     );
 
     const firstError = results.find((res) => res.error)?.error;
@@ -35,7 +37,7 @@ export async function POST(request: NextRequest) {
           message: "Failed to reorder some FAQs",
           error: firstError.message,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest) {
     console.error("Unexpected server error:", error.message);
     return NextResponse.json(
       { success: false, message: "Server error", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

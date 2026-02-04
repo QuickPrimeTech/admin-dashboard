@@ -1,8 +1,8 @@
-import { getAuthenticatedUser } from "@/helpers/common";
+import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const { supabase } = await getAuthenticatedUser();
+  const supabase = await createClient();
 
   const url = new URL(req.url);
   const order_id = url.searchParams.get("order_id");

@@ -1,8 +1,8 @@
-import { getAuthenticatedUser } from "@/helpers/common";
+import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const { supabase } = await getAuthenticatedUser();
+  const supabase = await createClient();
 
   // Get the phone number from query params
   const url = new URL(req.url);
@@ -16,7 +16,7 @@ export async function GET(req: Request) {
       `
       *,
       order:orders(name)
-    `
+    `,
     )
     .order("created_at", { ascending: false });
 

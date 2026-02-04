@@ -1,8 +1,8 @@
-import { getAuthenticatedUser } from "@/helpers/common";
+import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const { supabase } = await getAuthenticatedUser();
+  const supabase = await createClient();
 
   try {
     // Fetch essential data only (raw payments + orders)
@@ -16,7 +16,7 @@ export async function GET() {
       supabase
         .from("orders")
         .select(
-          "id, items, total, status, payment_method, pickup_time, created_at, user_id, name, phone"
+          "id, items, total, status, payment_method, pickup_time, created_at, user_id, name, phone",
         ),
     ]);
 
@@ -42,7 +42,7 @@ export async function GET() {
     console.error("Analytics fetch error:", err);
     return NextResponse.json(
       { success: false, error: err ?? "An error occurred" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

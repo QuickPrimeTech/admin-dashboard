@@ -1,11 +1,11 @@
 // types/order.ts
-export interface OrderItem {
+export type OrderItem = {
   id: string;
   name: string;
   quantity: number;
   price: number;
   modifiers?: string[];
-}
+};
 
 export type OrderStatus = "new" | "preparing" | "ready" | "completed";
 export type OrderType = "delivery" | "pickup";

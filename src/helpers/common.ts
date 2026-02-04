@@ -1,7 +1,5 @@
 //helpers/common.ts
-
 import { createClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
 import { cloudinary } from "@/utils/cloudinary/server";
 import { UploadResult } from "@/types/cloudinary";
 import { cookies } from "next/headers";
@@ -10,25 +8,6 @@ import { cookies } from "next/headers";
 export async function getCurrentBranchId() {
   const currentBranch = (await cookies()).get("app_branch")?.value;
   return currentBranch;
-}
-//This is a function that fetches the restaurant name and sanitises it to match proper cloudinary folder names
-export async function getAuthenticatedUser() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-  const { user } = data;
-
-  if (!user || error) {
-    return {
-      user: null,
-      supabase,
-      response: NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      ),
-    };
-  }
-
-  return { user, supabase, response: null };
 }
 
 //This is the function that gets all the info about a menu items such as public Id so that actions such as deleting images is possible
@@ -61,7 +40,7 @@ export async function getSanitizedPath(): Promise<string> {
 
   if (!currentBranchId) {
     throw new Error(
-      "You need to select a branch before starting creating and updating data"
+      "You need to select a branch before starting creating and updating data",
     );
   }
 
@@ -97,7 +76,7 @@ export async function getSanitizedPath(): Promise<string> {
 //This is the function that gets the folder path and uploads the image
 export async function uploadImageToCloudinary(
   file: File,
-  folderPath: string
+  folderPath: string,
 ): Promise<UploadResult> {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
@@ -115,7 +94,7 @@ export async function uploadImageToCloudinary(
 export async function uploadAndReplaceImage(
   imageFile: File,
   folderPath: string,
-  currentPublicId?: string
+  currentPublicId?: string,
 ): Promise<UploadResult> {
   //deleting the original image so that the new one can come and replace it
   if (currentPublicId) {
@@ -146,7 +125,7 @@ export async function deleteImageFromCloudinary(publicId: string) {
     // { result: "ok" } or { result: "not found" } or { result: "error" }
     if (result.result !== "ok") {
       throw new Error(
-        `Cloudinary deletion failed: ${result.result || "Unknown error"}`
+        `Cloudinary deletion failed: ${result.result || "Unknown error"}`,
       );
     }
 
@@ -154,13 +133,4 @@ export async function deleteImageFromCloudinary(publicId: string) {
   } catch (error) {
     throw new Error(`Failed to delete image from Cloudinary ${error}`);
   }
-}
-
-// This are the function for returning either true of error responses
-export function errorResponse(message: string, status = 500, error?: string) {
-  return NextResponse.json({ success: false, message, error }, { status });
-}
-
-export function successResponse(message: string, data?: string[]) {
-  return NextResponse.json({ success: true, message, ...(data && { data }) });
 }

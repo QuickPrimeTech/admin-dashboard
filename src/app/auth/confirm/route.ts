@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
+  // https://admin.quickprimetech.com//auth/confirm?token_hash=pkce_437758e90646fc494814d22b57d68a8bee65ae8da6b25ee67f5469a6&type=recovery&next=/auth/reset-password
+
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
