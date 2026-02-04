@@ -2,15 +2,15 @@
 import { TrendingUp, Clock, DollarSign, Package } from "lucide-react";
 
 interface StatsBarProps {
-  totalOrders: number;
-  avgPrepTime: number;
+  activeToday: number;
+  overdueToday: number;
   totalRevenue: number;
   completedToday: number;
 }
 
 export function StatsBar({
-  totalOrders,
-  avgPrepTime,
+  activeToday,
+  overdueToday,
   totalRevenue,
   completedToday,
 }: StatsBarProps) {
@@ -18,13 +18,13 @@ export function StatsBar({
     {
       icon: Package,
       label: "Active Orders",
-      value: totalOrders.toString(),
+      value: activeToday.toString(),
       color: "text-primary",
     },
     {
       icon: Clock,
-      label: "Avg. Prep Time",
-      value: `${avgPrepTime} min`,
+      label: "Overdue Orders",
+      value: overdueToday.toString(),
       color: "text-warning",
     },
     {

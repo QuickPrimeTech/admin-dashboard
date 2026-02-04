@@ -1,21 +1,43 @@
 // hooks/use-orders.ts
 import { ApiResponse } from "@/types/api";
-import { OrderItem } from "@/types/order";
-import { useQuery } from "@tanstack/react-query";
+import { OrderDB, OrderStatus } from "@/types/order";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 
 export const getOrdersQueryKey = (branchId: string) => ["orders", branchId];
 
-//Doing the fetching logic and all the orders from the db
 export function useOrders(branchId: string) {
-  return useQuery<OrderItem[], AxiosError<ApiResponse<null>>>({
+  return useQuery<OrderDB[], AxiosError<ApiResponse<null>>>({
     queryKey: getOrdersQueryKey(branchId),
     queryFn: async () => {
-      const res = await axios.get("/api/orders");
+      const res = await axios.get<ApiResponse<OrderDB[]>>("/api/orders");
       return res.data.data;
     },
+    enabled: !!branchId,
     staleTime: 30 * 1000, // 30 seconds
   });
 }
 
-export function useUpdateOrderMutation() {}
+interface UpdateOrderVariables {
+  orderId: string;
+  newStatus: OrderStatus;
+}
+
+export function useUpdateOrderMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, AxiosError<ApiResponse<null>>, UpdateOrderVariables>(
+    {
+      mutationFn: async ({ orderId, newStatus }) => {
+        await axios.patch(`/api/orders/${orderId}`, {
+          order_status: newStatus,
+        });
+      },
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: getOrdersQueryKey(variables.orderId),
+        });
+      },
+    },
+  );
+}

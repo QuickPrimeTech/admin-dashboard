@@ -1,14 +1,15 @@
 // sections/orders/order-column.tsx
-import { OrderUI, OrderStatus } from "@/types/order";
+import { OrderStatus, OrderViewModel } from "@/types/order";
 import { OrderCard } from "./order-card";
 import { cn } from "@/lib/utils";
 
 interface OrderColumnProps {
   title: string;
-  orders: OrderUI[];
+  orders: OrderViewModel[];
   status: OrderStatus;
   onStatusChange: (orderId: string, newStatus: OrderStatus) => void;
-  onViewDetails: (order: OrderUI) => void;
+  onViewDetails: (order: OrderViewModel) => void;
+  showTime: boolean;
 }
 
 const statusConfig = {

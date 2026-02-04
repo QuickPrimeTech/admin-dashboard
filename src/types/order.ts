@@ -87,26 +87,6 @@ export type OrderStatus = "new" | "preparing" | "ready" | "completed";
 export type OrderType = "delivery" | "pickup";
 export type OrderPriority = "normal" | "high" | "scheduled";
 
-export type OrderUI = {
-  id: string;
-  orderNumber: string; // formatted for display (e.g., "#001234")
-  customerName: string;
-  email: string;
-  phone: string;
-  type: OrderType;
-  status: OrderStatus;
-  priority: OrderPriority;
-  items: OrderItem[];
-  total: number;
-  deliveryAddress?: string;
-  specialInstructions?: string;
-  createdAt: Date;
-  scheduledFor?: Date; // pickup or delivery datetime
-  completedAt?: Date;
-  branchId: string;
-  paymentMethod: string;
-};
-
 // ==================== Helper Types for Calculations ====================
 
 export type ParsedChoice = {
@@ -120,3 +100,26 @@ export type ParsedChoice = {
 export function isMultiSelect(value: string | string[]): value is string[] {
   return Array.isArray(value);
 }
+
+// Lightweight UI type derived from OrderDB with computed fields
+export type OrderViewModel = {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  type: "pickup" | "delivery";
+  status: OrderStatus;
+  priority: "normal" | "high" | "scheduled";
+  items: OrderItem[];
+  total: number;
+  deliveryAddress: string | null;
+  specialInstructions: string | null;
+  createdAt: Date;
+  scheduledFor: Date | null;
+  completedAt: Date | null;
+  branchId: string;
+  paymentMethod: string;
+  // Keep raw data for mutations
+  raw: OrderDB;
+};

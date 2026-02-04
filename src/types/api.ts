@@ -4,8 +4,8 @@ export type Params = {
   }>;
 };
 
-export type ApiResponse<T> = {
+export type ApiResponse<T = null> = {
   message: string;
-  data: T | null;
+  data: T;
   success: boolean;
 };
