@@ -13,6 +13,7 @@ export async function GET() {
     .from("orders")
     .select("*")
     .eq("branch_id", branchId)
+    .eq("status", "success")
     .order("created_at", { ascending: false });
 
   if (error) {
