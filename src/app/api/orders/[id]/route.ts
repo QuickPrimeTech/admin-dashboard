@@ -9,21 +9,21 @@ import {
   OrderStatus,
 } from "@/types/order";
 import { z } from "zod";
+import { getCurrentBranchId } from "@/helpers/common";
+import { Params } from "@/types/api";
 
 // Validation schema for the request body
 const patchSchema = z.object({
   order_status: orderStatusSchema,
 });
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PATCH(request: NextRequest, { params }: Params) {
   const supabase = await createClient();
 
   try {
     // 1. Validate request body
     const body = await request.json();
+    console.log("body is ------->", body);
     const parseResult = patchSchema.safeParse(body);
 
     if (!parseResult.success) {
@@ -34,16 +34,24 @@ export async function PATCH(
     }
 
     const { order_status: newStatus } = parseResult.data;
-    const { id } = params;
+    const { id } = await params;
 
+    console.log("Your id is --->", id);
+
+    //Get the current branch id
+    const branchId = await getCurrentBranchId();
+
+    console.log("The new status is --->", newStatus);
     // 2. Get current order to check transition validity
     const { data: currentOrder, error: fetchError } = await supabase
       .from("orders")
       .select("order_status, id")
       .eq("id", id)
+      .eq("branch_id", branchId)
       .single();
 
     if (fetchError) {
+      console.log("fetch error", fetchError, newStatus);
       return createResponse(404, "Order not found");
     }
 
@@ -67,9 +75,10 @@ export async function PATCH(
       .update({ order_status: newStatus })
       .eq("id", id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (updateError) {
+      console.log(updateError);
       return createResponse(500, "Failed to update order status");
     }
 

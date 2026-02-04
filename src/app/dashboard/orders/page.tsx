@@ -34,7 +34,7 @@ export default function OrdersDashboard() {
 
   const { branchId } = useBranch();
   const { data: orders = [], isLoading, error } = useOrders(branchId);
-  const updateMutation = useUpdateOrderMutation();
+  const updateMutation = useUpdateOrderMutation(branchId);
 
   const viewModels = useMemo((): OrderViewModel[] => {
     return orders.map((order) => {
