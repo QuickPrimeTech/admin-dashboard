@@ -3,7 +3,9 @@ import { ApiResponse } from "@/types/api";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function POST(): Promise<NextResponse<ApiResponse<boolean>>> {
+export async function POST(): Promise<
+  NextResponse<ApiResponse<boolean | null>>
+> {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.updateUser({

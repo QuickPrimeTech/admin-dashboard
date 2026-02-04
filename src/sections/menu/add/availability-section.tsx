@@ -25,13 +25,13 @@ import { AvailabilityFormData, availabilitySchema } from "@/schemas/menu";
 import { useMenuItemForm } from "@/contexts/menu/add-menu-item";
 import { useEffect } from "react";
 
-  const defaultData: AvailabilityFormData = {
-    is_available: true,
-    is_popular: false,
-    start_time: "08:00",
-    end_time: "10:00",
-  };
-  
+const defaultData: AvailabilityFormData = {
+  is_available: true,
+  is_popular: false,
+  start_time: "11:00",
+  end_time: "22:00",
+};
+
 export default function AvailabilitySection() {
   const { availabilityInfo, setAvailabilityInfo } = useMenuItemForm();
 

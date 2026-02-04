@@ -1,265 +1,299 @@
+// app/dashboard/orders/page.tsx
 "use client";
-
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@ui/card";
-import { Input } from "@ui/input";
-import { Badge } from "@ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
+import { useState, useMemo } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarClock, Clock, History, Loader2 } from "lucide-react";
+import { StatsBar } from "@/sections/orders/stats-bar";
+import { OrderColumn } from "@/sections/orders/order-column";
+import { PastOrdersSection } from "@/sections/orders/past-orders-section";
+import { ScheduledOrdersSection } from "@/sections/orders/scheduled-orders-section";
+import { OrderDetailsSheet } from "@/sections/orders/order-details-sheet";
+import { useOrders, useUpdateOrderMutation } from "@/hooks/use-orders";
+import { OrderStatus, OrderViewModel } from "@/types/order";
 import {
-  ShoppingBag,
-  Phone,
-  Mail,
-  Calendar,
-  Search,
-  Clock,
-} from "lucide-react";
+  isToday,
+  startOfDay,
+  endOfDay,
+  parseISO,
+  isBefore,
+  isAfter,
+} from "date-fns";
+import { useBranch } from "@/components/providers/branch-provider";
 
-interface Order {
-  id: number;
-  created_at: string;
-  name: string;
-  email: string;
-  phone: string;
-  date: string;
-  time: string;
-  user_id: string;
-}
-
-export default function OrdersPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const isOrderExpired = (order: Order) => {
-    const pickupDateTime = new Date(`${order.date}T${order.time}:00`);
-    const now = new Date();
-    const diffInHours =
-      (now.getTime() - pickupDateTime.getTime()) / (1000 * 60 * 60);
-    return diffInHours > 12;
-  };
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/orders", {
-        method: "GET",
-        credentials: "include",
-      });
-      const data = await response.json();
-      setOrders(data.data || []);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const activeOrders = orders.filter((order) => !isOrderExpired(order));
-  const completedOrders = orders.filter((order) => isOrderExpired(order));
-
-  const filterOrders = (orderList: Order[]) => {
-    return orderList.filter(
-      (order) =>
-        order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.phone.includes(searchTerm) ||
-        order.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
-
-  const filteredActiveOrders = filterOrders(activeOrders);
-  const filteredCompletedOrders = filterOrders(completedOrders);
-
-  const OrderCard = ({ order }: { order: Order }) => (
-    <Card className="border-orange-200 dark:border-gray-800">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-              <ShoppingBag className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-lg">{order.name}</h3>
-                <Badge variant="outline" className="text-xs">
-                  #{order.id}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                <span className="flex items-center gap-1">
-                  <Mail className="w-3 h-3" />
-                  {order.email}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Phone className="w-3 h-3" />
-                  {order.phone}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <Calendar className="w-3 h-3" />
-              <span>{order.date}</span>
-              <Clock className="w-3 h-3" />
-              <span>{order.time}</span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+export default function OrdersDashboard() {
+  const [selectedOrder, setSelectedOrder] = useState<OrderViewModel | null>(
+    null,
+  );
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [orderTypeFilter, setOrderTypeFilter] = useState<
+    "all" | "pickup" | "delivery"
+  >("all");
+  const [viewMode, setViewMode] = useState<"today" | "scheduled" | "history">(
+    "today",
   );
 
-  if (loading) {
+  const { branchId } = useBranch();
+  const { data: orders = [], isLoading, error } = useOrders(branchId);
+  const updateMutation = useUpdateOrderMutation(branchId);
+
+  const viewModels = useMemo((): OrderViewModel[] => {
+    return orders.map((order) => {
+      const scheduledFor =
+        order.pickup_date && order.pickup_time
+          ? parseISO(`${order.pickup_date}T${order.pickup_time}`)
+          : order.delivery_date && order.delivery_time
+            ? parseISO(`${order.delivery_date}T${order.delivery_time}`)
+            : null;
+
+      return {
+        id: order.id,
+        orderNumber: `#${order.id.slice(-6).toUpperCase()}`,
+        customerName: order.name,
+        email: order.email,
+        phone: order.phone,
+        type: order.delivery_address ? "delivery" : "pickup",
+        status: order.order_status || "new",
+        priority: scheduledFor ? "scheduled" : "normal",
+        items: order.items,
+        total: Number(order.total),
+        deliveryAddress: order.delivery_address,
+        specialInstructions: order.special_instructions,
+        createdAt: parseISO(order.created_at),
+        scheduledFor,
+        completedAt: order.completed_at ? parseISO(order.completed_at) : null,
+        branchId: order.branch_id,
+        paymentMethod: order.payment_method,
+        raw: order,
+      };
+    });
+  }, [orders]);
+
+  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
+    updateMutation.mutate({ orderId, newStatus });
+  };
+
+  const handleViewDetails = (order: OrderViewModel) => {
+    setSelectedOrder(order);
+    setSheetOpen(true);
+  };
+
+  const typeFilteredOrders = useMemo(() => {
+    if (orderTypeFilter === "all") return viewModels;
+    return viewModels.filter((order) => order.type === orderTypeFilter);
+  }, [viewModels, orderTypeFilter]);
+
+  // TODAY ORDERS: Due today, sorted by scheduled time (nearest first)
+  const todayOrders = useMemo(() => {
+    const now = new Date();
+    return typeFilteredOrders
+      .filter((o) => {
+        // Must be scheduled and due today
+        if (!o.scheduledFor) return false;
+        return isToday(o.scheduledFor) && o.status !== "completed";
+      })
+      .sort((a, b) => {
+        const timeA = a.scheduledFor!.getTime();
+        const timeB = b.scheduledFor!.getTime();
+
+        // Overdue orders (before now) go to top
+        const aIsOverdue = isBefore(a.scheduledFor!, now);
+        const bIsOverdue = isBefore(b.scheduledFor!, now);
+
+        if (aIsOverdue && !bIsOverdue) return -1;
+        if (!aIsOverdue && bIsOverdue) return 1;
+
+        // Both overdue or both upcoming: sort by time (nearest first)
+        return timeA - timeB;
+      });
+  }, [typeFilteredOrders]);
+
+  // UPCOMING SCHEDULED: Future dates (not today), sorted by date
+  const upcomingScheduledOrders = useMemo(() => {
+    return typeFilteredOrders
+      .filter((o) => {
+        if (!o.scheduledFor) return false;
+        return (
+          !isToday(o.scheduledFor) &&
+          isAfter(o.scheduledFor, new Date()) &&
+          o.status !== "completed"
+        );
+      })
+      .sort((a, b) => a.scheduledFor!.getTime() - b.scheduledFor!.getTime());
+  }, [typeFilteredOrders]);
+
+  const completedOrders = useMemo(() => {
+    return typeFilteredOrders
+      .filter((o) => o.status === "completed")
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }, [typeFilteredOrders]);
+
+  // Split today orders by status for columns
+  const newOrders = todayOrders.filter((o) => o.status === "new");
+  const preparingOrders = todayOrders.filter((o) => o.status === "preparing");
+  const readyOrders = todayOrders.filter((o) => o.status === "ready");
+
+  const stats = useMemo(() => {
+    const now = new Date();
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
+
+    const activeToday = todayOrders.length;
+    const overdueToday = todayOrders.filter(
+      (o) => o.scheduledFor && isBefore(o.scheduledFor, now),
+    ).length;
+
+    const completedToday = typeFilteredOrders.filter(
+      (o) =>
+        o.status === "completed" &&
+        o.completedAt &&
+        o.completedAt >= todayStart &&
+        o.completedAt <= todayEnd,
+    ).length;
+
+    const totalRevenue = typeFilteredOrders
+      .filter((o) => o.status === "completed" && isToday(o.createdAt))
+      .reduce((sum, o) => sum + o.total, 0);
+
+    return {
+      activeToday,
+      overdueToday,
+      completedToday,
+      totalRevenue,
+    };
+  }, [todayOrders, typeFilteredOrders]);
+
+  if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-              Orders
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage customer pickup orders
-            </p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading orders...</p>
         </div>
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="border-orange-200 dark:border-gray-800">
-              <CardContent className="p-6">
-                <div className="animate-pulse flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
-                  <div className="space-y-2 flex-1">
-                    <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive font-medium">Failed to load orders</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {error.response?.data?.message || error.message}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-            Orders
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Manage customer pickup orders
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen">
+      <main>
+        <div className="container mx-auto space-y-6">
+          <StatsBar
+            activeToday={stats.activeToday}
+            overdueToday={stats.overdueToday}
+            completedToday={stats.completedToday}
+            totalRevenue={stats.totalRevenue}
+          />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-orange-200 dark:border-gray-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-orange-600" />
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Active Orders
-                </p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {activeOrders.length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-green-200 dark:border-gray-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Completed Orders
-                </p>
-                <p className="text-2xl font-bold text-green-600">
-                  {completedOrders.length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Tabs
+              value={viewMode}
+              onValueChange={(v) => setViewMode(v as typeof viewMode)}
+            >
+              <TabsList className="h-11">
+                <TabsTrigger value="today" className="gap-2 px-4">
+                  <Clock className="h-4 w-4" />
+                  Today
+                  {todayOrders.length > 0 && (
+                    <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
+                      {todayOrders.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="scheduled" className="gap-2 px-4">
+                  <CalendarClock className="h-4 w-4" />
+                  Upcoming
+                  {upcomingScheduledOrders.length > 0 && (
+                    <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                      {upcomingScheduledOrders.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="history" className="gap-2 px-4">
+                  <History className="h-4 w-4" />
+                  History
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-      {/* Search */}
-      <Card className="border-orange-200 dark:border-gray-800">
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search orders by name, phone, or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+            <Tabs
+              value={orderTypeFilter}
+              onValueChange={(v) =>
+                setOrderTypeFilter(v as typeof orderTypeFilter)
+              }
+            >
+              <TabsList>
+                <TabsTrigger value="all">All Types</TabsTrigger>
+                <TabsTrigger value="pickup">Pickup</TabsTrigger>
+                <TabsTrigger value="delivery">Delivery</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
-        </CardContent>
-      </Card>
 
-      <Tabs defaultValue="active" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="active">
-            Active Orders ({activeOrders.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            Completed Orders ({completedOrders.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="active" className="space-y-4 mt-6">
-          {filteredActiveOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
-
-          {filteredActiveOrders.length === 0 && (
-            <Card className="border-orange-200 dark:border-gray-800">
-              <CardContent className="p-6 text-center">
-                <ShoppingBag className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  No active orders found
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {searchTerm
-                    ? "No active orders match your search criteria"
-                    : "No active orders at the moment"}
-                </p>
-              </CardContent>
-            </Card>
+          {viewMode === "today" && (
+            <div className="grid gap-6 lg:grid-cols-3">
+              <OrderColumn
+                title="New"
+                orders={newOrders}
+                status="new"
+                onStatusChange={handleStatusChange}
+                onViewDetails={handleViewDetails}
+                showTime // Pass this to display scheduled time
+              />
+              <OrderColumn
+                title="Preparing"
+                orders={preparingOrders}
+                status="preparing"
+                onStatusChange={handleStatusChange}
+                onViewDetails={handleViewDetails}
+                showTime
+              />
+              <OrderColumn
+                title="Ready"
+                orders={readyOrders}
+                status="ready"
+                onStatusChange={handleStatusChange}
+                onViewDetails={handleViewDetails}
+                showTime
+              />
+            </div>
           )}
-        </TabsContent>
 
-        <TabsContent value="completed" className="space-y-4 mt-6">
-          {filteredCompletedOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
-
-          {filteredCompletedOrders.length === 0 && (
-            <Card className="border-orange-200 dark:border-gray-800">
-              <CardContent className="p-6 text-center">
-                <ShoppingBag className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  No completed orders found
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {searchTerm
-                    ? "No completed orders match your search criteria"
-                    : "No completed orders yet"}
-                </p>
-              </CardContent>
-            </Card>
+          {viewMode === "scheduled" && (
+            <ScheduledOrdersSection
+              orders={upcomingScheduledOrders}
+              onStatusChange={handleStatusChange}
+              onViewDetails={handleViewDetails}
+            />
           )}
-        </TabsContent>
-      </Tabs>
+
+          {viewMode === "history" && (
+            <PastOrdersSection
+              orders={completedOrders}
+              onViewDetails={handleViewDetails}
+            />
+          )}
+        </div>
+      </main>
+
+      <OrderDetailsSheet
+        order={selectedOrder}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onStatusChange={handleStatusChange}
+      />
     </div>
   );
 }

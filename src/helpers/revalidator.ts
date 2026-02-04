@@ -11,7 +11,7 @@ export async function revalidatePage(path: string) {
       .single();
 
     if (error || !data?.website) {
-      console.error("Restaurant website not found for this user.");
+      console.error("Restaurant website not found:", JSON.stringify(error));
       return null;
     }
 
@@ -19,35 +19,33 @@ export async function revalidatePage(path: string) {
     const revalidateSecret = process.env.REVALIDATE_SECRET;
 
     if (!revalidateSecret) {
-      console.error("Missing REVALIDATE_SECRET in environment variables.");
+      console.error("Missing REVALIDATE_SECRET.");
       return null;
     }
 
-    // 3. Call the restaurant site's /api/revalidate endpoint
-    const { data: res } = await axios.post(`${website}/api/revalidate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    // ✅ Axios call (correct)
+    const res = await axios.post(
+      `${website}/api/revalidate`,
+      {
         path,
         secret: revalidateSecret,
-      }),
-    });
+      },
+      {
+        headers: { "Content-Type": "application/json" },
+      },
+    );
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      console.error(
-        `Revalidation failed: ${res.status} ${res.statusText} - ${
-          body.message || ""
-        }`
-      );
-      return null;
+    return res.data;
+  } catch (err: any) {
+    // 🔥 THIS logs the error returned from the other site's API
+    if (axios.isAxiosError(err)) {
+      console.error("Revalidation API Error:");
+      console.error("Status:", err.response?.status);
+      console.error("Response:", JSON.stringify(err.response?.data));
+    } else {
+      console.error("Unexpected error:", JSON.stringify(err));
     }
 
-    return await res.json();
-  } catch (err) {
-    console.error("Error in revalidatePage:", err);
     return null;
   }
 }

@@ -6,6 +6,7 @@ import {
   getSanitizedPath,
   uploadAndReplaceImage,
 } from "@/helpers/common";
+import { revalidatePage } from "@/helpers/revalidator";
 import { createSlug } from "@/helpers/slug";
 import { MenuItemFormData, menuItemSchema } from "@/schemas/menu";
 import { Params } from "@/types/api";
@@ -21,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!branchId) {
     return createResponse(
       403,
-      "You should choose a branch before fetching menu items"
+      "You should choose a branch before fetching menu items",
     );
   }
 
@@ -54,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         404,
         "Menu item not found",
         fetchError?.message ?? null,
-        false
+        false,
       );
     }
 
@@ -119,7 +120,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       const uploadResult = await uploadAndReplaceImage(
         imageFile,
         `${sanitizedRestaurantName}/menu-items`,
-        existingItem.public_id
+        existingItem.public_id,
       );
       uploadedImageUrl = uploadResult.secure_url;
       publicId = uploadResult.public_id;
@@ -152,16 +153,16 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         500,
         "Failed to update menu item",
         updateError.message,
-        false
+        false,
       );
     }
 
-    // await revalidatePage("/menu");
+    await revalidatePage("/menu");
     return createResponse(
       200,
       "Menu item updated successfully",
       updatedItem,
-      true
+      true,
     );
   } catch (err) {
     const error = err as Error;
@@ -169,7 +170,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       500,
       "An error occurred while updating menu item",
       error.message,
-      false
+      false,
     );
   }
 }
@@ -206,17 +207,17 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       return createResponse(502, "Failed to delete menu item");
     }
     //revalidating the page in the frontend for the menu items to be rendered
-    // await revalidatePage("/menu");
+    await revalidatePage("/menu");
     //  returning a success message to the frontend
     return createResponse(
       200,
       `${data.name} deleted successfully from the menu`,
-      data
+      data,
     );
   } catch {
     return createResponse(
       500,
-      "An error occurred on the server while deleting your menu item"
+      "An error occurred on the server while deleting your menu item",
     );
   }
 }
