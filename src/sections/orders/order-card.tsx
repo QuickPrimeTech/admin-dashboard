@@ -51,15 +51,7 @@ export function OrderCard({
         {/* Top row: Type badge + Time info */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Badge
-              variant="secondary"
-              className={cn(
-                "gap-1.5 font-normal text-xs",
-                order.type === "delivery"
-                  ? "bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-800"
-                  : "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-800",
-              )}
-            >
+            <Badge variant={order.type === "delivery" ? "info" : "warning"}>
               {order.type === "delivery" ? (
                 <Bike className="h-3 w-3" />
               ) : (

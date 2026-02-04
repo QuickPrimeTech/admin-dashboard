@@ -20,7 +20,6 @@ import {
   Utensils,
   AlertCircle,
   Calendar,
-  Sparkles,
   ChefHat,
   PackageCheck,
   CheckCircle2,
@@ -31,6 +30,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { useTimeAgo } from "@/helpers/time-formatters";
 import { getNextAction } from "@/helpers/order-helpers";
+import { formatDate } from "@/utils/date-formatters";
 
 interface OrderDetailsSheetProps {
   order: OrderViewModel | null;
@@ -163,7 +163,7 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   > = {
     new: {
       color: "bg-primary/10 text-primary border border-primary/20",
-      icon: Sparkles,
+      icon: ShoppingBag,
     },
     preparing: {
       color:
@@ -202,6 +202,8 @@ export function OrderDetailsSheet({
   if (!order) return null;
 
   const placedTime = useTimeAgo(order.createdAt);
+
+  const basePrice = Math.floor(order.total * (1 / 1.18));
 
   const isScheduled = order.priority === "scheduled" && order.scheduledFor;
 
@@ -269,6 +271,14 @@ export function OrderDetailsSheet({
                     : "Ready in 20-30 mins"
                 }
               />
+              <InfoRow
+                icon={Calendar}
+                label="Pickup Date"
+                value={
+                  order.scheduledFor &&
+                  formatDate(order.scheduledFor.toString())
+                }
+              />
               <InfoRow icon={Calendar} label="Date Placed" value={placedTime} />
             </>
           )}
@@ -313,13 +323,19 @@ export function OrderDetailsSheet({
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
             <span className="text-foreground">
-              Ksh {Math.round(order.total * 0.9).toLocaleString()}
+              Ksh {basePrice.toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Tax (10%)</span>
+            <span className="text-muted-foreground">VAT (16%)</span>
             <span className="text-foreground">
-              Ksh {Math.round(order.total * 0.1).toLocaleString()}
+              Ksh {(basePrice * 0.16).toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Catering Levy (2%)</span>
+            <span className="text-foreground">
+              Ksh {(basePrice * 0.02).toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between items-center pt-3 border-t border-border">

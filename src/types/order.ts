@@ -123,3 +123,25 @@ export type OrderViewModel = {
   // Keep raw data for mutations
   raw: OrderDB;
 };
+
+export const orderStatusSchema = z.enum([
+  "new",
+  "preparing",
+  "ready",
+  "completed",
+]);
+
+// Valid status transitions (business logic)
+export const validTransitions: Record<OrderStatus, OrderStatus[]> = {
+  new: ["preparing", "completed"], // Can start prep or cancel
+  preparing: ["ready", "completed"], // Can finish prep or cancel
+  ready: ["completed"], // Can only complete
+  completed: [], // Terminal state
+};
+
+export function isValidStatusTransition(
+  currentStatus: OrderStatus,
+  newStatus: OrderStatus,
+): boolean {
+  return validTransitions[currentStatus].includes(newStatus);
+}
