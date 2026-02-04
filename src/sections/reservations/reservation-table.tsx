@@ -24,7 +24,7 @@ type SortDirection = "asc" | "desc";
 
 export function ReservationsTable({ reservations }: ReservationsTableProps) {
   const [sortField, setSortField] = useState<SortField>("date");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);

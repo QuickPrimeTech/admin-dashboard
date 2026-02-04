@@ -7,8 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 //endpoint for creating a new restaurant and updating one if exists
 export async function POST(
-  req: NextRequest
-): Promise<NextResponse<ApiResponse<Restaurant>>> {
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse<Restaurant | null>>> {
   const supabase = await createClient();
 
   //  Read restaurant name from request
@@ -39,7 +39,7 @@ export async function POST(
       },
       {
         onConflict: "user_id", // means if same user_id exists, update
-      }
+      },
     )
     .select()
     .single();
@@ -52,6 +52,6 @@ export async function POST(
   return createResponse<Restaurant>(
     200,
     "Your restaurant name has been successfully saved",
-    data
+    data,
   );
 }

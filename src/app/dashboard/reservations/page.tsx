@@ -13,6 +13,7 @@ import { useBranch } from "@/components/providers/branch-provider";
 import { StatsCards } from "@/sections/reservations/stats-card";
 import { FilterBar } from "@/sections/reservations/filter-bar";
 import { ReservationsTable } from "@/sections/reservations/reservation-table";
+import { Spinner } from "@/components/ui/spinner";
 
 const Index = () => {
   const { branchId } = useBranch();
@@ -65,7 +66,14 @@ const Index = () => {
       : [];
   }, [reservations, searchQuery, statusFilter, dateFilter]);
 
-  if (!reservations) return null;
+  if (!reservations) {
+    return (
+      <div className="min-h-screen space-y-3 flex flex-col items-center justify-center">
+        <Spinner />
+        Loading Reservations
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
