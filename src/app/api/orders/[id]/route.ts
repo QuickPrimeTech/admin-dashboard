@@ -36,12 +36,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const { order_status: newStatus } = parseResult.data;
     const { id } = await params;
 
-    console.log("Your id is --->", id);
-
     //Get the current branch id
     const branchId = await getCurrentBranchId();
 
-    console.log("The new status is --->", newStatus);
     // 2. Get current order to check transition validity
     const { data: currentOrder, error: fetchError } = await supabase
       .from("orders")
@@ -51,7 +48,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       .single();
 
     if (fetchError) {
-      console.log("fetch error", fetchError, newStatus);
+      console.log("fetch error", fetchError);
       return createResponse(404, "Order not found");
     }
 
@@ -75,10 +72,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       .update({ order_status: newStatus })
       .eq("id", id)
       .select()
-      .maybeSingle();
+      .single();
 
     if (updateError) {
-      console.log(updateError);
       return createResponse(500, "Failed to update order status");
     }
 
