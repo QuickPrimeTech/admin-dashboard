@@ -5,53 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bike, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  format,
-  isToday,
-  isYesterday,
-  isTomorrow,
-  differenceInCalendarDays,
-} from "date-fns";
-import { useEffect, useState } from "react";
+import { isToday } from "date-fns";
 import { Separator } from "@/components/ui/separator";
-
-// Auto-updating time hook
-function useTimeAgo(date: Date) {
-  const [timeString, setTimeString] = useState(() => formatOrderTime(date));
-
-  useEffect(() => {
-    // Update immediately and then every minute
-    setTimeString(formatOrderTime(date));
-    const interval = setInterval(() => {
-      setTimeString(formatOrderTime(date));
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [date]);
-
-  return timeString;
-}
-
-// Friendly time formatting: "Today 2:30 PM", "Yesterday 2:30 PM", "Wednesday 2:30 PM"
-const formatOrderTime = (date: Date) => {
-  const time = format(date, "h:mm a");
-
-  if (isToday(date)) return `Today ${time}`;
-  if (isYesterday(date)) return `Yesterday ${time}`;
-  if (isTomorrow(date)) return `Tomorrow ${time}`;
-
-  const daysDiff = differenceInCalendarDays(new Date(), date);
-  if (daysDiff < 7) {
-    return `${format(date, "EEEE")} ${time}`; // "Wednesday 2:30 PM"
-  }
-
-  return format(date, "MMM d, h:mm a"); // "Jan 15, 2:30 PM"
-};
-
-// Due time formatting for today orders
-const formatDueTime = (date: Date) => {
-  return `Due by ${format(date, "h:mm a")}`;
-};
+import {
+  formatDueTime,
+  formatOrderTime,
+  useTimeAgo,
+} from "@/helpers/time-formatters";
+import { getNextAction } from "@/helpers/order-helpers";
 
 interface OrderCardProps {
   order: OrderViewModel;
@@ -76,29 +37,7 @@ export function OrderCard({
   // Get food names only (no choices/variants)
   const foodNames = order.items.map((item) => item.name).join(", ");
 
-  const getNextAction = () => {
-    switch (order.status) {
-      case "new":
-        return {
-          label: isScheduled ? "Start Prep" : "Accept",
-          action: () => onStatusChange(order.id, "preparing"),
-        };
-      case "preparing":
-        return {
-          label: "Ready",
-          action: () => onStatusChange(order.id, "ready"),
-        };
-      case "ready":
-        return {
-          label: "Complete",
-          action: () => onStatusChange(order.id, "completed"),
-        };
-      default:
-        return null;
-    }
-  };
-
-  const nextAction = getNextAction();
+  const nextAction = getNextAction(order, onStatusChange, isScheduled);
 
   return (
     <Card

@@ -1,63 +1,197 @@
 // sections/orders/order-details-sheet.tsx
-
-import { OrderUI, OrderStatus } from "@/types/order";
+import { OrderViewModel, OrderStatus, OrderItem } from "@/types/order";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Clock,
   MapPin,
   ShoppingBag,
-  Bike,
-  User,
   Phone,
-  MessageSquare,
   Printer,
-  CalendarClock,
-  AlertTriangle,
+  ChevronRight,
+  User,
+  Mail,
+  Clock,
+  Utensils,
+  AlertCircle,
+  Calendar,
+  Sparkles,
+  ChefHat,
+  PackageCheck,
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, isToday, isTomorrow } from "date-fns";
+import { format } from "date-fns";
 import Link from "next/link";
+import { ReactNode } from "react";
+import { useTimeAgo } from "@/helpers/time-formatters";
+import { getNextAction } from "@/helpers/order-helpers";
 
 interface OrderDetailsSheetProps {
-  order: OrderUI | null;
+  order: OrderViewModel | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusChange: (orderId: string, newStatus: OrderStatus) => void;
 }
 
 const statusLabels: Record<OrderStatus, string> = {
-  new: "New Order",
+  new: "New",
   preparing: "Preparing",
   ready: "Ready",
   completed: "Completed",
 };
 
-const statusColors: Record<OrderStatus, string> = {
-  new: "bg-primary text-primary-foreground",
-  preparing: "bg-blue-600 text-white",
-  ready: "bg-green-600 text-white",
-  completed: "bg-muted text-muted-foreground",
-};
+// Reusable section component
+function Section({
+  title,
+  icon: Icon,
+  children,
+  className,
+}: {
+  title: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("py-4 space-y-3", className)}>
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {Icon && <Icon className="h-4 w-4" />}
+        <h3 className="text-sm font-semibold uppercase tracking-wide">
+          {title}
+        </h3>
+      </div>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
 
-const formatScheduledTime = (date: Date) => {
-  if (isToday(date)) {
-    return `Today at ${format(date, "h:mm a")}`;
-  }
-  if (isTomorrow(date)) {
-    return `Tomorrow at ${format(date, "h:mm a")}`;
-  }
-  return format(date, "EEEE, MMMM d 'at' h:mm a");
-};
+// Reusable info row
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+  action,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label?: string;
+  value: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <div className="min-w-0 flex-1">
+          {label && <p className="text-xs text-muted-foreground">{label}</p>}
+          <p className="text-sm text-foreground truncate">{value}</p>
+        </div>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+// Order item with choices
+function OrderItemCard({ item, index }: { item: OrderItem; index: number }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-border last:border-0">
+      <div className="flex items-start gap-3 flex-1">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+          {index + 1}
+        </span>
+        <div className="flex-1 space-y-1">
+          <div className="flex gap-1 items-center font-medium text-foreground">
+            <p>{item.name}</p>x<span>{item.quantity}</span>
+          </div>
+
+          {/* Choices with labels */}
+          {item.choices && item.menuItem?.choices && (
+            <div className="space-y-0.5">
+              {item.menuItem.choices.map((choice) => {
+                const selection = item.choices[choice.id];
+                if (!selection) return null;
+
+                const value = Array.isArray(selection)
+                  ? selection.join(", ")
+                  : selection;
+
+                return (
+                  <p key={choice.id} className="text-sm">
+                    <span className="text-muted-foreground">
+                      {choice.title}:
+                    </span>{" "}
+                    {value}
+                  </p>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="flex items-start gap-2 text-xs bg-warning/40 rounded-sm px-2 py-1">
+            <AlertCircle className="h-4 w-4 text-warning-foreground  mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-warning-foreground">
+                Special Note for {item.name}
+              </p>
+              <p className="text-warning-foreground mt-0.5">
+                {item.specialInstructions}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span className="font-medium text-foreground shrink-0">
+        Ksh {item.price.toLocaleString()}
+      </span>
+    </div>
+  );
+}
+
+// Status badge component
+function StatusBadge({ status }: { status: OrderStatus }) {
+  const config: Record<
+    OrderStatus,
+    { color: string; icon: React.ComponentType<{ className?: string }> }
+  > = {
+    new: {
+      color: "bg-primary/10 text-primary border border-primary/20",
+      icon: Sparkles,
+    },
+    preparing: {
+      color:
+        "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800",
+      icon: ChefHat,
+    },
+    ready: {
+      color:
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800",
+      icon: PackageCheck,
+    },
+    completed: {
+      color: "bg-muted text-muted-foreground border border-border",
+      icon: CheckCircle2,
+    },
+  };
+
+  const { color, icon: Icon } = config[status];
+
+  return (
+    <div className={cn("flex items-center gap-2 px-3 py-2 rounded-lg", color)}>
+      <Icon className="size-4" />
+      <SheetTitle className="font-medium text-sm">
+        {statusLabels[status]} Order
+      </SheetTitle>
+    </div>
+  );
+}
 
 export function OrderDetailsSheet({
   order,
@@ -67,224 +201,162 @@ export function OrderDetailsSheet({
 }: OrderDetailsSheetProps) {
   if (!order) return null;
 
+  const placedTime = useTimeAgo(order.createdAt);
+
   const isScheduled = order.priority === "scheduled" && order.scheduledFor;
-  const isHighPriority = order.priority === "high";
-  const isCompleted = order.status === "completed";
 
-  const getNextAction = () => {
-    switch (order.status) {
-      case "new":
-        return {
-          label: isScheduled ? "Start Preparation" : "Accept Order",
-          action: () => onStatusChange(order.id, "preparing"),
-        };
-      case "preparing":
-        return {
-          label: "Mark as Ready",
-          action: () => onStatusChange(order.id, "ready"),
-        };
-      case "ready":
-        return {
-          label: "Complete Order",
-          action: () => onStatusChange(order.id, "completed"),
-        };
-      default:
-        return null;
-    }
-  };
-
-  const nextAction = getNextAction();
-  const orderTime = order.createdAt.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const nextAction = getNextAction(order, onStatusChange, isScheduled);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="rounded-l-xl w-full overflow-y-auto sm:max-w-lg px-6 py-10">
-        <SheetHeader className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <SheetTitle className="text-2xl">{order.orderNumber}</SheetTitle>
-              {isHighPriority && (
-                <Badge className="gap-1 bg-warning/20 text-warning">
-                  <AlertTriangle className="h-3 w-3" />
-                  Priority
-                </Badge>
-              )}
-            </div>
-            <Badge className={cn("text-sm", statusColors[order.status])}>
-              {statusLabels[order.status]}
-            </Badge>
-          </div>
-
-          {isScheduled && order.scheduledFor && (
-            <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-3 text-primary">
-              <CalendarClock className="h-5 w-5" />
-              <div>
-                <p className="text-sm font-medium">Scheduled Order</p>
-                <p className="text-sm">
-                  {formatScheduledTime(order.scheduledFor)}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {isCompleted && order.completedAt && (
-            <div className="flex items-center gap-2 rounded-lg bg-success/10 px-4 py-3 text-success">
-              <CheckCircle2 className="h-5 w-5" />
-              <div>
-                <p className="text-sm font-medium">Order Completed</p>
-                <p className="text-sm">
-                  {format(order.completedAt, "EEEE, MMMM d 'at' h:mm a")}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <SheetDescription className="flex items-center gap-4 text-sm">
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              Placed at {orderTime}
-            </span>
-            <Badge
-              variant="secondary"
-              className={cn(
-                "gap-1",
-                order.type === "delivery"
-                  ? "bg-blue-500/20 text-blue-400"
-                  : "bg-orange-500/20 text-orange-400",
-              )}
-            >
-              {order.type === "delivery" ? (
-                <>
-                  <Bike className="h-3 w-3" />
-                  Delivery
-                </>
-              ) : (
-                <>
-                  <ShoppingBag className="h-3 w-3" />
-                  Pickup
-                </>
-              )}
-            </Badge>
-          </SheetDescription>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto px-4 pb-8 rounded-2xl">
+        {/* Header */}
+        <SheetHeader className="p-0 pt-4 pr-10">
+          <StatusBadge status={order.status} />
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
-          <div className="space-y-3">
-            <h3 className="font-semibold">Customer</h3>
-            <div className="space-y-2 rounded-lg bg-secondary p-4">
-              <div className="flex items-center gap-2">
-                <User className="size-4 text-muted-foreground" />
-                <span>{order.customerName}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="size-4" />
-                <span>{order.phone}</span>
-              </div>
-              {order.type === "delivery" && order.deliveryAddress && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm">{order.deliveryAddress}</span>
-                </div>
-              )}
-              <div className="flex gap-2 pt-2">
-                <Button variant="default" size="sm" className="gap-1" asChild>
-                  <Link href={`tel:${order.phone}`}>
-                    <Phone className="size-4" />
-                    Call
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <MessageSquare className="h-4 w-4" />
-                  Message
-                </Button>
-              </div>
-            </div>
-          </div>
+        {/* Customer Details */}
+        <Section title="Customer Details" icon={User}>
+          <InfoRow icon={User} label="Name" value={order.customerName} />
+          <InfoRow icon={Mail} label="Email" value={order.email} />
+          <InfoRow
+            icon={Phone}
+            label="Phone"
+            value={order.phone}
+            action={
+              <Button
+                variant="success"
+                size="sm"
+                className="rounded-full"
+                asChild
+              >
+                <Link
+                  href={`tel:${order.phone}`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <Phone className="size-4 mr-1" />
+                  Call Customer
+                </Link>
+              </Button>
+            }
+          />
+        </Section>
 
-          <Separator />
+        <Separator />
 
-          <div className="space-y-3">
-            <h3 className="font-semibold">Order Items</h3>
-            <div className="space-y-3">
-              {order.items.map((item) => (
-                <div key={item.id} className="flex justify-between">
-                  <div className="flex gap-3">
-                    <span className="flex h-6 w-6 items-center justify-center rounded bg-primary/20 text-sm font-medium text-primary">
-                      {item.quantity}
-                    </span>
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      {item.modifiers && item.modifiers.length > 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          {item.modifiers.join(", ")}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <span className="font-medium">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {order.specialInstructions && (
+        {/* Pickup/Delivery Details */}
+        <Section
+          title={
+            order.type === "delivery" ? "Delivery Details" : "Pickup Details"
+          }
+          icon={order.type === "delivery" ? MapPin : ShoppingBag}
+        >
+          {order.type === "delivery" && order.deliveryAddress ? (
+            <InfoRow
+              icon={MapPin}
+              label="Address"
+              value={order.deliveryAddress}
+            />
+          ) : (
             <>
-              <Separator />
-              <div className="space-y-2">
-                <h3 className="font-semibold">Special Instructions</h3>
-                <div className="rounded-lg bg-warning/10 p-3 text-warning">
-                  {order.specialInstructions}
-                </div>
-              </div>
+              <InfoRow
+                icon={Clock}
+                label="Pickup Time"
+                value={
+                  isScheduled && order.scheduledFor
+                    ? format(order.scheduledFor, "h:mm a")
+                    : "Ready in 20-30 mins"
+                }
+              />
+              <InfoRow icon={Calendar} label="Date Placed" value={placedTime} />
             </>
           )}
+        </Section>
 
-          <Separator />
+        <Separator />
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>${(order.total * 0.9).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Tax</span>
-              <span>${(order.total * 0.1).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
-              <span>${order.total.toFixed(2)}</span>
-            </div>
+        {/* Order Details */}
+        <Section title="Order Details" icon={Utensils}>
+          <div className="space-y-1">
+            {order.items.map((item, index) => (
+              <OrderItemCard
+                key={item.cartItemId || index}
+                item={item}
+                index={index}
+              />
+            ))}
           </div>
 
-          <Separator />
+          {/* Special Instructions */}
+          {order.specialInstructions && (
+            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
+                    Special Note for Order
+                  </p>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-0.5">
+                    {order.specialInstructions}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </Section>
 
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1 gap-2">
-              <Printer className="h-4 w-4" />
-              Print
+        <Separator />
+
+        {/* Payment Summary */}
+        <div className="py-4 space-y-3">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="text-foreground">
+              Ksh {Math.round(order.total * 0.9).toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Tax (10%)</span>
+            <span className="text-foreground">
+              Ksh {Math.round(order.total * 0.1).toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between items-center pt-3 border-t border-border">
+            <span className="text-base font-semibold">Total</span>
+            <span className="text-2xl font-bold text-primary">
+              Ksh {order.total.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Actions */}
+        <div className="pt-4 flex gap-3">
+          <Button variant="outline" className="flex-1 gap-2">
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
+          {nextAction && (
+            <Button
+              onClick={() => {
+                nextAction.action();
+                onOpenChange(false);
+              }}
+              variant={
+                order.status === "new"
+                  ? "default"
+                  : order.status === "preparing"
+                    ? "blue"
+                    : "success"
+              }
+              className="flex-1 gap-1 cursor-pointer"
+            >
+              {nextAction.label}
+              <ChevronRight className="h-4 w-4" />
             </Button>
-            {nextAction && (
-              <Button
-                onClick={() => {
-                  nextAction.action();
-                  onOpenChange(false);
-                }}
-                className={cn(
-                  "flex-1",
-                  order.status === "preparing" &&
-                    "bg-blue-600 hover:bg-blue-700",
-                  order.status === "ready" && "bg-green-600 hover:bg-green-700",
-                )}
-              >
-                {nextAction.label}
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>

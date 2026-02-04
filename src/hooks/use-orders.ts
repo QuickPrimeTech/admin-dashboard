@@ -15,6 +15,7 @@ export function useOrders(branchId: string) {
     },
     enabled: !!branchId,
     staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 30 * 1000,
   });
 }
 
