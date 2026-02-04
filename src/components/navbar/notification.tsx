@@ -16,6 +16,7 @@ import {
   Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface Notification {
   id: string;
@@ -37,44 +38,44 @@ interface Notification {
 }
 
 const fakeNotifications: Notification[] = [
-  {
-    id: "3",
-    type: "order_ready",
-    title: "Order Ready for Pickup",
-    description: "Order #ORD-7821 has been ready for 5 minutes",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
-    read: false,
-    orderId: "#ORD-7821",
-    customer: "Emma Thompson",
-  },
-  {
-    id: "4",
-    type: "delivery_out",
-    title: "Out for Delivery",
-    description: "Driver Mike picked up order #ORD-7815 (2.4km away)",
-    timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
-    read: true,
-    orderId: "#ORD-7815",
-    customer: "David Park",
-  },
-  {
-    id: "5",
-    type: "special_request",
-    title: "Dietary Alert",
-    description: "Table 5 has severe nut allergy — Birthday cake order",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-    read: false,
-  },
-  {
-    id: "6",
-    type: "event_booking",
-    title: "Wine Tasting Confirmed",
-    description: "Private wine pairing event for 8 guests — Saturday 6:00 PM",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
-    read: true,
-    customer: "The Anderson Group",
-    amount: "$890.00",
-  },
+  // {
+  //   id: "3",
+  //   type: "order_ready",
+  //   title: "Order Ready for Pickup",
+  //   description: "Order #ORD-7821 has been ready for 5 minutes",
+  //   timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
+  //   read: false,
+  //   orderId: "#ORD-7821",
+  //   customer: "Emma Thompson",
+  // },
+  // {
+  //   id: "4",
+  //   type: "delivery_out",
+  //   title: "Out for Delivery",
+  //   description: "Driver Mike picked up order #ORD-7815 (2.4km away)",
+  //   timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
+  //   read: true,
+  //   orderId: "#ORD-7815",
+  //   customer: "David Park",
+  // },
+  // {
+  //   id: "5",
+  //   type: "special_request",
+  //   title: "Dietary Alert",
+  //   description: "Table 5 has severe nut allergy — Birthday cake order",
+  //   timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+  //   read: false,
+  // },
+  // {
+  //   id: "6",
+  //   type: "event_booking",
+  //   title: "Wine Tasting Confirmed",
+  //   description: "Private wine pairing event for 8 guests — Saturday 6:00 PM",
+  //   timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
+  //   read: true,
+  //   customer: "The Anderson Group",
+  //   amount: "$890.00",
+  // },
 ];
 
 const notificationIcons = {
@@ -296,8 +297,8 @@ export function Notifications() {
         </div>
 
         <div className="border-t bg-muted/30 p-2 flex gap-2">
-          <Button size={"sm"} className="flex-1">
-            View order dashboard
+          <Button size={"sm"} className="flex-1" asChild>
+            <Link href={"/dashboard/orders"}>View order dashboard</Link>
           </Button>
           <Button variant="secondary" size={"sm"} className="flex-1">
             Event calendar
